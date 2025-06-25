@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoInterpreter with WebLLM</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        #container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        button:hover:not(:disabled) {
+            background-color: #0056b3;
+        }
+        #analysis-output {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            white-space: pre-wrap; /* To preserve formatting from the LLM */
+            min-height: 100px;
+        }
+        .loader {
+            border: 5px solid #f3f3f3; /* Light grey */
+            border-top: 5px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+            display: none; /* Hidden by default */
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>Geospatial Data Interpreter</h1>
+        <p>Click the button to analyze the sample map data using a Small Language Model running in your browser.</p>
+        <button id="analyze-button">Analyze Map Data</button>
+        <div id="loader" class="loader"></div>
+        <h2>Analysis Output:</h2>
+        <div id="analysis-output">Click the button to see the analysis.</div>
+    </div>
+
+    <!-- WebLLM Script -->
+    <script type="module">
+        try {
+            // Attempt to import everything to see what's available
+            const allExports = await import("https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.46/+esm");
+            console.log("WebLLM module loaded. All exports:", allExports);
+
+            if (allExports.ChatModule) {
+                console.log("ChatModule found in exports.");
+                window.webLLM = { ChatModule: allExports.ChatModule };
+            } else {
+                console.error("ChatModule is NOT found in exports. Available keys:", Object.keys(allExports));
+                // Fallback check if it's part of a default export (less likely for ChatModule)
+                if (allExports.default && allExports.default.ChatModule) {
+                    console.log("ChatModule found in default export's properties.");
+                    window.webLLM = { ChatModule: allExports.default.ChatModule };
+                }
+            }
+        } catch (e) {
+            console.error("Error importing WebLLM module:", e);
+        }
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>

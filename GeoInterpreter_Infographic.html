@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoInterpreter: Making Maps Talk</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F0F8FF;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 384px;
+            }
+        }
+        .flow-box {
+            border: 2px solid #488FB1;
+            background-color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            color: #004E89;
+            font-weight: 600;
+        }
+        .flow-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #488FB1;
+            min-height: 2.5rem;
+        }
+        @media (min-width: 1024px) {
+             .flow-arrow {
+                min-height: auto;
+            }
+        }
+        .tech-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 600;
+            min-height: 150px;
+        }
+    </style>
+</head>
+<body class="text-[#004E89]">
+    
+    <!-- 
+    NARRATIVE AND VISUALIZATION PLAN
+    1. Hook: Title and Logo to grab attention. (HTML/CSS Logo)
+    2. Problem: Explain the three core barriers GeoInterpreter solves. (HTML/CSS Cards with Unicode Icons)
+    3. Target Users: Show who benefits from the solution. (Chart.js Horizontal Bar Chart)
+    4. How It Works: Detail the process flow from user query to response. (HTML/CSS Flowchart)
+    5. Tech Stack: Break down the core components conceptually. (HTML/CSS Rectangular grid)
+    6. Key Benefits: Highlight the main advantages of the platform. (Chart.js Radar Chart)
+    7. Conclusion: A final impactful statement.
+
+    COLOR PALETTE: "Brilliant Blues"
+    - #004E89 (Deep Slate Blue)
+    - #1A659E (Medium Blue)
+    - #488FB1 (Lighter Blue)
+    - #84C5F4 (Vibrant Teal/Sky Blue)
+    - #F0F8FF (Alice Blue)
+
+    CONSTRAINT CONFIRMATION:
+    NEITHER Mermaid JS NOR SVG were used anywhere in this output. All diagrams and charts are rendered using either structured HTML/CSS with Tailwind or the Chart.js library configured for Canvas rendering. 
+    -->
+
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <header class="text-center py-12">
+            <div class="flex justify-center items-center mb-6 h-28">
+                <div class="relative w-20 h-full">
+                    
+                    <!-- Human Figure Pointer -->
+                    <div class="absolute top-[60px] left-1/2 -translate-x-1/2 w-12 h-12">
+                        <!-- Torso -->
+                        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-8 bg-[#004E89] rounded-t-lg rounded-b-full"></div>
+                        <!-- Left Arm -->
+                        <div class="absolute top-[6px] left-[2px] w-6 h-6 border-b-4 border-l-4 border-[#004E89] rounded-bl-full transform -rotate-45"></div>
+                        <!-- Right Arm -->
+                        <div class="absolute top-[6px] right-[2px] w-6 h-6 border-b-4 border-r-4 border-[#004E89] rounded-br-full transform rotate-45"></div>
+                    </div>
+
+                     <!-- Pin Head - Placed on top to hide the top of the arms -->
+                    <div class="absolute top-0 left-0 w-20 h-20 z-10">
+                        <!-- Base Circle -->
+                         <div class="w-full h-full rounded-full bg-white shadow-lg"></div>
+                        <!-- Concentric Arcs -->
+                        <div class="absolute inset-0 rounded-full border-4 border-[#84C5F4] border-r-transparent border-t-transparent transform rotate-[135deg]"></div>
+                        <div class="absolute inset-3 rounded-full border-4 border-[#488FB1] border-r-transparent border-t-transparent transform rotate-[135deg]"></div>
+                        <div class="absolute inset-6 rounded-full border-4 border-[#1A659E] border-r-transparent border-t-transparent transform rotate-[135deg]"></div>
+                        <!-- Lower Pulse/Wave Symbol -->
+                        <div class="absolute inset-0 flex justify-center items-end pb-3">
+                            <div class="flex items-center space-x-1 h-5">
+                                <div class="w-1.5 h-2 rounded-full bg-[#488FB1]"></div>
+                                <div class="w-1.5 h-4 rounded-full bg-[#488FB1]"></div>
+                                <div class="w-1.5 h-5 rounded-full bg-[#1A659E]"></div>
+                                <div class="w-1.5 h-3 rounded-full bg-[#488FB1]"></div>
+                                <div class="w-1.5 h-2 rounded-full bg-[#488FB1]"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <h1 class="text-4xl md:text-6xl font-black tracking-tight text-[#004E89]">GeoInterpreter</h1>
+            <p class="text-xl md:text-2xl font-semibold text-[#1A659E] mt-2">A conversational partner for data exploration.</p>
+        </header>
+
+        <main class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <section class="md:col-span-2 bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-center mb-6">The Problem: Silent Maps, Hidden Insights</h2>
+                <p class="max-w-3xl mx-auto text-center text-lg text-[#1A659E] mb-8">
+                    Geospatial data holds powerful stories, but it's often locked behind barriers that prevent true understanding. GeoInterpreter is designed to break down these walls.
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <div class="border-2 border-[#488FB1] rounded-lg p-6 text-center bg-[#F0F8FF]">
+                        <span class="text-5xl">👁️</span>
+                        <h3 class="text-xl font-bold mt-4 mb-2">The Visual Barrier</h3>
+                        <p class="text-[#1A659E]">Maps are unusable for visually impaired users, excluding them from critical data-driven conversations.</p>
+                    </div>
+                    <div class="border-2 border-[#488FB1] rounded-lg p-6 text-center bg-[#F0F8FF]">
+                        <span class="text-5xl">🧠</span>
+                        <h3 class="text-xl font-bold mt-4 mb-2">The Expertise Barrier</h3>
+                        <p class="text-[#1A659E]">Complex data and jargon make maps incomprehensible to non-experts like journalists and policymakers.</p>
+                    </div>
+                    <div class="border-2 border-[#488FB1] rounded-lg p-6 text-center bg-[#F0F8FF]">
+                        <span class="text-5xl">🖱️</span>
+                        <h3 class="text-xl font-bold mt-4 mb-2">The Interaction Barrier</h3>
+                        <p class="text-[#1A659E]">Experts are slowed by rigid GIS tools, lacking a fluid, conversational way to explore their data.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-center mb-2">Who It's For: Empowering Every User</h2>
+                <p class="text-center text-lg text-[#1A659E] mb-6">GeoInterpreter provides tailored benefits to a diverse range of users, democratizing data access.</p>
+                <div class="chart-container">
+                    <canvas id="userBenefitsChart"></canvas>
+                </div>
+                 <p class="text-center text-sm text-[#488FB1] mt-4">This chart abstractly represents the significant boost in data accessibility and workflow efficiency provided to each key user group, turning complex data into actionable insights.</p>
+            </section>
+            
+            <section class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-center mb-2">Key Benefits: The GeoInterpreter Advantage</h2>
+                 <p class="text-center text-lg text-[#1A659E] mb-6">The unique serverless architecture delivers a trifecta of powerful advantages for all users.</p>
+                <div class="chart-container">
+                    <canvas id="keyBenefitsChart"></canvas>
+                </div>
+                <p class="text-center text-sm text-[#488FB1] mt-4">A comparison of core platform strengths, highlighting the balance between providing universal access, ensuring total data privacy, and eliminating infrastructure overhead.</p>
+            </section>
+            
+            <section class="md:col-span-2 bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-center mb-2">How It Works: A Serverless Symphony</h2>
+                <p class="max-w-3xl mx-auto text-center text-lg text-[#1A659E] mb-8">From a simple question to a clear answer, the entire process happens securely and instantly within your browser.</p>
+                <div class="grid grid-cols-1 lg:grid-cols-11 items-center gap-4">
+                    <div class="flow-box lg:col-span-2">User Asks Question</div>
+                    <div class="flow-arrow lg:col-span-1">
+                        <div class="flex flex-col items-center justify-center w-full h-full lg:hidden">
+                            <div class="w-1 flex-grow bg-[#488FB1]"></div>
+                            <div class="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[16px] border-t-[#488FB1]"></div>
+                        </div>
+                        <div class="hidden lg:flex items-center justify-center w-full">
+                            <div class="w-full h-1 bg-[#488FB1]"></div>
+                            <div class="w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[16px] border-l-[#488FB1]"></div>
+                        </div>
+                    </div>
+                    <div class="flow-box lg:col-span-2">WebLLM Parses & Selects Tool</div>
+                    <div class="flow-arrow lg:col-span-1">
+                        <div class="flex flex-col items-center justify-center w-full h-full lg:hidden">
+                            <div class="w-1 flex-grow bg-[#488FB1]"></div>
+                            <div class="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[16px] border-t-[#488FB1]"></div>
+                        </div>
+                        <div class="hidden lg:flex items-center justify-center w-full">
+                            <div class="w-full h-1 bg-[#488FB1]"></div>
+                            <div class="w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[16px] border-l-[#488FB1]"></div>
+                        </div>
+                    </div>
+                    <div class="flow-box lg:col-span-2">DuckDB Executes Spatial SQL</div>
+                    <div class="flow-arrow lg:col-span-1">
+                        <div class="flex flex-col items-center justify-center w-full h-full lg:hidden">
+                            <div class="w-1 flex-grow bg-[#488FB1]"></div>
+                            <div class="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[16px] border-t-[#488FB1]"></div>
+                        </div>
+                        <div class="hidden lg:flex items-center justify-center w-full">
+                            <div class="w-full h-1 bg-[#488FB1]"></div>
+                            <div class="w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[16px] border-l-[#488FB1]"></div>
+                        </div>
+                    </div>
+                    <div class="flow-box lg:col-span-2">AI Formulates Response</div>
+                </div>
+            </section>
+            
+            <section class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-center mb-2">The Technology Stack</h2>
+                <p class="text-center text-lg text-[#1A659E] mb-6">Four core components work together to power the in-browser analysis.</p>
+                <div class="w-full grid grid-cols-2 grid-rows-2 gap-4 h-[320px] md:h-[384px]">
+                    <div class="tech-card" style="background-color: #84C5F4;">WebLLM Conversational Brain</div>
+                    <div class="tech-card" style="background-color: #488FB1;">DuckDB Analytical Engine</div>
+                    <div class="tech-card" style="background-color: #1A659E;">Tool & Function Registry</div>
+                    <div class="tech-card" style="background-color: #004E89;">Custom Advanced Tools</div>
+                </div>
+                 <p class="text-center text-sm text-[#488FB1] mt-4">A conceptual breakdown of the system's architecture, showing the equal importance of the conversational AI, the analytical engine, its instruction set, and custom tools.</p>
+            </section>
+
+             <section class="bg-white rounded-lg shadow-lg p-6 md:p-8 flex flex-col justify-center items-center text-center">
+                <h2 class="text-3xl font-bold mb-4">The Future is Accessible and Private</h2>
+                <p class="text-lg text-[#1A659E] mb-6">
+                    GeoInterpreter represents a paradigm shift. By moving the entire analytical stack into the browser, we create a tool that is not only powerful but also fundamentally private, secure, and accessible to all. It’s more than just a mapping tool; it’s a conversational partner for data exploration.
+                </p>
+                 <div class="text-6xl text-[#84C5F4]">💬</div>
+            </section>
+
+        </main>
+
+        <footer class="text-center py-8 mt-8 border-t border-[#488FB1]">
+            <p class="text-[#1A659E]">GeoInterpreter | A new way to interact with geospatial data.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        function wrapLabel(str, maxWidth) {
+            if (str.length <= maxWidth) {
+                return str;
+            }
+            const words = str.split(' ');
+            let lines = [];
+            let currentLine = words[0];
+
+            for (let i = 1; i < words.length; i++) {
+                if (currentLine.length + words[i].length + 1 < maxWidth) {
+                    currentLine += ' ' + words[i];
+                } else {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            } else {
+                return label;
+            }
+        };
+
+        const chartDefaultOptions = {
+            maintainAspectRatio: false,
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                     labels: {
+                        color: '#004E89',
+                        font: { size: 14, weight: '600' }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: tooltipTitleCallback
+                    },
+                    backgroundColor: '#004E89',
+                    titleFont: { size: 16, weight: 'bold' },
+                    bodyFont: { size: 14 },
+                    padding: 12,
+                    cornerRadius: 4,
+                }
+            }
+        };
+
+        const userBenefitsCtx = document.getElementById('userBenefitsChart');
+        if (userBenefitsCtx) {
+            new Chart(userBenefitsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Visually Impaired Users', 'Non-Expert Users', 'Domain Experts'],
+                    datasets: [{
+                        label: 'Accessibility & Efficiency Boost',
+                        data: [95, 85, 90],
+                        backgroundColor: ['#84C5F4', '#488FB1', '#1A659E'],
+                        borderColor: '#004E89',
+                        borderWidth: 2,
+                        borderRadius: 4
+                    }]
+                },
+                options: { ...chartDefaultOptions,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            grid: { color: '#e0e0e0' },
+                            ticks: { color: '#004E89', font: { weight: '600' } }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#004E89', font: { weight: '600', size: 14 } }
+                        }
+                    }
+                }
+            });
+        }
+        
+        const keyBenefitsCtx = document.getElementById('keyBenefitsChart');
+        if (keyBenefitsCtx) {
+            const rawLabels = ['Universal Accessibility', 'Total Data Privacy', 'Zero Infrastructure Cost'];
+            const processedLabels = rawLabels.map(label => wrapLabel(label, 20));
+
+            new Chart(keyBenefitsCtx, {
+                type: 'radar',
+                data: {
+                    labels: processedLabels,
+                    datasets: [{
+                        label: 'GeoInterpreter Advantage',
+                        data: [90, 100, 95],
+                        fill: true,
+                        backgroundColor: 'rgba(132, 197, 244, 0.4)',
+                        borderColor: '#84C5F4',
+                        pointBackgroundColor: '#84C5F4',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#84C5F4'
+                    }]
+                },
+                options: { ...chartDefaultOptions,
+                    layout: {
+                        padding: {
+                            bottom: 20 
+                        }
+                    },
+                    scales: {
+                        r: {
+                            angleLines: { color: '#488FB1' },
+                            grid: { color: '#488FB1' },
+                            pointLabels: {
+                                color: '#004E89',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+    </script>
+</body>
+</html>

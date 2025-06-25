@@ -1,0 +1,418 @@
+html {
+  min-height: 100%; /* make sure it is at least as tall as the viewport */
+  position: relative;
+  font-size: 1rem;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+body {
+  height: 100%; /* force the BODY element to match the height of the HTML element */
+  font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+/* SIDEBAR - START */
+.sidebar.active {
+  padding: 2px;
+  background: #eef1ee;
+  min-width: 18.75rem; /* 300px; */
+  max-width: 18.75rem; /* 300px; */
+  font-size: 0.875rem; /* 14px; */
+  text-align: left;
+  box-sizing: border-box;
+  transition: 0.3s all;
+  overflow-y: hidden;
+  overflow-x: hidden;
+}
+
+.da-sidebar {
+  min-width: 20.5rem; /*21.875rem; /* 350px; */
+  max-width: 20.5rem; /* 21.875rem; /* 350px; */
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.da-sidebar .card-body {
+  padding: 0.75rem;
+}
+
+.da-sidebar .accordion-button {
+  font-size: 0.812rem;
+  font-weight: bold;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.da-sidebar .accordion-button.collapsed {
+  background: #07648d;
+  color: #ffffff;
+}
+
+/* 11May2022 .da-sidebar .accordion-button.collapsed::after {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='https://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    } */
+.da-sidebar .accordion-button.collapsed svg path::after {
+  fill: currentcolor;
+}
+/* SIDEBAR - END */
+.delete-dataset {
+  display: none;
+}
+.da-dataset:hover {
+  .delete-dataset {
+    display: block;
+  }
+}
+
+/* div#map {
+  width: 100%;
+  height: 100%;
+} */
+
+.medium-size-checkbox {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+#mapTooltip,
+#preview_mapTooltip {
+  position: absolute;
+  display: inline-block;
+  padding: 10px;
+  font-family: "Open Sans" sans-serif;
+  color: #000;
+  background-color: #fff;
+  border: 1px solid #999;
+  border-radius: 2px;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 1;
+}
+
+#divToastContainer {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1060;
+}
+
+.expandable-panel {
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+}
+
+.panel-header {
+  background-color: #f1f1f1;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.panel-content {
+  display: block;
+  padding: 10px;
+}
+
+.blockly-workspace {
+  height: 300px;
+  width: 100%;
+}
+
+/* DATATABLES - START */
+
+.dataTables_wrapper {
+  overflow: auto;
+}
+
+.state_left {
+  /*used by datatables*/
+  text-align: left;
+}
+
+td.colAlignRight {
+  /*1Aug2017, used by datatables*/
+  text-align: right;
+}
+
+td.colAlignLeft {
+  /*1Aug2017, used by datatables*/
+  text-align: left;
+}
+
+.dataTables_wrapper {
+  /* font-size: 0.875rem; */
+  font-size: 0.75rem;
+}
+
+th.colAlignRight {
+  /*1Aug2017, used by datatables*/
+  text-align: right;
+}
+
+th.colAlignLeft {
+  /*1Aug2017, used by datatables*/
+  text-align: left;
+}
+
+th.colAlignCenter {
+  /*1Aug2017, used by datatables*/
+  text-align: center;
+}
+
+table.dataTable thead .sorting_asc {
+  /*used by datatables*/
+  background: url("../images/sort_asc.png") no-repeat center right;
+}
+
+table.dataTable thead .sorting_desc {
+  background: url("../images/sort_desc.png") no-repeat center right;
+}
+
+table.dataTable thead .sorting {
+  background: url("../images/sort_both.png") no-repeat center right;
+}
+
+table.dataTable thead .colAlignLeft.sorting_asc {
+  background: url("../images/sort_asc.png") no-repeat center left;
+}
+
+table.dataTable thead .colAlignLeft.sorting_desc {
+  background: url("../images/sort_desc.png") no-repeat center left;
+}
+
+table.dataTable thead .colAlignLeft.sorting {
+  background: url("../images/sort_both.png") no-repeat center left;
+}
+
+/* DATATABLES - END */
+.ol-zoom .da-olmap-zoom-reset {
+  border-radius: 0 0 2px 2px;
+}
+
+.bw {
+  filter: grayscale(100%);
+}
+
+.flex1 {
+  flex: 1;
+}
+.expandable-panel > .panel-header {
+  background-color: #c5daf4;
+}
+
+.workflowstep-icon:hover {
+  border-style: solid;
+  border-color: #272626;
+}
+.parquet-logo {
+  background-image: url("../images/parquet.png");
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+/* MAP - BEGIN */
+.da-map {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#preview_map {
+  /* height: 400px;
+  width: 100%; */
+  height: 800px;
+  width: 100%;
+}
+
+.layer-control {
+  position: absolute;
+  top: 62px;
+  right: 10px;
+  background: white;
+  padding: 10px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  padding-bottom: 20px;
+  width: 20rem;
+}
+
+.layer-item label {
+  margin-left: 5px;
+  margin-right: 10px;
+}
+
+.active-map-layer {
+  background-color: #ffd800;
+}
+
+.add-basemap-layer-btn {
+  margin-top: 10px;
+  padding: 5px 10px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+/* MAP - END */
+
+.workflow-preview-content {
+  min-width: 500px;
+  max-height: calc(100vh - 40px);
+  margin: 100px 0 20px 0;
+  overflow-y: auto;
+}
+
+/* 04Mar2025 */
+.layer-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.layer-item-sortable {
+  cursor: move; /* Change the cursor to indicate that items are draggable */
+  border-bottom: 1px solid #ddd;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.layer-item-sortable:hover {
+  background-color: #f5f5f5;
+}
+.layer-item-sortable.active-map-layer {
+  background-color: #ffd800;
+}
+
+.layer-item-sortable label {
+  margin-left: 5px;
+  margin-right: 10px;
+  flex-grow: 1;
+}
+.layer-item-sortable .remove-btn {
+  flex-shrink: 0; /* Prevent the button from shrinking */
+}
+
+.layer-item {
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 3px 0; /* Add padding for better spacing */
+}
+
+.layer-info {
+  display: flex;
+  align-items: center; /* Change back to center for better vertical alignment */
+  flex-grow: 1;
+}
+
+.layer-name-container {
+  display: flex;
+  align-items: center; /* Change back to center for better vertical alignment */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 200px;
+}
+
+.layer-name-container i,
+.layer-name-container img {
+  margin-right: 8px;
+  flex-shrink: 0; /* Prevent the icon from shrinking */
+  align-self: flex-start; /* This aligns the icon to the top when text wraps */
+  margin-top: 2px; /* Small adjustment for alignment */
+}
+
+.layer-controls {
+  display: flex;
+  align-items: center; /* Change back to center for better vertical alignment */
+  margin-left: auto;
+}
+
+.layer-visibility-toggle {
+  margin: 0;
+  margin-right: 10px;
+  flex-shrink: 0; 
+  margin-top: 2px; /* Match the same top margin as the icon */
+  cursor:pointer;
+  position: relative;
+  z-index: 10; /* Ensure checkbox is above other elements */
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  margin-right: 5px;
+  position: relative;
+  z-index: 10; /* Ensure checkbox container is above other elements */
+}
+
+.drag-handle {
+  display: flex;
+  align-items: center;
+  margin-right: 5px;
+  cursor: move;
+}
+
+/* Adjust the remove button styling */
+.remove-btn {
+  background: none;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  padding: 2px 5px;
+  margin-left: 5px;
+}
+
+/* Adjust the opacity control styling */
+.opacity-control {
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.small-text-black {
+  color: #000;
+  font-size: 0.725rem;
+}
+
+.small-text-gray {
+  color: #5f5d5d;
+  font-size: 0.8125rem;
+}
+
+.layer-name-container label {
+  white-space: normal;
+  display: inline-block;
+  line-height: 1.2;
+  margin-top: 0; /* Remove top margin */
+  align-self: center; /* Center the label vertically */
+}
+
+/* Add a special rule to allow breaking at underscores */
+.layer-name-container label::before {
+  content: "";
+  white-space: normal;
+}
+
+/* This maintains the existing spacing between icon and text */
+.layer-name-container img {
+  margin-right: 8px; /* Add space between icon and text */
+}
+
+/* For long text that wraps */
+@media (max-width: 768px) {
+  .layer-name-container label {
+    align-self: flex-start; /* Align to top when likely to wrap */
+  }
+  
+  .layer-name-container i,
+  .layer-name-container img {
+    align-self: flex-start; /* Align icon to top when text wraps */
+  }
+}
+
+
