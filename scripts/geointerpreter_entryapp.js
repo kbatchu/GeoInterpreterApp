@@ -117967,6 +117967,4417 @@ function __rewriteRelativeImportExtension(path, preserveJsx) {
 
 /***/ }),
 
+/***/ "./node_modules/zod/v3/ZodError.js":
+/*!*****************************************!*\
+  !*** ./node_modules/zod/v3/ZodError.js ***!
+  \*****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ZodError: () => (/* binding */ ZodError),
+/* harmony export */   ZodIssueCode: () => (/* binding */ ZodIssueCode),
+/* harmony export */   quotelessJson: () => (/* binding */ quotelessJson)
+/* harmony export */ });
+/* harmony import */ var _helpers_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./helpers/util.js */ "./node_modules/zod/v3/helpers/util.js");
+
+const ZodIssueCode = _helpers_util_js__WEBPACK_IMPORTED_MODULE_0__.util.arrayToEnum([
+    "invalid_type",
+    "invalid_literal",
+    "custom",
+    "invalid_union",
+    "invalid_union_discriminator",
+    "invalid_enum_value",
+    "unrecognized_keys",
+    "invalid_arguments",
+    "invalid_return_type",
+    "invalid_date",
+    "invalid_string",
+    "too_small",
+    "too_big",
+    "invalid_intersection_types",
+    "not_multiple_of",
+    "not_finite",
+]);
+const quotelessJson = (obj) => {
+    const json = JSON.stringify(obj, null, 2);
+    return json.replace(/"([^"]+)":/g, "$1:");
+};
+class ZodError extends Error {
+    get errors() {
+        return this.issues;
+    }
+    constructor(issues) {
+        super();
+        this.issues = [];
+        this.addIssue = (sub) => {
+            this.issues = [...this.issues, sub];
+        };
+        this.addIssues = (subs = []) => {
+            this.issues = [...this.issues, ...subs];
+        };
+        const actualProto = new.target.prototype;
+        if (Object.setPrototypeOf) {
+            // eslint-disable-next-line ban/ban
+            Object.setPrototypeOf(this, actualProto);
+        }
+        else {
+            this.__proto__ = actualProto;
+        }
+        this.name = "ZodError";
+        this.issues = issues;
+    }
+    format(_mapper) {
+        const mapper = _mapper ||
+            function (issue) {
+                return issue.message;
+            };
+        const fieldErrors = { _errors: [] };
+        const processError = (error) => {
+            for (const issue of error.issues) {
+                if (issue.code === "invalid_union") {
+                    issue.unionErrors.map(processError);
+                }
+                else if (issue.code === "invalid_return_type") {
+                    processError(issue.returnTypeError);
+                }
+                else if (issue.code === "invalid_arguments") {
+                    processError(issue.argumentsError);
+                }
+                else if (issue.path.length === 0) {
+                    fieldErrors._errors.push(mapper(issue));
+                }
+                else {
+                    let curr = fieldErrors;
+                    let i = 0;
+                    while (i < issue.path.length) {
+                        const el = issue.path[i];
+                        const terminal = i === issue.path.length - 1;
+                        if (!terminal) {
+                            curr[el] = curr[el] || { _errors: [] };
+                            // if (typeof el === "string") {
+                            //   curr[el] = curr[el] || { _errors: [] };
+                            // } else if (typeof el === "number") {
+                            //   const errorArray: any = [];
+                            //   errorArray._errors = [];
+                            //   curr[el] = curr[el] || errorArray;
+                            // }
+                        }
+                        else {
+                            curr[el] = curr[el] || { _errors: [] };
+                            curr[el]._errors.push(mapper(issue));
+                        }
+                        curr = curr[el];
+                        i++;
+                    }
+                }
+            }
+        };
+        processError(this);
+        return fieldErrors;
+    }
+    static assert(value) {
+        if (!(value instanceof ZodError)) {
+            throw new Error(`Not a ZodError: ${value}`);
+        }
+    }
+    toString() {
+        return this.message;
+    }
+    get message() {
+        return JSON.stringify(this.issues, _helpers_util_js__WEBPACK_IMPORTED_MODULE_0__.util.jsonStringifyReplacer, 2);
+    }
+    get isEmpty() {
+        return this.issues.length === 0;
+    }
+    flatten(mapper = (issue) => issue.message) {
+        const fieldErrors = {};
+        const formErrors = [];
+        for (const sub of this.issues) {
+            if (sub.path.length > 0) {
+                const firstEl = sub.path[0];
+                fieldErrors[firstEl] = fieldErrors[firstEl] || [];
+                fieldErrors[firstEl].push(mapper(sub));
+            }
+            else {
+                formErrors.push(mapper(sub));
+            }
+        }
+        return { formErrors, fieldErrors };
+    }
+    get formErrors() {
+        return this.flatten();
+    }
+}
+ZodError.create = (issues) => {
+    const error = new ZodError(issues);
+    return error;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/zod/v3/errors.js":
+/*!***************************************!*\
+  !*** ./node_modules/zod/v3/errors.js ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   defaultErrorMap: () => (/* reexport safe */ _locales_en_js__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   getErrorMap: () => (/* binding */ getErrorMap),
+/* harmony export */   setErrorMap: () => (/* binding */ setErrorMap)
+/* harmony export */ });
+/* harmony import */ var _locales_en_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./locales/en.js */ "./node_modules/zod/v3/locales/en.js");
+
+let overrideErrorMap = _locales_en_js__WEBPACK_IMPORTED_MODULE_0__["default"];
+
+function setErrorMap(map) {
+    overrideErrorMap = map;
+}
+function getErrorMap() {
+    return overrideErrorMap;
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/zod/v3/helpers/errorUtil.js":
+/*!**************************************************!*\
+  !*** ./node_modules/zod/v3/helpers/errorUtil.js ***!
+  \**************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   errorUtil: () => (/* binding */ errorUtil)
+/* harmony export */ });
+var errorUtil;
+(function (errorUtil) {
+    errorUtil.errToObj = (message) => typeof message === "string" ? { message } : message || {};
+    // biome-ignore lint:
+    errorUtil.toString = (message) => typeof message === "string" ? message : message?.message;
+})(errorUtil || (errorUtil = {}));
+
+
+/***/ }),
+
+/***/ "./node_modules/zod/v3/helpers/parseUtil.js":
+/*!**************************************************!*\
+  !*** ./node_modules/zod/v3/helpers/parseUtil.js ***!
+  \**************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   DIRTY: () => (/* binding */ DIRTY),
+/* harmony export */   EMPTY_PATH: () => (/* binding */ EMPTY_PATH),
+/* harmony export */   INVALID: () => (/* binding */ INVALID),
+/* harmony export */   OK: () => (/* binding */ OK),
+/* harmony export */   ParseStatus: () => (/* binding */ ParseStatus),
+/* harmony export */   addIssueToContext: () => (/* binding */ addIssueToContext),
+/* harmony export */   isAborted: () => (/* binding */ isAborted),
+/* harmony export */   isAsync: () => (/* binding */ isAsync),
+/* harmony export */   isDirty: () => (/* binding */ isDirty),
+/* harmony export */   isValid: () => (/* binding */ isValid),
+/* harmony export */   makeIssue: () => (/* binding */ makeIssue)
+/* harmony export */ });
+/* harmony import */ var _errors_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../errors.js */ "./node_modules/zod/v3/errors.js");
+/* harmony import */ var _locales_en_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../locales/en.js */ "./node_modules/zod/v3/locales/en.js");
+
+
+const makeIssue = (params) => {
+    const { data, path, errorMaps, issueData } = params;
+    const fullPath = [...path, ...(issueData.path || [])];
+    const fullIssue = {
+        ...issueData,
+        path: fullPath,
+    };
+    if (issueData.message !== undefined) {
+        return {
+            ...issueData,
+            path: fullPath,
+            message: issueData.message,
+        };
+    }
+    let errorMessage = "";
+    const maps = errorMaps
+        .filter((m) => !!m)
+        .slice()
+        .reverse();
+    for (const map of maps) {
+        errorMessage = map(fullIssue, { data, defaultError: errorMessage }).message;
+    }
+    return {
+        ...issueData,
+        path: fullPath,
+        message: errorMessage,
+    };
+};
+const EMPTY_PATH = [];
+function addIssueToContext(ctx, issueData) {
+    const overrideMap = (0,_errors_js__WEBPACK_IMPORTED_MODULE_0__.getErrorMap)();
+    const issue = makeIssue({
+        issueData: issueData,
+        data: ctx.data,
+        path: ctx.path,
+        errorMaps: [
+            ctx.common.contextualErrorMap, // contextual error map is first priority
+            ctx.schemaErrorMap, // then schema-bound map if available
+            overrideMap, // then global override map
+            overrideMap === _locales_en_js__WEBPACK_IMPORTED_MODULE_1__["default"] ? undefined : _locales_en_js__WEBPACK_IMPORTED_MODULE_1__["default"], // then global default map
+        ].filter((x) => !!x),
+    });
+    ctx.common.issues.push(issue);
+}
+class ParseStatus {
+    constructor() {
+        this.value = "valid";
+    }
+    dirty() {
+        if (this.value === "valid")
+            this.value = "dirty";
+    }
+    abort() {
+        if (this.value !== "aborted")
+            this.value = "aborted";
+    }
+    static mergeArray(status, results) {
+        const arrayValue = [];
+        for (const s of results) {
+            if (s.status === "aborted")
+                return INVALID;
+            if (s.status === "dirty")
+                status.dirty();
+            arrayValue.push(s.value);
+        }
+        return { status: status.value, value: arrayValue };
+    }
+    static async mergeObjectAsync(status, pairs) {
+        const syncPairs = [];
+        for (const pair of pairs) {
+            const key = await pair.key;
+            const value = await pair.value;
+            syncPairs.push({
+                key,
+                value,
+            });
+        }
+        return ParseStatus.mergeObjectSync(status, syncPairs);
+    }
+    static mergeObjectSync(status, pairs) {
+        const finalObject = {};
+        for (const pair of pairs) {
+            const { key, value } = pair;
+            if (key.status === "aborted")
+                return INVALID;
+            if (value.status === "aborted")
+                return INVALID;
+            if (key.status === "dirty")
+                status.dirty();
+            if (value.status === "dirty")
+                status.dirty();
+            if (key.value !== "__proto__" && (typeof value.value !== "undefined" || pair.alwaysSet)) {
+                finalObject[key.value] = value.value;
+            }
+        }
+        return { status: status.value, value: finalObject };
+    }
+}
+const INVALID = Object.freeze({
+    status: "aborted",
+});
+const DIRTY = (value) => ({ status: "dirty", value });
+const OK = (value) => ({ status: "valid", value });
+const isAborted = (x) => x.status === "aborted";
+const isDirty = (x) => x.status === "dirty";
+const isValid = (x) => x.status === "valid";
+const isAsync = (x) => typeof Promise !== "undefined" && x instanceof Promise;
+
+
+/***/ }),
+
+/***/ "./node_modules/zod/v3/helpers/util.js":
+/*!*********************************************!*\
+  !*** ./node_modules/zod/v3/helpers/util.js ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ZodParsedType: () => (/* binding */ ZodParsedType),
+/* harmony export */   getParsedType: () => (/* binding */ getParsedType),
+/* harmony export */   objectUtil: () => (/* binding */ objectUtil),
+/* harmony export */   util: () => (/* binding */ util)
+/* harmony export */ });
+var util;
+(function (util) {
+    util.assertEqual = (_) => { };
+    function assertIs(_arg) { }
+    util.assertIs = assertIs;
+    function assertNever(_x) {
+        throw new Error();
+    }
+    util.assertNever = assertNever;
+    util.arrayToEnum = (items) => {
+        const obj = {};
+        for (const item of items) {
+            obj[item] = item;
+        }
+        return obj;
+    };
+    util.getValidEnumValues = (obj) => {
+        const validKeys = util.objectKeys(obj).filter((k) => typeof obj[obj[k]] !== "number");
+        const filtered = {};
+        for (const k of validKeys) {
+            filtered[k] = obj[k];
+        }
+        return util.objectValues(filtered);
+    };
+    util.objectValues = (obj) => {
+        return util.objectKeys(obj).map(function (e) {
+            return obj[e];
+        });
+    };
+    util.objectKeys = typeof Object.keys === "function" // eslint-disable-line ban/ban
+        ? (obj) => Object.keys(obj) // eslint-disable-line ban/ban
+        : (object) => {
+            const keys = [];
+            for (const key in object) {
+                if (Object.prototype.hasOwnProperty.call(object, key)) {
+                    keys.push(key);
+                }
+            }
+            return keys;
+        };
+    util.find = (arr, checker) => {
+        for (const item of arr) {
+            if (checker(item))
+                return item;
+        }
+        return undefined;
+    };
+    util.isInteger = typeof Number.isInteger === "function"
+        ? (val) => Number.isInteger(val) // eslint-disable-line ban/ban
+        : (val) => typeof val === "number" && Number.isFinite(val) && Math.floor(val) === val;
+    function joinValues(array, separator = " | ") {
+        return array.map((val) => (typeof val === "string" ? `'${val}'` : val)).join(separator);
+    }
+    util.joinValues = joinValues;
+    util.jsonStringifyReplacer = (_, value) => {
+        if (typeof value === "bigint") {
+            return value.toString();
+        }
+        return value;
+    };
+})(util || (util = {}));
+var objectUtil;
+(function (objectUtil) {
+    objectUtil.mergeShapes = (first, second) => {
+        return {
+            ...first,
+            ...second, // second overwrites first
+        };
+    };
+})(objectUtil || (objectUtil = {}));
+const ZodParsedType = util.arrayToEnum([
+    "string",
+    "nan",
+    "number",
+    "integer",
+    "float",
+    "boolean",
+    "date",
+    "bigint",
+    "symbol",
+    "function",
+    "undefined",
+    "null",
+    "array",
+    "object",
+    "unknown",
+    "promise",
+    "void",
+    "never",
+    "map",
+    "set",
+]);
+const getParsedType = (data) => {
+    const t = typeof data;
+    switch (t) {
+        case "undefined":
+            return ZodParsedType.undefined;
+        case "string":
+            return ZodParsedType.string;
+        case "number":
+            return Number.isNaN(data) ? ZodParsedType.nan : ZodParsedType.number;
+        case "boolean":
+            return ZodParsedType.boolean;
+        case "function":
+            return ZodParsedType.function;
+        case "bigint":
+            return ZodParsedType.bigint;
+        case "symbol":
+            return ZodParsedType.symbol;
+        case "object":
+            if (Array.isArray(data)) {
+                return ZodParsedType.array;
+            }
+            if (data === null) {
+                return ZodParsedType.null;
+            }
+            if (data.then && typeof data.then === "function" && data.catch && typeof data.catch === "function") {
+                return ZodParsedType.promise;
+            }
+            if (typeof Map !== "undefined" && data instanceof Map) {
+                return ZodParsedType.map;
+            }
+            if (typeof Set !== "undefined" && data instanceof Set) {
+                return ZodParsedType.set;
+            }
+            if (typeof Date !== "undefined" && data instanceof Date) {
+                return ZodParsedType.date;
+            }
+            return ZodParsedType.object;
+        default:
+            return ZodParsedType.unknown;
+    }
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/zod/v3/locales/en.js":
+/*!*******************************************!*\
+  !*** ./node_modules/zod/v3/locales/en.js ***!
+  \*******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _ZodError_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../ZodError.js */ "./node_modules/zod/v3/ZodError.js");
+/* harmony import */ var _helpers_util_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helpers/util.js */ "./node_modules/zod/v3/helpers/util.js");
+
+
+const errorMap = (issue, _ctx) => {
+    let message;
+    switch (issue.code) {
+        case _ZodError_js__WEBPACK_IMPORTED_MODULE_0__.ZodIssueCode.invalid_type:
+            if (issue.received === _helpers_util_js__WEBPACK_IMPORTED_MODULE_1__.ZodParsedType.undefined) {
+                message = "Required";
+            }
+            else {
+                message = `Expected ${issue.expected}, received ${issue.received}`;
+            }
+            break;
+        case _ZodError_js__WEBPACK_IMPORTED_MODULE_0__.ZodIssueCode.invalid_literal:
+            message = `Invalid literal value, expected ${JSON.stringify(issue.expected, _helpers_util_js__WEBPACK_IMPORTED_MODULE_1__.util.jsonStringifyReplacer)}`;
+            break;
+        case _ZodError_js__WEBPACK_IMPORTED_MODULE_0__.ZodIssueCode.unrecognized_keys:
+            message = `Unrecognized key(s) in object: ${_helpers_util_js__WEBPACK_IMPORTED_MODULE_1__.util.joinValues(issue.keys, ", ")}`;
+            break;
+        case _ZodError_js__WEBPACK_IMPORTED_MODULE_0__.ZodIssueCode.invalid_union:
+            message = `Invalid input`;
+            break;
+        case _ZodError_js__WEBPACK_IMPORTED_MODULE_0__.ZodIssueCode.invalid_union_discriminator:
+            message = `Invalid discriminator value. Expected ${_helpers_util_js__WEBPACK_IMPORTED_MODULE_1__.util.joinValues(issue.options)}`;
+            break;
+        case _ZodError_js__WEBPACK_IMPORTED_MODULE_0__.ZodIssueCode.invalid_enum_value:
+            message = `Invalid enum value. Expected ${_helpers_util_js__WEBPACK_IMPORTED_MODULE_1__.util.joinValues(issue.options)}, received '${issue.received}'`;
+            break;
+        case _ZodError_js__WEBPACK_IMPORTED_MODULE_0__.ZodIssueCode.invalid_arguments:
+            message = `Invalid function arguments`;
+            break;
+        case _ZodError_js__WEBPACK_IMPORTED_MODULE_0__.ZodIssueCode.invalid_return_type:
+            message = `Invalid function return type`;
+            break;
+        case _ZodError_js__WEBPACK_IMPORTED_MODULE_0__.ZodIssueCode.invalid_date:
+            message = `Invalid date`;
+            break;
+        case _ZodError_js__WEBPACK_IMPORTED_MODULE_0__.ZodIssueCode.invalid_string:
+            if (typeof issue.validation === "object") {
+                if ("includes" in issue.validation) {
+                    message = `Invalid input: must include "${issue.validation.includes}"`;
+                    if (typeof issue.validation.position === "number") {
+                        message = `${message} at one or more positions greater than or equal to ${issue.validation.position}`;
+                    }
+                }
+                else if ("startsWith" in issue.validation) {
+                    message = `Invalid input: must start with "${issue.validation.startsWith}"`;
+                }
+                else if ("endsWith" in issue.validation) {
+                    message = `Invalid input: must end with "${issue.validation.endsWith}"`;
+                }
+                else {
+                    _helpers_util_js__WEBPACK_IMPORTED_MODULE_1__.util.assertNever(issue.validation);
+                }
+            }
+            else if (issue.validation !== "regex") {
+                message = `Invalid ${issue.validation}`;
+            }
+            else {
+                message = "Invalid";
+            }
+            break;
+        case _ZodError_js__WEBPACK_IMPORTED_MODULE_0__.ZodIssueCode.too_small:
+            if (issue.type === "array")
+                message = `Array must contain ${issue.exact ? "exactly" : issue.inclusive ? `at least` : `more than`} ${issue.minimum} element(s)`;
+            else if (issue.type === "string")
+                message = `String must contain ${issue.exact ? "exactly" : issue.inclusive ? `at least` : `over`} ${issue.minimum} character(s)`;
+            else if (issue.type === "number")
+                message = `Number must be ${issue.exact ? `exactly equal to ` : issue.inclusive ? `greater than or equal to ` : `greater than `}${issue.minimum}`;
+            else if (issue.type === "bigint")
+                message = `Number must be ${issue.exact ? `exactly equal to ` : issue.inclusive ? `greater than or equal to ` : `greater than `}${issue.minimum}`;
+            else if (issue.type === "date")
+                message = `Date must be ${issue.exact ? `exactly equal to ` : issue.inclusive ? `greater than or equal to ` : `greater than `}${new Date(Number(issue.minimum))}`;
+            else
+                message = "Invalid input";
+            break;
+        case _ZodError_js__WEBPACK_IMPORTED_MODULE_0__.ZodIssueCode.too_big:
+            if (issue.type === "array")
+                message = `Array must contain ${issue.exact ? `exactly` : issue.inclusive ? `at most` : `less than`} ${issue.maximum} element(s)`;
+            else if (issue.type === "string")
+                message = `String must contain ${issue.exact ? `exactly` : issue.inclusive ? `at most` : `under`} ${issue.maximum} character(s)`;
+            else if (issue.type === "number")
+                message = `Number must be ${issue.exact ? `exactly` : issue.inclusive ? `less than or equal to` : `less than`} ${issue.maximum}`;
+            else if (issue.type === "bigint")
+                message = `BigInt must be ${issue.exact ? `exactly` : issue.inclusive ? `less than or equal to` : `less than`} ${issue.maximum}`;
+            else if (issue.type === "date")
+                message = `Date must be ${issue.exact ? `exactly` : issue.inclusive ? `smaller than or equal to` : `smaller than`} ${new Date(Number(issue.maximum))}`;
+            else
+                message = "Invalid input";
+            break;
+        case _ZodError_js__WEBPACK_IMPORTED_MODULE_0__.ZodIssueCode.custom:
+            message = `Invalid input`;
+            break;
+        case _ZodError_js__WEBPACK_IMPORTED_MODULE_0__.ZodIssueCode.invalid_intersection_types:
+            message = `Intersection results could not be merged`;
+            break;
+        case _ZodError_js__WEBPACK_IMPORTED_MODULE_0__.ZodIssueCode.not_multiple_of:
+            message = `Number must be a multiple of ${issue.multipleOf}`;
+            break;
+        case _ZodError_js__WEBPACK_IMPORTED_MODULE_0__.ZodIssueCode.not_finite:
+            message = "Number must be finite";
+            break;
+        default:
+            message = _ctx.defaultError;
+            _helpers_util_js__WEBPACK_IMPORTED_MODULE_1__.util.assertNever(issue);
+    }
+    return { message };
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (errorMap);
+
+
+/***/ }),
+
+/***/ "./node_modules/zod/v3/types.js":
+/*!**************************************!*\
+  !*** ./node_modules/zod/v3/types.js ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   BRAND: () => (/* binding */ BRAND),
+/* harmony export */   NEVER: () => (/* binding */ NEVER),
+/* harmony export */   Schema: () => (/* binding */ ZodType),
+/* harmony export */   ZodAny: () => (/* binding */ ZodAny),
+/* harmony export */   ZodArray: () => (/* binding */ ZodArray),
+/* harmony export */   ZodBigInt: () => (/* binding */ ZodBigInt),
+/* harmony export */   ZodBoolean: () => (/* binding */ ZodBoolean),
+/* harmony export */   ZodBranded: () => (/* binding */ ZodBranded),
+/* harmony export */   ZodCatch: () => (/* binding */ ZodCatch),
+/* harmony export */   ZodDate: () => (/* binding */ ZodDate),
+/* harmony export */   ZodDefault: () => (/* binding */ ZodDefault),
+/* harmony export */   ZodDiscriminatedUnion: () => (/* binding */ ZodDiscriminatedUnion),
+/* harmony export */   ZodEffects: () => (/* binding */ ZodEffects),
+/* harmony export */   ZodEnum: () => (/* binding */ ZodEnum),
+/* harmony export */   ZodFirstPartyTypeKind: () => (/* binding */ ZodFirstPartyTypeKind),
+/* harmony export */   ZodFunction: () => (/* binding */ ZodFunction),
+/* harmony export */   ZodIntersection: () => (/* binding */ ZodIntersection),
+/* harmony export */   ZodLazy: () => (/* binding */ ZodLazy),
+/* harmony export */   ZodLiteral: () => (/* binding */ ZodLiteral),
+/* harmony export */   ZodMap: () => (/* binding */ ZodMap),
+/* harmony export */   ZodNaN: () => (/* binding */ ZodNaN),
+/* harmony export */   ZodNativeEnum: () => (/* binding */ ZodNativeEnum),
+/* harmony export */   ZodNever: () => (/* binding */ ZodNever),
+/* harmony export */   ZodNull: () => (/* binding */ ZodNull),
+/* harmony export */   ZodNullable: () => (/* binding */ ZodNullable),
+/* harmony export */   ZodNumber: () => (/* binding */ ZodNumber),
+/* harmony export */   ZodObject: () => (/* binding */ ZodObject),
+/* harmony export */   ZodOptional: () => (/* binding */ ZodOptional),
+/* harmony export */   ZodPipeline: () => (/* binding */ ZodPipeline),
+/* harmony export */   ZodPromise: () => (/* binding */ ZodPromise),
+/* harmony export */   ZodReadonly: () => (/* binding */ ZodReadonly),
+/* harmony export */   ZodRecord: () => (/* binding */ ZodRecord),
+/* harmony export */   ZodSchema: () => (/* binding */ ZodType),
+/* harmony export */   ZodSet: () => (/* binding */ ZodSet),
+/* harmony export */   ZodString: () => (/* binding */ ZodString),
+/* harmony export */   ZodSymbol: () => (/* binding */ ZodSymbol),
+/* harmony export */   ZodTransformer: () => (/* binding */ ZodEffects),
+/* harmony export */   ZodTuple: () => (/* binding */ ZodTuple),
+/* harmony export */   ZodType: () => (/* binding */ ZodType),
+/* harmony export */   ZodUndefined: () => (/* binding */ ZodUndefined),
+/* harmony export */   ZodUnion: () => (/* binding */ ZodUnion),
+/* harmony export */   ZodUnknown: () => (/* binding */ ZodUnknown),
+/* harmony export */   ZodVoid: () => (/* binding */ ZodVoid),
+/* harmony export */   any: () => (/* binding */ anyType),
+/* harmony export */   array: () => (/* binding */ arrayType),
+/* harmony export */   bigint: () => (/* binding */ bigIntType),
+/* harmony export */   boolean: () => (/* binding */ booleanType),
+/* harmony export */   coerce: () => (/* binding */ coerce),
+/* harmony export */   custom: () => (/* binding */ custom),
+/* harmony export */   date: () => (/* binding */ dateType),
+/* harmony export */   datetimeRegex: () => (/* binding */ datetimeRegex),
+/* harmony export */   discriminatedUnion: () => (/* binding */ discriminatedUnionType),
+/* harmony export */   effect: () => (/* binding */ effectsType),
+/* harmony export */   "enum": () => (/* binding */ enumType),
+/* harmony export */   "function": () => (/* binding */ functionType),
+/* harmony export */   "instanceof": () => (/* binding */ instanceOfType),
+/* harmony export */   intersection: () => (/* binding */ intersectionType),
+/* harmony export */   late: () => (/* binding */ late),
+/* harmony export */   lazy: () => (/* binding */ lazyType),
+/* harmony export */   literal: () => (/* binding */ literalType),
+/* harmony export */   map: () => (/* binding */ mapType),
+/* harmony export */   nan: () => (/* binding */ nanType),
+/* harmony export */   nativeEnum: () => (/* binding */ nativeEnumType),
+/* harmony export */   never: () => (/* binding */ neverType),
+/* harmony export */   "null": () => (/* binding */ nullType),
+/* harmony export */   nullable: () => (/* binding */ nullableType),
+/* harmony export */   number: () => (/* binding */ numberType),
+/* harmony export */   object: () => (/* binding */ objectType),
+/* harmony export */   oboolean: () => (/* binding */ oboolean),
+/* harmony export */   onumber: () => (/* binding */ onumber),
+/* harmony export */   optional: () => (/* binding */ optionalType),
+/* harmony export */   ostring: () => (/* binding */ ostring),
+/* harmony export */   pipeline: () => (/* binding */ pipelineType),
+/* harmony export */   preprocess: () => (/* binding */ preprocessType),
+/* harmony export */   promise: () => (/* binding */ promiseType),
+/* harmony export */   record: () => (/* binding */ recordType),
+/* harmony export */   set: () => (/* binding */ setType),
+/* harmony export */   strictObject: () => (/* binding */ strictObjectType),
+/* harmony export */   string: () => (/* binding */ stringType),
+/* harmony export */   symbol: () => (/* binding */ symbolType),
+/* harmony export */   transformer: () => (/* binding */ effectsType),
+/* harmony export */   tuple: () => (/* binding */ tupleType),
+/* harmony export */   undefined: () => (/* binding */ undefinedType),
+/* harmony export */   union: () => (/* binding */ unionType),
+/* harmony export */   unknown: () => (/* binding */ unknownType),
+/* harmony export */   "void": () => (/* binding */ voidType)
+/* harmony export */ });
+/* harmony import */ var _ZodError_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ZodError.js */ "./node_modules/zod/v3/ZodError.js");
+/* harmony import */ var _errors_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./errors.js */ "./node_modules/zod/v3/errors.js");
+/* harmony import */ var _errors_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./errors.js */ "./node_modules/zod/v3/locales/en.js");
+/* harmony import */ var _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./helpers/errorUtil.js */ "./node_modules/zod/v3/helpers/errorUtil.js");
+/* harmony import */ var _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./helpers/parseUtil.js */ "./node_modules/zod/v3/helpers/parseUtil.js");
+/* harmony import */ var _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./helpers/util.js */ "./node_modules/zod/v3/helpers/util.js");
+
+
+
+
+
+class ParseInputLazyPath {
+    constructor(parent, value, path, key) {
+        this._cachedPath = [];
+        this.parent = parent;
+        this.data = value;
+        this._path = path;
+        this._key = key;
+    }
+    get path() {
+        if (!this._cachedPath.length) {
+            if (Array.isArray(this._key)) {
+                this._cachedPath.push(...this._path, ...this._key);
+            }
+            else {
+                this._cachedPath.push(...this._path, this._key);
+            }
+        }
+        return this._cachedPath;
+    }
+}
+const handleResult = (ctx, result) => {
+    if ((0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.isValid)(result)) {
+        return { success: true, data: result.value };
+    }
+    else {
+        if (!ctx.common.issues.length) {
+            throw new Error("Validation failed but no issues detected.");
+        }
+        return {
+            success: false,
+            get error() {
+                if (this._error)
+                    return this._error;
+                const error = new _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodError(ctx.common.issues);
+                this._error = error;
+                return this._error;
+            },
+        };
+    }
+};
+function processCreateParams(params) {
+    if (!params)
+        return {};
+    const { errorMap, invalid_type_error, required_error, description } = params;
+    if (errorMap && (invalid_type_error || required_error)) {
+        throw new Error(`Can't use "invalid_type_error" or "required_error" in conjunction with custom error map.`);
+    }
+    if (errorMap)
+        return { errorMap: errorMap, description };
+    const customMap = (iss, ctx) => {
+        const { message } = params;
+        if (iss.code === "invalid_enum_value") {
+            return { message: message ?? ctx.defaultError };
+        }
+        if (typeof ctx.data === "undefined") {
+            return { message: message ?? required_error ?? ctx.defaultError };
+        }
+        if (iss.code !== "invalid_type")
+            return { message: ctx.defaultError };
+        return { message: message ?? invalid_type_error ?? ctx.defaultError };
+    };
+    return { errorMap: customMap, description };
+}
+class ZodType {
+    get description() {
+        return this._def.description;
+    }
+    _getType(input) {
+        return (0,_helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.getParsedType)(input.data);
+    }
+    _getOrReturnCtx(input, ctx) {
+        return (ctx || {
+            common: input.parent.common,
+            data: input.data,
+            parsedType: (0,_helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.getParsedType)(input.data),
+            schemaErrorMap: this._def.errorMap,
+            path: input.path,
+            parent: input.parent,
+        });
+    }
+    _processInputParams(input) {
+        return {
+            status: new _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.ParseStatus(),
+            ctx: {
+                common: input.parent.common,
+                data: input.data,
+                parsedType: (0,_helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.getParsedType)(input.data),
+                schemaErrorMap: this._def.errorMap,
+                path: input.path,
+                parent: input.parent,
+            },
+        };
+    }
+    _parseSync(input) {
+        const result = this._parse(input);
+        if ((0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.isAsync)(result)) {
+            throw new Error("Synchronous parse encountered promise.");
+        }
+        return result;
+    }
+    _parseAsync(input) {
+        const result = this._parse(input);
+        return Promise.resolve(result);
+    }
+    parse(data, params) {
+        const result = this.safeParse(data, params);
+        if (result.success)
+            return result.data;
+        throw result.error;
+    }
+    safeParse(data, params) {
+        const ctx = {
+            common: {
+                issues: [],
+                async: params?.async ?? false,
+                contextualErrorMap: params?.errorMap,
+            },
+            path: params?.path || [],
+            schemaErrorMap: this._def.errorMap,
+            parent: null,
+            data,
+            parsedType: (0,_helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.getParsedType)(data),
+        };
+        const result = this._parseSync({ data, path: ctx.path, parent: ctx });
+        return handleResult(ctx, result);
+    }
+    "~validate"(data) {
+        const ctx = {
+            common: {
+                issues: [],
+                async: !!this["~standard"].async,
+            },
+            path: [],
+            schemaErrorMap: this._def.errorMap,
+            parent: null,
+            data,
+            parsedType: (0,_helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.getParsedType)(data),
+        };
+        if (!this["~standard"].async) {
+            try {
+                const result = this._parseSync({ data, path: [], parent: ctx });
+                return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.isValid)(result)
+                    ? {
+                        value: result.value,
+                    }
+                    : {
+                        issues: ctx.common.issues,
+                    };
+            }
+            catch (err) {
+                if (err?.message?.toLowerCase()?.includes("encountered")) {
+                    this["~standard"].async = true;
+                }
+                ctx.common = {
+                    issues: [],
+                    async: true,
+                };
+            }
+        }
+        return this._parseAsync({ data, path: [], parent: ctx }).then((result) => (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.isValid)(result)
+            ? {
+                value: result.value,
+            }
+            : {
+                issues: ctx.common.issues,
+            });
+    }
+    async parseAsync(data, params) {
+        const result = await this.safeParseAsync(data, params);
+        if (result.success)
+            return result.data;
+        throw result.error;
+    }
+    async safeParseAsync(data, params) {
+        const ctx = {
+            common: {
+                issues: [],
+                contextualErrorMap: params?.errorMap,
+                async: true,
+            },
+            path: params?.path || [],
+            schemaErrorMap: this._def.errorMap,
+            parent: null,
+            data,
+            parsedType: (0,_helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.getParsedType)(data),
+        };
+        const maybeAsyncResult = this._parse({ data, path: ctx.path, parent: ctx });
+        const result = await ((0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.isAsync)(maybeAsyncResult) ? maybeAsyncResult : Promise.resolve(maybeAsyncResult));
+        return handleResult(ctx, result);
+    }
+    refine(check, message) {
+        const getIssueProperties = (val) => {
+            if (typeof message === "string" || typeof message === "undefined") {
+                return { message };
+            }
+            else if (typeof message === "function") {
+                return message(val);
+            }
+            else {
+                return message;
+            }
+        };
+        return this._refinement((val, ctx) => {
+            const result = check(val);
+            const setError = () => ctx.addIssue({
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.custom,
+                ...getIssueProperties(val),
+            });
+            if (typeof Promise !== "undefined" && result instanceof Promise) {
+                return result.then((data) => {
+                    if (!data) {
+                        setError();
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
+                });
+            }
+            if (!result) {
+                setError();
+                return false;
+            }
+            else {
+                return true;
+            }
+        });
+    }
+    refinement(check, refinementData) {
+        return this._refinement((val, ctx) => {
+            if (!check(val)) {
+                ctx.addIssue(typeof refinementData === "function" ? refinementData(val, ctx) : refinementData);
+                return false;
+            }
+            else {
+                return true;
+            }
+        });
+    }
+    _refinement(refinement) {
+        return new ZodEffects({
+            schema: this,
+            typeName: ZodFirstPartyTypeKind.ZodEffects,
+            effect: { type: "refinement", refinement },
+        });
+    }
+    superRefine(refinement) {
+        return this._refinement(refinement);
+    }
+    constructor(def) {
+        /** Alias of safeParseAsync */
+        this.spa = this.safeParseAsync;
+        this._def = def;
+        this.parse = this.parse.bind(this);
+        this.safeParse = this.safeParse.bind(this);
+        this.parseAsync = this.parseAsync.bind(this);
+        this.safeParseAsync = this.safeParseAsync.bind(this);
+        this.spa = this.spa.bind(this);
+        this.refine = this.refine.bind(this);
+        this.refinement = this.refinement.bind(this);
+        this.superRefine = this.superRefine.bind(this);
+        this.optional = this.optional.bind(this);
+        this.nullable = this.nullable.bind(this);
+        this.nullish = this.nullish.bind(this);
+        this.array = this.array.bind(this);
+        this.promise = this.promise.bind(this);
+        this.or = this.or.bind(this);
+        this.and = this.and.bind(this);
+        this.transform = this.transform.bind(this);
+        this.brand = this.brand.bind(this);
+        this.default = this.default.bind(this);
+        this.catch = this.catch.bind(this);
+        this.describe = this.describe.bind(this);
+        this.pipe = this.pipe.bind(this);
+        this.readonly = this.readonly.bind(this);
+        this.isNullable = this.isNullable.bind(this);
+        this.isOptional = this.isOptional.bind(this);
+        this["~standard"] = {
+            version: 1,
+            vendor: "zod",
+            validate: (data) => this["~validate"](data),
+        };
+    }
+    optional() {
+        return ZodOptional.create(this, this._def);
+    }
+    nullable() {
+        return ZodNullable.create(this, this._def);
+    }
+    nullish() {
+        return this.nullable().optional();
+    }
+    array() {
+        return ZodArray.create(this);
+    }
+    promise() {
+        return ZodPromise.create(this, this._def);
+    }
+    or(option) {
+        return ZodUnion.create([this, option], this._def);
+    }
+    and(incoming) {
+        return ZodIntersection.create(this, incoming, this._def);
+    }
+    transform(transform) {
+        return new ZodEffects({
+            ...processCreateParams(this._def),
+            schema: this,
+            typeName: ZodFirstPartyTypeKind.ZodEffects,
+            effect: { type: "transform", transform },
+        });
+    }
+    default(def) {
+        const defaultValueFunc = typeof def === "function" ? def : () => def;
+        return new ZodDefault({
+            ...processCreateParams(this._def),
+            innerType: this,
+            defaultValue: defaultValueFunc,
+            typeName: ZodFirstPartyTypeKind.ZodDefault,
+        });
+    }
+    brand() {
+        return new ZodBranded({
+            typeName: ZodFirstPartyTypeKind.ZodBranded,
+            type: this,
+            ...processCreateParams(this._def),
+        });
+    }
+    catch(def) {
+        const catchValueFunc = typeof def === "function" ? def : () => def;
+        return new ZodCatch({
+            ...processCreateParams(this._def),
+            innerType: this,
+            catchValue: catchValueFunc,
+            typeName: ZodFirstPartyTypeKind.ZodCatch,
+        });
+    }
+    describe(description) {
+        const This = this.constructor;
+        return new This({
+            ...this._def,
+            description,
+        });
+    }
+    pipe(target) {
+        return ZodPipeline.create(this, target);
+    }
+    readonly() {
+        return ZodReadonly.create(this);
+    }
+    isOptional() {
+        return this.safeParse(undefined).success;
+    }
+    isNullable() {
+        return this.safeParse(null).success;
+    }
+}
+const cuidRegex = /^c[^\s-]{8,}$/i;
+const cuid2Regex = /^[0-9a-z]+$/;
+const ulidRegex = /^[0-9A-HJKMNP-TV-Z]{26}$/i;
+// const uuidRegex =
+//   /^([a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[a-f0-9]{4}-[a-f0-9]{12}|00000000-0000-0000-0000-000000000000)$/i;
+const uuidRegex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/i;
+const nanoidRegex = /^[a-z0-9_-]{21}$/i;
+const jwtRegex = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$/;
+const durationRegex = /^[-+]?P(?!$)(?:(?:[-+]?\d+Y)|(?:[-+]?\d+[.,]\d+Y$))?(?:(?:[-+]?\d+M)|(?:[-+]?\d+[.,]\d+M$))?(?:(?:[-+]?\d+W)|(?:[-+]?\d+[.,]\d+W$))?(?:(?:[-+]?\d+D)|(?:[-+]?\d+[.,]\d+D$))?(?:T(?=[\d+-])(?:(?:[-+]?\d+H)|(?:[-+]?\d+[.,]\d+H$))?(?:(?:[-+]?\d+M)|(?:[-+]?\d+[.,]\d+M$))?(?:[-+]?\d+(?:[.,]\d+)?S)?)??$/;
+// from https://stackoverflow.com/a/46181/1550155
+// old version: too slow, didn't support unicode
+// const emailRegex = /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))$/i;
+//old email regex
+// const emailRegex = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@((?!-)([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{1,})[^-<>()[\].,;:\s@"]$/i;
+// eslint-disable-next-line
+// const emailRegex =
+//   /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[(((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2}))\.){3}((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2}))\])|(\[IPv6:(([a-f0-9]{1,4}:){7}|::([a-f0-9]{1,4}:){0,6}|([a-f0-9]{1,4}:){1}:([a-f0-9]{1,4}:){0,5}|([a-f0-9]{1,4}:){2}:([a-f0-9]{1,4}:){0,4}|([a-f0-9]{1,4}:){3}:([a-f0-9]{1,4}:){0,3}|([a-f0-9]{1,4}:){4}:([a-f0-9]{1,4}:){0,2}|([a-f0-9]{1,4}:){5}:([a-f0-9]{1,4}:){0,1})([a-f0-9]{1,4}|(((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2}))\.){3}((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2})))\])|([A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])*(\.[A-Za-z]{2,})+))$/;
+// const emailRegex =
+//   /^[a-zA-Z0-9\.\!\#\$\%\&\'\*\+\/\=\?\^\_\`\{\|\}\~\-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+// const emailRegex =
+//   /^(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/i;
+const emailRegex = /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-\.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9\-]*\.)+[A-Z]{2,}$/i;
+// const emailRegex =
+//   /^[a-z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-z0-9-]+(?:\.[a-z0-9\-]+)*$/i;
+// from https://thekevinscott.com/emojis-in-javascript/#writing-a-regular-expression
+const _emojiRegex = `^(\\p{Extended_Pictographic}|\\p{Emoji_Component})+$`;
+let emojiRegex;
+// faster, simpler, safer
+const ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])$/;
+const ipv4CidrRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\/(3[0-2]|[12]?[0-9])$/;
+// const ipv6Regex =
+// /^(([a-f0-9]{1,4}:){7}|::([a-f0-9]{1,4}:){0,6}|([a-f0-9]{1,4}:){1}:([a-f0-9]{1,4}:){0,5}|([a-f0-9]{1,4}:){2}:([a-f0-9]{1,4}:){0,4}|([a-f0-9]{1,4}:){3}:([a-f0-9]{1,4}:){0,3}|([a-f0-9]{1,4}:){4}:([a-f0-9]{1,4}:){0,2}|([a-f0-9]{1,4}:){5}:([a-f0-9]{1,4}:){0,1})([a-f0-9]{1,4}|(((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2}))\.){3}((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2})))$/;
+const ipv6Regex = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/;
+const ipv6CidrRegex = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))\/(12[0-8]|1[01][0-9]|[1-9]?[0-9])$/;
+// https://stackoverflow.com/questions/7860392/determine-if-string-is-in-base64-using-javascript
+const base64Regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
+// https://base64.guru/standards/base64url
+const base64urlRegex = /^([0-9a-zA-Z-_]{4})*(([0-9a-zA-Z-_]{2}(==)?)|([0-9a-zA-Z-_]{3}(=)?))?$/;
+// simple
+// const dateRegexSource = `\\d{4}-\\d{2}-\\d{2}`;
+// no leap year validation
+// const dateRegexSource = `\\d{4}-((0[13578]|10|12)-31|(0[13-9]|1[0-2])-30|(0[1-9]|1[0-2])-(0[1-9]|1\\d|2\\d))`;
+// with leap year validation
+const dateRegexSource = `((\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-((0[13578]|1[02])-(0[1-9]|[12]\\d|3[01])|(0[469]|11)-(0[1-9]|[12]\\d|30)|(02)-(0[1-9]|1\\d|2[0-8])))`;
+const dateRegex = new RegExp(`^${dateRegexSource}$`);
+function timeRegexSource(args) {
+    let secondsRegexSource = `[0-5]\\d`;
+    if (args.precision) {
+        secondsRegexSource = `${secondsRegexSource}\\.\\d{${args.precision}}`;
+    }
+    else if (args.precision == null) {
+        secondsRegexSource = `${secondsRegexSource}(\\.\\d+)?`;
+    }
+    const secondsQuantifier = args.precision ? "+" : "?"; // require seconds if precision is nonzero
+    return `([01]\\d|2[0-3]):[0-5]\\d(:${secondsRegexSource})${secondsQuantifier}`;
+}
+function timeRegex(args) {
+    return new RegExp(`^${timeRegexSource(args)}$`);
+}
+// Adapted from https://stackoverflow.com/a/3143231
+function datetimeRegex(args) {
+    let regex = `${dateRegexSource}T${timeRegexSource(args)}`;
+    const opts = [];
+    opts.push(args.local ? `Z?` : `Z`);
+    if (args.offset)
+        opts.push(`([+-]\\d{2}:?\\d{2})`);
+    regex = `${regex}(${opts.join("|")})`;
+    return new RegExp(`^${regex}$`);
+}
+function isValidIP(ip, version) {
+    if ((version === "v4" || !version) && ipv4Regex.test(ip)) {
+        return true;
+    }
+    if ((version === "v6" || !version) && ipv6Regex.test(ip)) {
+        return true;
+    }
+    return false;
+}
+function isValidJWT(jwt, alg) {
+    if (!jwtRegex.test(jwt))
+        return false;
+    try {
+        const [header] = jwt.split(".");
+        if (!header)
+            return false;
+        // Convert base64url to base64
+        const base64 = header
+            .replace(/-/g, "+")
+            .replace(/_/g, "/")
+            .padEnd(header.length + ((4 - (header.length % 4)) % 4), "=");
+        const decoded = JSON.parse(atob(base64));
+        if (typeof decoded !== "object" || decoded === null)
+            return false;
+        if ("typ" in decoded && decoded?.typ !== "JWT")
+            return false;
+        if (!decoded.alg)
+            return false;
+        if (alg && decoded.alg !== alg)
+            return false;
+        return true;
+    }
+    catch {
+        return false;
+    }
+}
+function isValidCidr(ip, version) {
+    if ((version === "v4" || !version) && ipv4CidrRegex.test(ip)) {
+        return true;
+    }
+    if ((version === "v6" || !version) && ipv6CidrRegex.test(ip)) {
+        return true;
+    }
+    return false;
+}
+class ZodString extends ZodType {
+    _parse(input) {
+        if (this._def.coerce) {
+            input.data = String(input.data);
+        }
+        const parsedType = this._getType(input);
+        if (parsedType !== _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.string) {
+            const ctx = this._getOrReturnCtx(input);
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+                expected: _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.string,
+                received: ctx.parsedType,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        const status = new _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.ParseStatus();
+        let ctx = undefined;
+        for (const check of this._def.checks) {
+            if (check.kind === "min") {
+                if (input.data.length < check.value) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.too_small,
+                        minimum: check.value,
+                        type: "string",
+                        inclusive: true,
+                        exact: false,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "max") {
+                if (input.data.length > check.value) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.too_big,
+                        maximum: check.value,
+                        type: "string",
+                        inclusive: true,
+                        exact: false,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "length") {
+                const tooBig = input.data.length > check.value;
+                const tooSmall = input.data.length < check.value;
+                if (tooBig || tooSmall) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    if (tooBig) {
+                        (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                            code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.too_big,
+                            maximum: check.value,
+                            type: "string",
+                            inclusive: true,
+                            exact: true,
+                            message: check.message,
+                        });
+                    }
+                    else if (tooSmall) {
+                        (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                            code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.too_small,
+                            minimum: check.value,
+                            type: "string",
+                            inclusive: true,
+                            exact: true,
+                            message: check.message,
+                        });
+                    }
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "email") {
+                if (!emailRegex.test(input.data)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        validation: "email",
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_string,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "emoji") {
+                if (!emojiRegex) {
+                    emojiRegex = new RegExp(_emojiRegex, "u");
+                }
+                if (!emojiRegex.test(input.data)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        validation: "emoji",
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_string,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "uuid") {
+                if (!uuidRegex.test(input.data)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        validation: "uuid",
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_string,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "nanoid") {
+                if (!nanoidRegex.test(input.data)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        validation: "nanoid",
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_string,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "cuid") {
+                if (!cuidRegex.test(input.data)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        validation: "cuid",
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_string,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "cuid2") {
+                if (!cuid2Regex.test(input.data)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        validation: "cuid2",
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_string,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "ulid") {
+                if (!ulidRegex.test(input.data)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        validation: "ulid",
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_string,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "url") {
+                try {
+                    new URL(input.data);
+                }
+                catch {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        validation: "url",
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_string,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "regex") {
+                check.regex.lastIndex = 0;
+                const testResult = check.regex.test(input.data);
+                if (!testResult) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        validation: "regex",
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_string,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "trim") {
+                input.data = input.data.trim();
+            }
+            else if (check.kind === "includes") {
+                if (!input.data.includes(check.value, check.position)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_string,
+                        validation: { includes: check.value, position: check.position },
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "toLowerCase") {
+                input.data = input.data.toLowerCase();
+            }
+            else if (check.kind === "toUpperCase") {
+                input.data = input.data.toUpperCase();
+            }
+            else if (check.kind === "startsWith") {
+                if (!input.data.startsWith(check.value)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_string,
+                        validation: { startsWith: check.value },
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "endsWith") {
+                if (!input.data.endsWith(check.value)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_string,
+                        validation: { endsWith: check.value },
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "datetime") {
+                const regex = datetimeRegex(check);
+                if (!regex.test(input.data)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_string,
+                        validation: "datetime",
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "date") {
+                const regex = dateRegex;
+                if (!regex.test(input.data)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_string,
+                        validation: "date",
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "time") {
+                const regex = timeRegex(check);
+                if (!regex.test(input.data)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_string,
+                        validation: "time",
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "duration") {
+                if (!durationRegex.test(input.data)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        validation: "duration",
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_string,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "ip") {
+                if (!isValidIP(input.data, check.version)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        validation: "ip",
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_string,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "jwt") {
+                if (!isValidJWT(input.data, check.alg)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        validation: "jwt",
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_string,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "cidr") {
+                if (!isValidCidr(input.data, check.version)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        validation: "cidr",
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_string,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "base64") {
+                if (!base64Regex.test(input.data)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        validation: "base64",
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_string,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "base64url") {
+                if (!base64urlRegex.test(input.data)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        validation: "base64url",
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_string,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else {
+                _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.util.assertNever(check);
+            }
+        }
+        return { status: status.value, value: input.data };
+    }
+    _regex(regex, validation, message) {
+        return this.refinement((data) => regex.test(data), {
+            validation,
+            code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_string,
+            ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(message),
+        });
+    }
+    _addCheck(check) {
+        return new ZodString({
+            ...this._def,
+            checks: [...this._def.checks, check],
+        });
+    }
+    email(message) {
+        return this._addCheck({ kind: "email", ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(message) });
+    }
+    url(message) {
+        return this._addCheck({ kind: "url", ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(message) });
+    }
+    emoji(message) {
+        return this._addCheck({ kind: "emoji", ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(message) });
+    }
+    uuid(message) {
+        return this._addCheck({ kind: "uuid", ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(message) });
+    }
+    nanoid(message) {
+        return this._addCheck({ kind: "nanoid", ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(message) });
+    }
+    cuid(message) {
+        return this._addCheck({ kind: "cuid", ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(message) });
+    }
+    cuid2(message) {
+        return this._addCheck({ kind: "cuid2", ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(message) });
+    }
+    ulid(message) {
+        return this._addCheck({ kind: "ulid", ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(message) });
+    }
+    base64(message) {
+        return this._addCheck({ kind: "base64", ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(message) });
+    }
+    base64url(message) {
+        // base64url encoding is a modification of base64 that can safely be used in URLs and filenames
+        return this._addCheck({
+            kind: "base64url",
+            ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(message),
+        });
+    }
+    jwt(options) {
+        return this._addCheck({ kind: "jwt", ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(options) });
+    }
+    ip(options) {
+        return this._addCheck({ kind: "ip", ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(options) });
+    }
+    cidr(options) {
+        return this._addCheck({ kind: "cidr", ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(options) });
+    }
+    datetime(options) {
+        if (typeof options === "string") {
+            return this._addCheck({
+                kind: "datetime",
+                precision: null,
+                offset: false,
+                local: false,
+                message: options,
+            });
+        }
+        return this._addCheck({
+            kind: "datetime",
+            precision: typeof options?.precision === "undefined" ? null : options?.precision,
+            offset: options?.offset ?? false,
+            local: options?.local ?? false,
+            ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(options?.message),
+        });
+    }
+    date(message) {
+        return this._addCheck({ kind: "date", message });
+    }
+    time(options) {
+        if (typeof options === "string") {
+            return this._addCheck({
+                kind: "time",
+                precision: null,
+                message: options,
+            });
+        }
+        return this._addCheck({
+            kind: "time",
+            precision: typeof options?.precision === "undefined" ? null : options?.precision,
+            ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(options?.message),
+        });
+    }
+    duration(message) {
+        return this._addCheck({ kind: "duration", ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(message) });
+    }
+    regex(regex, message) {
+        return this._addCheck({
+            kind: "regex",
+            regex: regex,
+            ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(message),
+        });
+    }
+    includes(value, options) {
+        return this._addCheck({
+            kind: "includes",
+            value: value,
+            position: options?.position,
+            ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(options?.message),
+        });
+    }
+    startsWith(value, message) {
+        return this._addCheck({
+            kind: "startsWith",
+            value: value,
+            ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(message),
+        });
+    }
+    endsWith(value, message) {
+        return this._addCheck({
+            kind: "endsWith",
+            value: value,
+            ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(message),
+        });
+    }
+    min(minLength, message) {
+        return this._addCheck({
+            kind: "min",
+            value: minLength,
+            ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(message),
+        });
+    }
+    max(maxLength, message) {
+        return this._addCheck({
+            kind: "max",
+            value: maxLength,
+            ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(message),
+        });
+    }
+    length(len, message) {
+        return this._addCheck({
+            kind: "length",
+            value: len,
+            ..._helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(message),
+        });
+    }
+    /**
+     * Equivalent to `.min(1)`
+     */
+    nonempty(message) {
+        return this.min(1, _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(message));
+    }
+    trim() {
+        return new ZodString({
+            ...this._def,
+            checks: [...this._def.checks, { kind: "trim" }],
+        });
+    }
+    toLowerCase() {
+        return new ZodString({
+            ...this._def,
+            checks: [...this._def.checks, { kind: "toLowerCase" }],
+        });
+    }
+    toUpperCase() {
+        return new ZodString({
+            ...this._def,
+            checks: [...this._def.checks, { kind: "toUpperCase" }],
+        });
+    }
+    get isDatetime() {
+        return !!this._def.checks.find((ch) => ch.kind === "datetime");
+    }
+    get isDate() {
+        return !!this._def.checks.find((ch) => ch.kind === "date");
+    }
+    get isTime() {
+        return !!this._def.checks.find((ch) => ch.kind === "time");
+    }
+    get isDuration() {
+        return !!this._def.checks.find((ch) => ch.kind === "duration");
+    }
+    get isEmail() {
+        return !!this._def.checks.find((ch) => ch.kind === "email");
+    }
+    get isURL() {
+        return !!this._def.checks.find((ch) => ch.kind === "url");
+    }
+    get isEmoji() {
+        return !!this._def.checks.find((ch) => ch.kind === "emoji");
+    }
+    get isUUID() {
+        return !!this._def.checks.find((ch) => ch.kind === "uuid");
+    }
+    get isNANOID() {
+        return !!this._def.checks.find((ch) => ch.kind === "nanoid");
+    }
+    get isCUID() {
+        return !!this._def.checks.find((ch) => ch.kind === "cuid");
+    }
+    get isCUID2() {
+        return !!this._def.checks.find((ch) => ch.kind === "cuid2");
+    }
+    get isULID() {
+        return !!this._def.checks.find((ch) => ch.kind === "ulid");
+    }
+    get isIP() {
+        return !!this._def.checks.find((ch) => ch.kind === "ip");
+    }
+    get isCIDR() {
+        return !!this._def.checks.find((ch) => ch.kind === "cidr");
+    }
+    get isBase64() {
+        return !!this._def.checks.find((ch) => ch.kind === "base64");
+    }
+    get isBase64url() {
+        // base64url encoding is a modification of base64 that can safely be used in URLs and filenames
+        return !!this._def.checks.find((ch) => ch.kind === "base64url");
+    }
+    get minLength() {
+        let min = null;
+        for (const ch of this._def.checks) {
+            if (ch.kind === "min") {
+                if (min === null || ch.value > min)
+                    min = ch.value;
+            }
+        }
+        return min;
+    }
+    get maxLength() {
+        let max = null;
+        for (const ch of this._def.checks) {
+            if (ch.kind === "max") {
+                if (max === null || ch.value < max)
+                    max = ch.value;
+            }
+        }
+        return max;
+    }
+}
+ZodString.create = (params) => {
+    return new ZodString({
+        checks: [],
+        typeName: ZodFirstPartyTypeKind.ZodString,
+        coerce: params?.coerce ?? false,
+        ...processCreateParams(params),
+    });
+};
+// https://stackoverflow.com/questions/3966484/why-does-modulus-operator-return-fractional-number-in-javascript/31711034#31711034
+function floatSafeRemainder(val, step) {
+    const valDecCount = (val.toString().split(".")[1] || "").length;
+    const stepDecCount = (step.toString().split(".")[1] || "").length;
+    const decCount = valDecCount > stepDecCount ? valDecCount : stepDecCount;
+    const valInt = Number.parseInt(val.toFixed(decCount).replace(".", ""));
+    const stepInt = Number.parseInt(step.toFixed(decCount).replace(".", ""));
+    return (valInt % stepInt) / 10 ** decCount;
+}
+class ZodNumber extends ZodType {
+    constructor() {
+        super(...arguments);
+        this.min = this.gte;
+        this.max = this.lte;
+        this.step = this.multipleOf;
+    }
+    _parse(input) {
+        if (this._def.coerce) {
+            input.data = Number(input.data);
+        }
+        const parsedType = this._getType(input);
+        if (parsedType !== _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.number) {
+            const ctx = this._getOrReturnCtx(input);
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+                expected: _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.number,
+                received: ctx.parsedType,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        let ctx = undefined;
+        const status = new _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.ParseStatus();
+        for (const check of this._def.checks) {
+            if (check.kind === "int") {
+                if (!_helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.util.isInteger(input.data)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+                        expected: "integer",
+                        received: "float",
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "min") {
+                const tooSmall = check.inclusive ? input.data < check.value : input.data <= check.value;
+                if (tooSmall) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.too_small,
+                        minimum: check.value,
+                        type: "number",
+                        inclusive: check.inclusive,
+                        exact: false,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "max") {
+                const tooBig = check.inclusive ? input.data > check.value : input.data >= check.value;
+                if (tooBig) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.too_big,
+                        maximum: check.value,
+                        type: "number",
+                        inclusive: check.inclusive,
+                        exact: false,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "multipleOf") {
+                if (floatSafeRemainder(input.data, check.value) !== 0) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.not_multiple_of,
+                        multipleOf: check.value,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "finite") {
+                if (!Number.isFinite(input.data)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.not_finite,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else {
+                _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.util.assertNever(check);
+            }
+        }
+        return { status: status.value, value: input.data };
+    }
+    gte(value, message) {
+        return this.setLimit("min", value, true, _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message));
+    }
+    gt(value, message) {
+        return this.setLimit("min", value, false, _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message));
+    }
+    lte(value, message) {
+        return this.setLimit("max", value, true, _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message));
+    }
+    lt(value, message) {
+        return this.setLimit("max", value, false, _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message));
+    }
+    setLimit(kind, value, inclusive, message) {
+        return new ZodNumber({
+            ...this._def,
+            checks: [
+                ...this._def.checks,
+                {
+                    kind,
+                    value,
+                    inclusive,
+                    message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message),
+                },
+            ],
+        });
+    }
+    _addCheck(check) {
+        return new ZodNumber({
+            ...this._def,
+            checks: [...this._def.checks, check],
+        });
+    }
+    int(message) {
+        return this._addCheck({
+            kind: "int",
+            message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message),
+        });
+    }
+    positive(message) {
+        return this._addCheck({
+            kind: "min",
+            value: 0,
+            inclusive: false,
+            message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message),
+        });
+    }
+    negative(message) {
+        return this._addCheck({
+            kind: "max",
+            value: 0,
+            inclusive: false,
+            message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message),
+        });
+    }
+    nonpositive(message) {
+        return this._addCheck({
+            kind: "max",
+            value: 0,
+            inclusive: true,
+            message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message),
+        });
+    }
+    nonnegative(message) {
+        return this._addCheck({
+            kind: "min",
+            value: 0,
+            inclusive: true,
+            message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message),
+        });
+    }
+    multipleOf(value, message) {
+        return this._addCheck({
+            kind: "multipleOf",
+            value: value,
+            message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message),
+        });
+    }
+    finite(message) {
+        return this._addCheck({
+            kind: "finite",
+            message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message),
+        });
+    }
+    safe(message) {
+        return this._addCheck({
+            kind: "min",
+            inclusive: true,
+            value: Number.MIN_SAFE_INTEGER,
+            message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message),
+        })._addCheck({
+            kind: "max",
+            inclusive: true,
+            value: Number.MAX_SAFE_INTEGER,
+            message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message),
+        });
+    }
+    get minValue() {
+        let min = null;
+        for (const ch of this._def.checks) {
+            if (ch.kind === "min") {
+                if (min === null || ch.value > min)
+                    min = ch.value;
+            }
+        }
+        return min;
+    }
+    get maxValue() {
+        let max = null;
+        for (const ch of this._def.checks) {
+            if (ch.kind === "max") {
+                if (max === null || ch.value < max)
+                    max = ch.value;
+            }
+        }
+        return max;
+    }
+    get isInt() {
+        return !!this._def.checks.find((ch) => ch.kind === "int" || (ch.kind === "multipleOf" && _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.util.isInteger(ch.value)));
+    }
+    get isFinite() {
+        let max = null;
+        let min = null;
+        for (const ch of this._def.checks) {
+            if (ch.kind === "finite" || ch.kind === "int" || ch.kind === "multipleOf") {
+                return true;
+            }
+            else if (ch.kind === "min") {
+                if (min === null || ch.value > min)
+                    min = ch.value;
+            }
+            else if (ch.kind === "max") {
+                if (max === null || ch.value < max)
+                    max = ch.value;
+            }
+        }
+        return Number.isFinite(min) && Number.isFinite(max);
+    }
+}
+ZodNumber.create = (params) => {
+    return new ZodNumber({
+        checks: [],
+        typeName: ZodFirstPartyTypeKind.ZodNumber,
+        coerce: params?.coerce || false,
+        ...processCreateParams(params),
+    });
+};
+class ZodBigInt extends ZodType {
+    constructor() {
+        super(...arguments);
+        this.min = this.gte;
+        this.max = this.lte;
+    }
+    _parse(input) {
+        if (this._def.coerce) {
+            try {
+                input.data = BigInt(input.data);
+            }
+            catch {
+                return this._getInvalidInput(input);
+            }
+        }
+        const parsedType = this._getType(input);
+        if (parsedType !== _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.bigint) {
+            return this._getInvalidInput(input);
+        }
+        let ctx = undefined;
+        const status = new _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.ParseStatus();
+        for (const check of this._def.checks) {
+            if (check.kind === "min") {
+                const tooSmall = check.inclusive ? input.data < check.value : input.data <= check.value;
+                if (tooSmall) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.too_small,
+                        type: "bigint",
+                        minimum: check.value,
+                        inclusive: check.inclusive,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "max") {
+                const tooBig = check.inclusive ? input.data > check.value : input.data >= check.value;
+                if (tooBig) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.too_big,
+                        type: "bigint",
+                        maximum: check.value,
+                        inclusive: check.inclusive,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "multipleOf") {
+                if (input.data % check.value !== BigInt(0)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.not_multiple_of,
+                        multipleOf: check.value,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
+            else {
+                _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.util.assertNever(check);
+            }
+        }
+        return { status: status.value, value: input.data };
+    }
+    _getInvalidInput(input) {
+        const ctx = this._getOrReturnCtx(input);
+        (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+            code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+            expected: _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.bigint,
+            received: ctx.parsedType,
+        });
+        return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+    }
+    gte(value, message) {
+        return this.setLimit("min", value, true, _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message));
+    }
+    gt(value, message) {
+        return this.setLimit("min", value, false, _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message));
+    }
+    lte(value, message) {
+        return this.setLimit("max", value, true, _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message));
+    }
+    lt(value, message) {
+        return this.setLimit("max", value, false, _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message));
+    }
+    setLimit(kind, value, inclusive, message) {
+        return new ZodBigInt({
+            ...this._def,
+            checks: [
+                ...this._def.checks,
+                {
+                    kind,
+                    value,
+                    inclusive,
+                    message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message),
+                },
+            ],
+        });
+    }
+    _addCheck(check) {
+        return new ZodBigInt({
+            ...this._def,
+            checks: [...this._def.checks, check],
+        });
+    }
+    positive(message) {
+        return this._addCheck({
+            kind: "min",
+            value: BigInt(0),
+            inclusive: false,
+            message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message),
+        });
+    }
+    negative(message) {
+        return this._addCheck({
+            kind: "max",
+            value: BigInt(0),
+            inclusive: false,
+            message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message),
+        });
+    }
+    nonpositive(message) {
+        return this._addCheck({
+            kind: "max",
+            value: BigInt(0),
+            inclusive: true,
+            message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message),
+        });
+    }
+    nonnegative(message) {
+        return this._addCheck({
+            kind: "min",
+            value: BigInt(0),
+            inclusive: true,
+            message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message),
+        });
+    }
+    multipleOf(value, message) {
+        return this._addCheck({
+            kind: "multipleOf",
+            value,
+            message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message),
+        });
+    }
+    get minValue() {
+        let min = null;
+        for (const ch of this._def.checks) {
+            if (ch.kind === "min") {
+                if (min === null || ch.value > min)
+                    min = ch.value;
+            }
+        }
+        return min;
+    }
+    get maxValue() {
+        let max = null;
+        for (const ch of this._def.checks) {
+            if (ch.kind === "max") {
+                if (max === null || ch.value < max)
+                    max = ch.value;
+            }
+        }
+        return max;
+    }
+}
+ZodBigInt.create = (params) => {
+    return new ZodBigInt({
+        checks: [],
+        typeName: ZodFirstPartyTypeKind.ZodBigInt,
+        coerce: params?.coerce ?? false,
+        ...processCreateParams(params),
+    });
+};
+class ZodBoolean extends ZodType {
+    _parse(input) {
+        if (this._def.coerce) {
+            input.data = Boolean(input.data);
+        }
+        const parsedType = this._getType(input);
+        if (parsedType !== _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.boolean) {
+            const ctx = this._getOrReturnCtx(input);
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+                expected: _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.boolean,
+                received: ctx.parsedType,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.OK)(input.data);
+    }
+}
+ZodBoolean.create = (params) => {
+    return new ZodBoolean({
+        typeName: ZodFirstPartyTypeKind.ZodBoolean,
+        coerce: params?.coerce || false,
+        ...processCreateParams(params),
+    });
+};
+class ZodDate extends ZodType {
+    _parse(input) {
+        if (this._def.coerce) {
+            input.data = new Date(input.data);
+        }
+        const parsedType = this._getType(input);
+        if (parsedType !== _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.date) {
+            const ctx = this._getOrReturnCtx(input);
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+                expected: _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.date,
+                received: ctx.parsedType,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        if (Number.isNaN(input.data.getTime())) {
+            const ctx = this._getOrReturnCtx(input);
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_date,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        const status = new _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.ParseStatus();
+        let ctx = undefined;
+        for (const check of this._def.checks) {
+            if (check.kind === "min") {
+                if (input.data.getTime() < check.value) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.too_small,
+                        message: check.message,
+                        inclusive: true,
+                        exact: false,
+                        minimum: check.value,
+                        type: "date",
+                    });
+                    status.dirty();
+                }
+            }
+            else if (check.kind === "max") {
+                if (input.data.getTime() > check.value) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.too_big,
+                        message: check.message,
+                        inclusive: true,
+                        exact: false,
+                        maximum: check.value,
+                        type: "date",
+                    });
+                    status.dirty();
+                }
+            }
+            else {
+                _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.util.assertNever(check);
+            }
+        }
+        return {
+            status: status.value,
+            value: new Date(input.data.getTime()),
+        };
+    }
+    _addCheck(check) {
+        return new ZodDate({
+            ...this._def,
+            checks: [...this._def.checks, check],
+        });
+    }
+    min(minDate, message) {
+        return this._addCheck({
+            kind: "min",
+            value: minDate.getTime(),
+            message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message),
+        });
+    }
+    max(maxDate, message) {
+        return this._addCheck({
+            kind: "max",
+            value: maxDate.getTime(),
+            message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message),
+        });
+    }
+    get minDate() {
+        let min = null;
+        for (const ch of this._def.checks) {
+            if (ch.kind === "min") {
+                if (min === null || ch.value > min)
+                    min = ch.value;
+            }
+        }
+        return min != null ? new Date(min) : null;
+    }
+    get maxDate() {
+        let max = null;
+        for (const ch of this._def.checks) {
+            if (ch.kind === "max") {
+                if (max === null || ch.value < max)
+                    max = ch.value;
+            }
+        }
+        return max != null ? new Date(max) : null;
+    }
+}
+ZodDate.create = (params) => {
+    return new ZodDate({
+        checks: [],
+        coerce: params?.coerce || false,
+        typeName: ZodFirstPartyTypeKind.ZodDate,
+        ...processCreateParams(params),
+    });
+};
+class ZodSymbol extends ZodType {
+    _parse(input) {
+        const parsedType = this._getType(input);
+        if (parsedType !== _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.symbol) {
+            const ctx = this._getOrReturnCtx(input);
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+                expected: _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.symbol,
+                received: ctx.parsedType,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.OK)(input.data);
+    }
+}
+ZodSymbol.create = (params) => {
+    return new ZodSymbol({
+        typeName: ZodFirstPartyTypeKind.ZodSymbol,
+        ...processCreateParams(params),
+    });
+};
+class ZodUndefined extends ZodType {
+    _parse(input) {
+        const parsedType = this._getType(input);
+        if (parsedType !== _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.undefined) {
+            const ctx = this._getOrReturnCtx(input);
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+                expected: _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.undefined,
+                received: ctx.parsedType,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.OK)(input.data);
+    }
+}
+ZodUndefined.create = (params) => {
+    return new ZodUndefined({
+        typeName: ZodFirstPartyTypeKind.ZodUndefined,
+        ...processCreateParams(params),
+    });
+};
+class ZodNull extends ZodType {
+    _parse(input) {
+        const parsedType = this._getType(input);
+        if (parsedType !== _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.null) {
+            const ctx = this._getOrReturnCtx(input);
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+                expected: _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.null,
+                received: ctx.parsedType,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.OK)(input.data);
+    }
+}
+ZodNull.create = (params) => {
+    return new ZodNull({
+        typeName: ZodFirstPartyTypeKind.ZodNull,
+        ...processCreateParams(params),
+    });
+};
+class ZodAny extends ZodType {
+    constructor() {
+        super(...arguments);
+        // to prevent instances of other classes from extending ZodAny. this causes issues with catchall in ZodObject.
+        this._any = true;
+    }
+    _parse(input) {
+        return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.OK)(input.data);
+    }
+}
+ZodAny.create = (params) => {
+    return new ZodAny({
+        typeName: ZodFirstPartyTypeKind.ZodAny,
+        ...processCreateParams(params),
+    });
+};
+class ZodUnknown extends ZodType {
+    constructor() {
+        super(...arguments);
+        // required
+        this._unknown = true;
+    }
+    _parse(input) {
+        return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.OK)(input.data);
+    }
+}
+ZodUnknown.create = (params) => {
+    return new ZodUnknown({
+        typeName: ZodFirstPartyTypeKind.ZodUnknown,
+        ...processCreateParams(params),
+    });
+};
+class ZodNever extends ZodType {
+    _parse(input) {
+        const ctx = this._getOrReturnCtx(input);
+        (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+            code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+            expected: _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.never,
+            received: ctx.parsedType,
+        });
+        return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+    }
+}
+ZodNever.create = (params) => {
+    return new ZodNever({
+        typeName: ZodFirstPartyTypeKind.ZodNever,
+        ...processCreateParams(params),
+    });
+};
+class ZodVoid extends ZodType {
+    _parse(input) {
+        const parsedType = this._getType(input);
+        if (parsedType !== _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.undefined) {
+            const ctx = this._getOrReturnCtx(input);
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+                expected: _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.void,
+                received: ctx.parsedType,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.OK)(input.data);
+    }
+}
+ZodVoid.create = (params) => {
+    return new ZodVoid({
+        typeName: ZodFirstPartyTypeKind.ZodVoid,
+        ...processCreateParams(params),
+    });
+};
+class ZodArray extends ZodType {
+    _parse(input) {
+        const { ctx, status } = this._processInputParams(input);
+        const def = this._def;
+        if (ctx.parsedType !== _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.array) {
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+                expected: _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.array,
+                received: ctx.parsedType,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        if (def.exactLength !== null) {
+            const tooBig = ctx.data.length > def.exactLength.value;
+            const tooSmall = ctx.data.length < def.exactLength.value;
+            if (tooBig || tooSmall) {
+                (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                    code: tooBig ? _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.too_big : _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.too_small,
+                    minimum: (tooSmall ? def.exactLength.value : undefined),
+                    maximum: (tooBig ? def.exactLength.value : undefined),
+                    type: "array",
+                    inclusive: true,
+                    exact: true,
+                    message: def.exactLength.message,
+                });
+                status.dirty();
+            }
+        }
+        if (def.minLength !== null) {
+            if (ctx.data.length < def.minLength.value) {
+                (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                    code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.too_small,
+                    minimum: def.minLength.value,
+                    type: "array",
+                    inclusive: true,
+                    exact: false,
+                    message: def.minLength.message,
+                });
+                status.dirty();
+            }
+        }
+        if (def.maxLength !== null) {
+            if (ctx.data.length > def.maxLength.value) {
+                (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                    code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.too_big,
+                    maximum: def.maxLength.value,
+                    type: "array",
+                    inclusive: true,
+                    exact: false,
+                    message: def.maxLength.message,
+                });
+                status.dirty();
+            }
+        }
+        if (ctx.common.async) {
+            return Promise.all([...ctx.data].map((item, i) => {
+                return def.type._parseAsync(new ParseInputLazyPath(ctx, item, ctx.path, i));
+            })).then((result) => {
+                return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.ParseStatus.mergeArray(status, result);
+            });
+        }
+        const result = [...ctx.data].map((item, i) => {
+            return def.type._parseSync(new ParseInputLazyPath(ctx, item, ctx.path, i));
+        });
+        return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.ParseStatus.mergeArray(status, result);
+    }
+    get element() {
+        return this._def.type;
+    }
+    min(minLength, message) {
+        return new ZodArray({
+            ...this._def,
+            minLength: { value: minLength, message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message) },
+        });
+    }
+    max(maxLength, message) {
+        return new ZodArray({
+            ...this._def,
+            maxLength: { value: maxLength, message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message) },
+        });
+    }
+    length(len, message) {
+        return new ZodArray({
+            ...this._def,
+            exactLength: { value: len, message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message) },
+        });
+    }
+    nonempty(message) {
+        return this.min(1, message);
+    }
+}
+ZodArray.create = (schema, params) => {
+    return new ZodArray({
+        type: schema,
+        minLength: null,
+        maxLength: null,
+        exactLength: null,
+        typeName: ZodFirstPartyTypeKind.ZodArray,
+        ...processCreateParams(params),
+    });
+};
+function deepPartialify(schema) {
+    if (schema instanceof ZodObject) {
+        const newShape = {};
+        for (const key in schema.shape) {
+            const fieldSchema = schema.shape[key];
+            newShape[key] = ZodOptional.create(deepPartialify(fieldSchema));
+        }
+        return new ZodObject({
+            ...schema._def,
+            shape: () => newShape,
+        });
+    }
+    else if (schema instanceof ZodArray) {
+        return new ZodArray({
+            ...schema._def,
+            type: deepPartialify(schema.element),
+        });
+    }
+    else if (schema instanceof ZodOptional) {
+        return ZodOptional.create(deepPartialify(schema.unwrap()));
+    }
+    else if (schema instanceof ZodNullable) {
+        return ZodNullable.create(deepPartialify(schema.unwrap()));
+    }
+    else if (schema instanceof ZodTuple) {
+        return ZodTuple.create(schema.items.map((item) => deepPartialify(item)));
+    }
+    else {
+        return schema;
+    }
+}
+class ZodObject extends ZodType {
+    constructor() {
+        super(...arguments);
+        this._cached = null;
+        /**
+         * @deprecated In most cases, this is no longer needed - unknown properties are now silently stripped.
+         * If you want to pass through unknown properties, use `.passthrough()` instead.
+         */
+        this.nonstrict = this.passthrough;
+        // extend<
+        //   Augmentation extends ZodRawShape,
+        //   NewOutput extends util.flatten<{
+        //     [k in keyof Augmentation | keyof Output]: k extends keyof Augmentation
+        //       ? Augmentation[k]["_output"]
+        //       : k extends keyof Output
+        //       ? Output[k]
+        //       : never;
+        //   }>,
+        //   NewInput extends util.flatten<{
+        //     [k in keyof Augmentation | keyof Input]: k extends keyof Augmentation
+        //       ? Augmentation[k]["_input"]
+        //       : k extends keyof Input
+        //       ? Input[k]
+        //       : never;
+        //   }>
+        // >(
+        //   augmentation: Augmentation
+        // ): ZodObject<
+        //   extendShape<T, Augmentation>,
+        //   UnknownKeys,
+        //   Catchall,
+        //   NewOutput,
+        //   NewInput
+        // > {
+        //   return new ZodObject({
+        //     ...this._def,
+        //     shape: () => ({
+        //       ...this._def.shape(),
+        //       ...augmentation,
+        //     }),
+        //   }) as any;
+        // }
+        /**
+         * @deprecated Use `.extend` instead
+         *  */
+        this.augment = this.extend;
+    }
+    _getCached() {
+        if (this._cached !== null)
+            return this._cached;
+        const shape = this._def.shape();
+        const keys = _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.util.objectKeys(shape);
+        this._cached = { shape, keys };
+        return this._cached;
+    }
+    _parse(input) {
+        const parsedType = this._getType(input);
+        if (parsedType !== _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.object) {
+            const ctx = this._getOrReturnCtx(input);
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+                expected: _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.object,
+                received: ctx.parsedType,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        const { status, ctx } = this._processInputParams(input);
+        const { shape, keys: shapeKeys } = this._getCached();
+        const extraKeys = [];
+        if (!(this._def.catchall instanceof ZodNever && this._def.unknownKeys === "strip")) {
+            for (const key in ctx.data) {
+                if (!shapeKeys.includes(key)) {
+                    extraKeys.push(key);
+                }
+            }
+        }
+        const pairs = [];
+        for (const key of shapeKeys) {
+            const keyValidator = shape[key];
+            const value = ctx.data[key];
+            pairs.push({
+                key: { status: "valid", value: key },
+                value: keyValidator._parse(new ParseInputLazyPath(ctx, value, ctx.path, key)),
+                alwaysSet: key in ctx.data,
+            });
+        }
+        if (this._def.catchall instanceof ZodNever) {
+            const unknownKeys = this._def.unknownKeys;
+            if (unknownKeys === "passthrough") {
+                for (const key of extraKeys) {
+                    pairs.push({
+                        key: { status: "valid", value: key },
+                        value: { status: "valid", value: ctx.data[key] },
+                    });
+                }
+            }
+            else if (unknownKeys === "strict") {
+                if (extraKeys.length > 0) {
+                    (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                        code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.unrecognized_keys,
+                        keys: extraKeys,
+                    });
+                    status.dirty();
+                }
+            }
+            else if (unknownKeys === "strip") {
+            }
+            else {
+                throw new Error(`Internal ZodObject error: invalid unknownKeys value.`);
+            }
+        }
+        else {
+            // run catchall validation
+            const catchall = this._def.catchall;
+            for (const key of extraKeys) {
+                const value = ctx.data[key];
+                pairs.push({
+                    key: { status: "valid", value: key },
+                    value: catchall._parse(new ParseInputLazyPath(ctx, value, ctx.path, key) //, ctx.child(key), value, getParsedType(value)
+                    ),
+                    alwaysSet: key in ctx.data,
+                });
+            }
+        }
+        if (ctx.common.async) {
+            return Promise.resolve()
+                .then(async () => {
+                const syncPairs = [];
+                for (const pair of pairs) {
+                    const key = await pair.key;
+                    const value = await pair.value;
+                    syncPairs.push({
+                        key,
+                        value,
+                        alwaysSet: pair.alwaysSet,
+                    });
+                }
+                return syncPairs;
+            })
+                .then((syncPairs) => {
+                return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.ParseStatus.mergeObjectSync(status, syncPairs);
+            });
+        }
+        else {
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.ParseStatus.mergeObjectSync(status, pairs);
+        }
+    }
+    get shape() {
+        return this._def.shape();
+    }
+    strict(message) {
+        _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj;
+        return new ZodObject({
+            ...this._def,
+            unknownKeys: "strict",
+            ...(message !== undefined
+                ? {
+                    errorMap: (issue, ctx) => {
+                        const defaultError = this._def.errorMap?.(issue, ctx).message ?? ctx.defaultError;
+                        if (issue.code === "unrecognized_keys")
+                            return {
+                                message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.errToObj(message).message ?? defaultError,
+                            };
+                        return {
+                            message: defaultError,
+                        };
+                    },
+                }
+                : {}),
+        });
+    }
+    strip() {
+        return new ZodObject({
+            ...this._def,
+            unknownKeys: "strip",
+        });
+    }
+    passthrough() {
+        return new ZodObject({
+            ...this._def,
+            unknownKeys: "passthrough",
+        });
+    }
+    // const AugmentFactory =
+    //   <Def extends ZodObjectDef>(def: Def) =>
+    //   <Augmentation extends ZodRawShape>(
+    //     augmentation: Augmentation
+    //   ): ZodObject<
+    //     extendShape<ReturnType<Def["shape"]>, Augmentation>,
+    //     Def["unknownKeys"],
+    //     Def["catchall"]
+    //   > => {
+    //     return new ZodObject({
+    //       ...def,
+    //       shape: () => ({
+    //         ...def.shape(),
+    //         ...augmentation,
+    //       }),
+    //     }) as any;
+    //   };
+    extend(augmentation) {
+        return new ZodObject({
+            ...this._def,
+            shape: () => ({
+                ...this._def.shape(),
+                ...augmentation,
+            }),
+        });
+    }
+    /**
+     * Prior to zod@1.0.12 there was a bug in the
+     * inferred type of merged objects. Please
+     * upgrade if you are experiencing issues.
+     */
+    merge(merging) {
+        const merged = new ZodObject({
+            unknownKeys: merging._def.unknownKeys,
+            catchall: merging._def.catchall,
+            shape: () => ({
+                ...this._def.shape(),
+                ...merging._def.shape(),
+            }),
+            typeName: ZodFirstPartyTypeKind.ZodObject,
+        });
+        return merged;
+    }
+    // merge<
+    //   Incoming extends AnyZodObject,
+    //   Augmentation extends Incoming["shape"],
+    //   NewOutput extends {
+    //     [k in keyof Augmentation | keyof Output]: k extends keyof Augmentation
+    //       ? Augmentation[k]["_output"]
+    //       : k extends keyof Output
+    //       ? Output[k]
+    //       : never;
+    //   },
+    //   NewInput extends {
+    //     [k in keyof Augmentation | keyof Input]: k extends keyof Augmentation
+    //       ? Augmentation[k]["_input"]
+    //       : k extends keyof Input
+    //       ? Input[k]
+    //       : never;
+    //   }
+    // >(
+    //   merging: Incoming
+    // ): ZodObject<
+    //   extendShape<T, ReturnType<Incoming["_def"]["shape"]>>,
+    //   Incoming["_def"]["unknownKeys"],
+    //   Incoming["_def"]["catchall"],
+    //   NewOutput,
+    //   NewInput
+    // > {
+    //   const merged: any = new ZodObject({
+    //     unknownKeys: merging._def.unknownKeys,
+    //     catchall: merging._def.catchall,
+    //     shape: () =>
+    //       objectUtil.mergeShapes(this._def.shape(), merging._def.shape()),
+    //     typeName: ZodFirstPartyTypeKind.ZodObject,
+    //   }) as any;
+    //   return merged;
+    // }
+    setKey(key, schema) {
+        return this.augment({ [key]: schema });
+    }
+    // merge<Incoming extends AnyZodObject>(
+    //   merging: Incoming
+    // ): //ZodObject<T & Incoming["_shape"], UnknownKeys, Catchall> = (merging) => {
+    // ZodObject<
+    //   extendShape<T, ReturnType<Incoming["_def"]["shape"]>>,
+    //   Incoming["_def"]["unknownKeys"],
+    //   Incoming["_def"]["catchall"]
+    // > {
+    //   // const mergedShape = objectUtil.mergeShapes(
+    //   //   this._def.shape(),
+    //   //   merging._def.shape()
+    //   // );
+    //   const merged: any = new ZodObject({
+    //     unknownKeys: merging._def.unknownKeys,
+    //     catchall: merging._def.catchall,
+    //     shape: () =>
+    //       objectUtil.mergeShapes(this._def.shape(), merging._def.shape()),
+    //     typeName: ZodFirstPartyTypeKind.ZodObject,
+    //   }) as any;
+    //   return merged;
+    // }
+    catchall(index) {
+        return new ZodObject({
+            ...this._def,
+            catchall: index,
+        });
+    }
+    pick(mask) {
+        const shape = {};
+        for (const key of _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.util.objectKeys(mask)) {
+            if (mask[key] && this.shape[key]) {
+                shape[key] = this.shape[key];
+            }
+        }
+        return new ZodObject({
+            ...this._def,
+            shape: () => shape,
+        });
+    }
+    omit(mask) {
+        const shape = {};
+        for (const key of _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.util.objectKeys(this.shape)) {
+            if (!mask[key]) {
+                shape[key] = this.shape[key];
+            }
+        }
+        return new ZodObject({
+            ...this._def,
+            shape: () => shape,
+        });
+    }
+    /**
+     * @deprecated
+     */
+    deepPartial() {
+        return deepPartialify(this);
+    }
+    partial(mask) {
+        const newShape = {};
+        for (const key of _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.util.objectKeys(this.shape)) {
+            const fieldSchema = this.shape[key];
+            if (mask && !mask[key]) {
+                newShape[key] = fieldSchema;
+            }
+            else {
+                newShape[key] = fieldSchema.optional();
+            }
+        }
+        return new ZodObject({
+            ...this._def,
+            shape: () => newShape,
+        });
+    }
+    required(mask) {
+        const newShape = {};
+        for (const key of _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.util.objectKeys(this.shape)) {
+            if (mask && !mask[key]) {
+                newShape[key] = this.shape[key];
+            }
+            else {
+                const fieldSchema = this.shape[key];
+                let newField = fieldSchema;
+                while (newField instanceof ZodOptional) {
+                    newField = newField._def.innerType;
+                }
+                newShape[key] = newField;
+            }
+        }
+        return new ZodObject({
+            ...this._def,
+            shape: () => newShape,
+        });
+    }
+    keyof() {
+        return createZodEnum(_helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.util.objectKeys(this.shape));
+    }
+}
+ZodObject.create = (shape, params) => {
+    return new ZodObject({
+        shape: () => shape,
+        unknownKeys: "strip",
+        catchall: ZodNever.create(),
+        typeName: ZodFirstPartyTypeKind.ZodObject,
+        ...processCreateParams(params),
+    });
+};
+ZodObject.strictCreate = (shape, params) => {
+    return new ZodObject({
+        shape: () => shape,
+        unknownKeys: "strict",
+        catchall: ZodNever.create(),
+        typeName: ZodFirstPartyTypeKind.ZodObject,
+        ...processCreateParams(params),
+    });
+};
+ZodObject.lazycreate = (shape, params) => {
+    return new ZodObject({
+        shape,
+        unknownKeys: "strip",
+        catchall: ZodNever.create(),
+        typeName: ZodFirstPartyTypeKind.ZodObject,
+        ...processCreateParams(params),
+    });
+};
+class ZodUnion extends ZodType {
+    _parse(input) {
+        const { ctx } = this._processInputParams(input);
+        const options = this._def.options;
+        function handleResults(results) {
+            // return first issue-free validation if it exists
+            for (const result of results) {
+                if (result.result.status === "valid") {
+                    return result.result;
+                }
+            }
+            for (const result of results) {
+                if (result.result.status === "dirty") {
+                    // add issues from dirty option
+                    ctx.common.issues.push(...result.ctx.common.issues);
+                    return result.result;
+                }
+            }
+            // return invalid
+            const unionErrors = results.map((result) => new _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodError(result.ctx.common.issues));
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_union,
+                unionErrors,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        if (ctx.common.async) {
+            return Promise.all(options.map(async (option) => {
+                const childCtx = {
+                    ...ctx,
+                    common: {
+                        ...ctx.common,
+                        issues: [],
+                    },
+                    parent: null,
+                };
+                return {
+                    result: await option._parseAsync({
+                        data: ctx.data,
+                        path: ctx.path,
+                        parent: childCtx,
+                    }),
+                    ctx: childCtx,
+                };
+            })).then(handleResults);
+        }
+        else {
+            let dirty = undefined;
+            const issues = [];
+            for (const option of options) {
+                const childCtx = {
+                    ...ctx,
+                    common: {
+                        ...ctx.common,
+                        issues: [],
+                    },
+                    parent: null,
+                };
+                const result = option._parseSync({
+                    data: ctx.data,
+                    path: ctx.path,
+                    parent: childCtx,
+                });
+                if (result.status === "valid") {
+                    return result;
+                }
+                else if (result.status === "dirty" && !dirty) {
+                    dirty = { result, ctx: childCtx };
+                }
+                if (childCtx.common.issues.length) {
+                    issues.push(childCtx.common.issues);
+                }
+            }
+            if (dirty) {
+                ctx.common.issues.push(...dirty.ctx.common.issues);
+                return dirty.result;
+            }
+            const unionErrors = issues.map((issues) => new _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodError(issues));
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_union,
+                unionErrors,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+    }
+    get options() {
+        return this._def.options;
+    }
+}
+ZodUnion.create = (types, params) => {
+    return new ZodUnion({
+        options: types,
+        typeName: ZodFirstPartyTypeKind.ZodUnion,
+        ...processCreateParams(params),
+    });
+};
+/////////////////////////////////////////////////////
+/////////////////////////////////////////////////////
+//////////                                 //////////
+//////////      ZodDiscriminatedUnion      //////////
+//////////                                 //////////
+/////////////////////////////////////////////////////
+/////////////////////////////////////////////////////
+const getDiscriminator = (type) => {
+    if (type instanceof ZodLazy) {
+        return getDiscriminator(type.schema);
+    }
+    else if (type instanceof ZodEffects) {
+        return getDiscriminator(type.innerType());
+    }
+    else if (type instanceof ZodLiteral) {
+        return [type.value];
+    }
+    else if (type instanceof ZodEnum) {
+        return type.options;
+    }
+    else if (type instanceof ZodNativeEnum) {
+        // eslint-disable-next-line ban/ban
+        return _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.util.objectValues(type.enum);
+    }
+    else if (type instanceof ZodDefault) {
+        return getDiscriminator(type._def.innerType);
+    }
+    else if (type instanceof ZodUndefined) {
+        return [undefined];
+    }
+    else if (type instanceof ZodNull) {
+        return [null];
+    }
+    else if (type instanceof ZodOptional) {
+        return [undefined, ...getDiscriminator(type.unwrap())];
+    }
+    else if (type instanceof ZodNullable) {
+        return [null, ...getDiscriminator(type.unwrap())];
+    }
+    else if (type instanceof ZodBranded) {
+        return getDiscriminator(type.unwrap());
+    }
+    else if (type instanceof ZodReadonly) {
+        return getDiscriminator(type.unwrap());
+    }
+    else if (type instanceof ZodCatch) {
+        return getDiscriminator(type._def.innerType);
+    }
+    else {
+        return [];
+    }
+};
+class ZodDiscriminatedUnion extends ZodType {
+    _parse(input) {
+        const { ctx } = this._processInputParams(input);
+        if (ctx.parsedType !== _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.object) {
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+                expected: _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.object,
+                received: ctx.parsedType,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        const discriminator = this.discriminator;
+        const discriminatorValue = ctx.data[discriminator];
+        const option = this.optionsMap.get(discriminatorValue);
+        if (!option) {
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_union_discriminator,
+                options: Array.from(this.optionsMap.keys()),
+                path: [discriminator],
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        if (ctx.common.async) {
+            return option._parseAsync({
+                data: ctx.data,
+                path: ctx.path,
+                parent: ctx,
+            });
+        }
+        else {
+            return option._parseSync({
+                data: ctx.data,
+                path: ctx.path,
+                parent: ctx,
+            });
+        }
+    }
+    get discriminator() {
+        return this._def.discriminator;
+    }
+    get options() {
+        return this._def.options;
+    }
+    get optionsMap() {
+        return this._def.optionsMap;
+    }
+    /**
+     * The constructor of the discriminated union schema. Its behaviour is very similar to that of the normal z.union() constructor.
+     * However, it only allows a union of objects, all of which need to share a discriminator property. This property must
+     * have a different value for each object in the union.
+     * @param discriminator the name of the discriminator property
+     * @param types an array of object schemas
+     * @param params
+     */
+    static create(discriminator, options, params) {
+        // Get all the valid discriminator values
+        const optionsMap = new Map();
+        // try {
+        for (const type of options) {
+            const discriminatorValues = getDiscriminator(type.shape[discriminator]);
+            if (!discriminatorValues.length) {
+                throw new Error(`A discriminator value for key \`${discriminator}\` could not be extracted from all schema options`);
+            }
+            for (const value of discriminatorValues) {
+                if (optionsMap.has(value)) {
+                    throw new Error(`Discriminator property ${String(discriminator)} has duplicate value ${String(value)}`);
+                }
+                optionsMap.set(value, type);
+            }
+        }
+        return new ZodDiscriminatedUnion({
+            typeName: ZodFirstPartyTypeKind.ZodDiscriminatedUnion,
+            discriminator,
+            options,
+            optionsMap,
+            ...processCreateParams(params),
+        });
+    }
+}
+function mergeValues(a, b) {
+    const aType = (0,_helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.getParsedType)(a);
+    const bType = (0,_helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.getParsedType)(b);
+    if (a === b) {
+        return { valid: true, data: a };
+    }
+    else if (aType === _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.object && bType === _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.object) {
+        const bKeys = _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.util.objectKeys(b);
+        const sharedKeys = _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.util.objectKeys(a).filter((key) => bKeys.indexOf(key) !== -1);
+        const newObj = { ...a, ...b };
+        for (const key of sharedKeys) {
+            const sharedValue = mergeValues(a[key], b[key]);
+            if (!sharedValue.valid) {
+                return { valid: false };
+            }
+            newObj[key] = sharedValue.data;
+        }
+        return { valid: true, data: newObj };
+    }
+    else if (aType === _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.array && bType === _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.array) {
+        if (a.length !== b.length) {
+            return { valid: false };
+        }
+        const newArray = [];
+        for (let index = 0; index < a.length; index++) {
+            const itemA = a[index];
+            const itemB = b[index];
+            const sharedValue = mergeValues(itemA, itemB);
+            if (!sharedValue.valid) {
+                return { valid: false };
+            }
+            newArray.push(sharedValue.data);
+        }
+        return { valid: true, data: newArray };
+    }
+    else if (aType === _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.date && bType === _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.date && +a === +b) {
+        return { valid: true, data: a };
+    }
+    else {
+        return { valid: false };
+    }
+}
+class ZodIntersection extends ZodType {
+    _parse(input) {
+        const { status, ctx } = this._processInputParams(input);
+        const handleParsed = (parsedLeft, parsedRight) => {
+            if ((0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.isAborted)(parsedLeft) || (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.isAborted)(parsedRight)) {
+                return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+            }
+            const merged = mergeValues(parsedLeft.value, parsedRight.value);
+            if (!merged.valid) {
+                (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                    code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_intersection_types,
+                });
+                return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+            }
+            if ((0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.isDirty)(parsedLeft) || (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.isDirty)(parsedRight)) {
+                status.dirty();
+            }
+            return { status: status.value, value: merged.data };
+        };
+        if (ctx.common.async) {
+            return Promise.all([
+                this._def.left._parseAsync({
+                    data: ctx.data,
+                    path: ctx.path,
+                    parent: ctx,
+                }),
+                this._def.right._parseAsync({
+                    data: ctx.data,
+                    path: ctx.path,
+                    parent: ctx,
+                }),
+            ]).then(([left, right]) => handleParsed(left, right));
+        }
+        else {
+            return handleParsed(this._def.left._parseSync({
+                data: ctx.data,
+                path: ctx.path,
+                parent: ctx,
+            }), this._def.right._parseSync({
+                data: ctx.data,
+                path: ctx.path,
+                parent: ctx,
+            }));
+        }
+    }
+}
+ZodIntersection.create = (left, right, params) => {
+    return new ZodIntersection({
+        left: left,
+        right: right,
+        typeName: ZodFirstPartyTypeKind.ZodIntersection,
+        ...processCreateParams(params),
+    });
+};
+// type ZodTupleItems = [ZodTypeAny, ...ZodTypeAny[]];
+class ZodTuple extends ZodType {
+    _parse(input) {
+        const { status, ctx } = this._processInputParams(input);
+        if (ctx.parsedType !== _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.array) {
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+                expected: _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.array,
+                received: ctx.parsedType,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        if (ctx.data.length < this._def.items.length) {
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.too_small,
+                minimum: this._def.items.length,
+                inclusive: true,
+                exact: false,
+                type: "array",
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        const rest = this._def.rest;
+        if (!rest && ctx.data.length > this._def.items.length) {
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.too_big,
+                maximum: this._def.items.length,
+                inclusive: true,
+                exact: false,
+                type: "array",
+            });
+            status.dirty();
+        }
+        const items = [...ctx.data]
+            .map((item, itemIndex) => {
+            const schema = this._def.items[itemIndex] || this._def.rest;
+            if (!schema)
+                return null;
+            return schema._parse(new ParseInputLazyPath(ctx, item, ctx.path, itemIndex));
+        })
+            .filter((x) => !!x); // filter nulls
+        if (ctx.common.async) {
+            return Promise.all(items).then((results) => {
+                return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.ParseStatus.mergeArray(status, results);
+            });
+        }
+        else {
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.ParseStatus.mergeArray(status, items);
+        }
+    }
+    get items() {
+        return this._def.items;
+    }
+    rest(rest) {
+        return new ZodTuple({
+            ...this._def,
+            rest,
+        });
+    }
+}
+ZodTuple.create = (schemas, params) => {
+    if (!Array.isArray(schemas)) {
+        throw new Error("You must pass an array of schemas to z.tuple([ ... ])");
+    }
+    return new ZodTuple({
+        items: schemas,
+        typeName: ZodFirstPartyTypeKind.ZodTuple,
+        rest: null,
+        ...processCreateParams(params),
+    });
+};
+class ZodRecord extends ZodType {
+    get keySchema() {
+        return this._def.keyType;
+    }
+    get valueSchema() {
+        return this._def.valueType;
+    }
+    _parse(input) {
+        const { status, ctx } = this._processInputParams(input);
+        if (ctx.parsedType !== _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.object) {
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+                expected: _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.object,
+                received: ctx.parsedType,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        const pairs = [];
+        const keyType = this._def.keyType;
+        const valueType = this._def.valueType;
+        for (const key in ctx.data) {
+            pairs.push({
+                key: keyType._parse(new ParseInputLazyPath(ctx, key, ctx.path, key)),
+                value: valueType._parse(new ParseInputLazyPath(ctx, ctx.data[key], ctx.path, key)),
+                alwaysSet: key in ctx.data,
+            });
+        }
+        if (ctx.common.async) {
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.ParseStatus.mergeObjectAsync(status, pairs);
+        }
+        else {
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.ParseStatus.mergeObjectSync(status, pairs);
+        }
+    }
+    get element() {
+        return this._def.valueType;
+    }
+    static create(first, second, third) {
+        if (second instanceof ZodType) {
+            return new ZodRecord({
+                keyType: first,
+                valueType: second,
+                typeName: ZodFirstPartyTypeKind.ZodRecord,
+                ...processCreateParams(third),
+            });
+        }
+        return new ZodRecord({
+            keyType: ZodString.create(),
+            valueType: first,
+            typeName: ZodFirstPartyTypeKind.ZodRecord,
+            ...processCreateParams(second),
+        });
+    }
+}
+class ZodMap extends ZodType {
+    get keySchema() {
+        return this._def.keyType;
+    }
+    get valueSchema() {
+        return this._def.valueType;
+    }
+    _parse(input) {
+        const { status, ctx } = this._processInputParams(input);
+        if (ctx.parsedType !== _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.map) {
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+                expected: _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.map,
+                received: ctx.parsedType,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        const keyType = this._def.keyType;
+        const valueType = this._def.valueType;
+        const pairs = [...ctx.data.entries()].map(([key, value], index) => {
+            return {
+                key: keyType._parse(new ParseInputLazyPath(ctx, key, ctx.path, [index, "key"])),
+                value: valueType._parse(new ParseInputLazyPath(ctx, value, ctx.path, [index, "value"])),
+            };
+        });
+        if (ctx.common.async) {
+            const finalMap = new Map();
+            return Promise.resolve().then(async () => {
+                for (const pair of pairs) {
+                    const key = await pair.key;
+                    const value = await pair.value;
+                    if (key.status === "aborted" || value.status === "aborted") {
+                        return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+                    }
+                    if (key.status === "dirty" || value.status === "dirty") {
+                        status.dirty();
+                    }
+                    finalMap.set(key.value, value.value);
+                }
+                return { status: status.value, value: finalMap };
+            });
+        }
+        else {
+            const finalMap = new Map();
+            for (const pair of pairs) {
+                const key = pair.key;
+                const value = pair.value;
+                if (key.status === "aborted" || value.status === "aborted") {
+                    return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+                }
+                if (key.status === "dirty" || value.status === "dirty") {
+                    status.dirty();
+                }
+                finalMap.set(key.value, value.value);
+            }
+            return { status: status.value, value: finalMap };
+        }
+    }
+}
+ZodMap.create = (keyType, valueType, params) => {
+    return new ZodMap({
+        valueType,
+        keyType,
+        typeName: ZodFirstPartyTypeKind.ZodMap,
+        ...processCreateParams(params),
+    });
+};
+class ZodSet extends ZodType {
+    _parse(input) {
+        const { status, ctx } = this._processInputParams(input);
+        if (ctx.parsedType !== _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.set) {
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+                expected: _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.set,
+                received: ctx.parsedType,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        const def = this._def;
+        if (def.minSize !== null) {
+            if (ctx.data.size < def.minSize.value) {
+                (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                    code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.too_small,
+                    minimum: def.minSize.value,
+                    type: "set",
+                    inclusive: true,
+                    exact: false,
+                    message: def.minSize.message,
+                });
+                status.dirty();
+            }
+        }
+        if (def.maxSize !== null) {
+            if (ctx.data.size > def.maxSize.value) {
+                (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                    code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.too_big,
+                    maximum: def.maxSize.value,
+                    type: "set",
+                    inclusive: true,
+                    exact: false,
+                    message: def.maxSize.message,
+                });
+                status.dirty();
+            }
+        }
+        const valueType = this._def.valueType;
+        function finalizeSet(elements) {
+            const parsedSet = new Set();
+            for (const element of elements) {
+                if (element.status === "aborted")
+                    return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+                if (element.status === "dirty")
+                    status.dirty();
+                parsedSet.add(element.value);
+            }
+            return { status: status.value, value: parsedSet };
+        }
+        const elements = [...ctx.data.values()].map((item, i) => valueType._parse(new ParseInputLazyPath(ctx, item, ctx.path, i)));
+        if (ctx.common.async) {
+            return Promise.all(elements).then((elements) => finalizeSet(elements));
+        }
+        else {
+            return finalizeSet(elements);
+        }
+    }
+    min(minSize, message) {
+        return new ZodSet({
+            ...this._def,
+            minSize: { value: minSize, message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message) },
+        });
+    }
+    max(maxSize, message) {
+        return new ZodSet({
+            ...this._def,
+            maxSize: { value: maxSize, message: _helpers_errorUtil_js__WEBPACK_IMPORTED_MODULE_3__.errorUtil.toString(message) },
+        });
+    }
+    size(size, message) {
+        return this.min(size, message).max(size, message);
+    }
+    nonempty(message) {
+        return this.min(1, message);
+    }
+}
+ZodSet.create = (valueType, params) => {
+    return new ZodSet({
+        valueType,
+        minSize: null,
+        maxSize: null,
+        typeName: ZodFirstPartyTypeKind.ZodSet,
+        ...processCreateParams(params),
+    });
+};
+class ZodFunction extends ZodType {
+    constructor() {
+        super(...arguments);
+        this.validate = this.implement;
+    }
+    _parse(input) {
+        const { ctx } = this._processInputParams(input);
+        if (ctx.parsedType !== _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.function) {
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+                expected: _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.function,
+                received: ctx.parsedType,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        function makeArgsIssue(args, error) {
+            return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.makeIssue)({
+                data: args,
+                path: ctx.path,
+                errorMaps: [ctx.common.contextualErrorMap, ctx.schemaErrorMap, (0,_errors_js__WEBPACK_IMPORTED_MODULE_4__.getErrorMap)(), _errors_js__WEBPACK_IMPORTED_MODULE_5__["default"]].filter((x) => !!x),
+                issueData: {
+                    code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_arguments,
+                    argumentsError: error,
+                },
+            });
+        }
+        function makeReturnsIssue(returns, error) {
+            return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.makeIssue)({
+                data: returns,
+                path: ctx.path,
+                errorMaps: [ctx.common.contextualErrorMap, ctx.schemaErrorMap, (0,_errors_js__WEBPACK_IMPORTED_MODULE_4__.getErrorMap)(), _errors_js__WEBPACK_IMPORTED_MODULE_5__["default"]].filter((x) => !!x),
+                issueData: {
+                    code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_return_type,
+                    returnTypeError: error,
+                },
+            });
+        }
+        const params = { errorMap: ctx.common.contextualErrorMap };
+        const fn = ctx.data;
+        if (this._def.returns instanceof ZodPromise) {
+            // Would love a way to avoid disabling this rule, but we need
+            // an alias (using an arrow function was what caused 2651).
+            // eslint-disable-next-line @typescript-eslint/no-this-alias
+            const me = this;
+            return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.OK)(async function (...args) {
+                const error = new _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodError([]);
+                const parsedArgs = await me._def.args.parseAsync(args, params).catch((e) => {
+                    error.addIssue(makeArgsIssue(args, e));
+                    throw error;
+                });
+                const result = await Reflect.apply(fn, this, parsedArgs);
+                const parsedReturns = await me._def.returns._def.type
+                    .parseAsync(result, params)
+                    .catch((e) => {
+                    error.addIssue(makeReturnsIssue(result, e));
+                    throw error;
+                });
+                return parsedReturns;
+            });
+        }
+        else {
+            // Would love a way to avoid disabling this rule, but we need
+            // an alias (using an arrow function was what caused 2651).
+            // eslint-disable-next-line @typescript-eslint/no-this-alias
+            const me = this;
+            return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.OK)(function (...args) {
+                const parsedArgs = me._def.args.safeParse(args, params);
+                if (!parsedArgs.success) {
+                    throw new _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodError([makeArgsIssue(args, parsedArgs.error)]);
+                }
+                const result = Reflect.apply(fn, this, parsedArgs.data);
+                const parsedReturns = me._def.returns.safeParse(result, params);
+                if (!parsedReturns.success) {
+                    throw new _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodError([makeReturnsIssue(result, parsedReturns.error)]);
+                }
+                return parsedReturns.data;
+            });
+        }
+    }
+    parameters() {
+        return this._def.args;
+    }
+    returnType() {
+        return this._def.returns;
+    }
+    args(...items) {
+        return new ZodFunction({
+            ...this._def,
+            args: ZodTuple.create(items).rest(ZodUnknown.create()),
+        });
+    }
+    returns(returnType) {
+        return new ZodFunction({
+            ...this._def,
+            returns: returnType,
+        });
+    }
+    implement(func) {
+        const validatedFunc = this.parse(func);
+        return validatedFunc;
+    }
+    strictImplement(func) {
+        const validatedFunc = this.parse(func);
+        return validatedFunc;
+    }
+    static create(args, returns, params) {
+        return new ZodFunction({
+            args: (args ? args : ZodTuple.create([]).rest(ZodUnknown.create())),
+            returns: returns || ZodUnknown.create(),
+            typeName: ZodFirstPartyTypeKind.ZodFunction,
+            ...processCreateParams(params),
+        });
+    }
+}
+class ZodLazy extends ZodType {
+    get schema() {
+        return this._def.getter();
+    }
+    _parse(input) {
+        const { ctx } = this._processInputParams(input);
+        const lazySchema = this._def.getter();
+        return lazySchema._parse({ data: ctx.data, path: ctx.path, parent: ctx });
+    }
+}
+ZodLazy.create = (getter, params) => {
+    return new ZodLazy({
+        getter: getter,
+        typeName: ZodFirstPartyTypeKind.ZodLazy,
+        ...processCreateParams(params),
+    });
+};
+class ZodLiteral extends ZodType {
+    _parse(input) {
+        if (input.data !== this._def.value) {
+            const ctx = this._getOrReturnCtx(input);
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                received: ctx.data,
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_literal,
+                expected: this._def.value,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        return { status: "valid", value: input.data };
+    }
+    get value() {
+        return this._def.value;
+    }
+}
+ZodLiteral.create = (value, params) => {
+    return new ZodLiteral({
+        value: value,
+        typeName: ZodFirstPartyTypeKind.ZodLiteral,
+        ...processCreateParams(params),
+    });
+};
+function createZodEnum(values, params) {
+    return new ZodEnum({
+        values,
+        typeName: ZodFirstPartyTypeKind.ZodEnum,
+        ...processCreateParams(params),
+    });
+}
+class ZodEnum extends ZodType {
+    _parse(input) {
+        if (typeof input.data !== "string") {
+            const ctx = this._getOrReturnCtx(input);
+            const expectedValues = this._def.values;
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                expected: _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.util.joinValues(expectedValues),
+                received: ctx.parsedType,
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        if (!this._cache) {
+            this._cache = new Set(this._def.values);
+        }
+        if (!this._cache.has(input.data)) {
+            const ctx = this._getOrReturnCtx(input);
+            const expectedValues = this._def.values;
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                received: ctx.data,
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_enum_value,
+                options: expectedValues,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.OK)(input.data);
+    }
+    get options() {
+        return this._def.values;
+    }
+    get enum() {
+        const enumValues = {};
+        for (const val of this._def.values) {
+            enumValues[val] = val;
+        }
+        return enumValues;
+    }
+    get Values() {
+        const enumValues = {};
+        for (const val of this._def.values) {
+            enumValues[val] = val;
+        }
+        return enumValues;
+    }
+    get Enum() {
+        const enumValues = {};
+        for (const val of this._def.values) {
+            enumValues[val] = val;
+        }
+        return enumValues;
+    }
+    extract(values, newDef = this._def) {
+        return ZodEnum.create(values, {
+            ...this._def,
+            ...newDef,
+        });
+    }
+    exclude(values, newDef = this._def) {
+        return ZodEnum.create(this.options.filter((opt) => !values.includes(opt)), {
+            ...this._def,
+            ...newDef,
+        });
+    }
+}
+ZodEnum.create = createZodEnum;
+class ZodNativeEnum extends ZodType {
+    _parse(input) {
+        const nativeEnumValues = _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.util.getValidEnumValues(this._def.values);
+        const ctx = this._getOrReturnCtx(input);
+        if (ctx.parsedType !== _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.string && ctx.parsedType !== _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.number) {
+            const expectedValues = _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.util.objectValues(nativeEnumValues);
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                expected: _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.util.joinValues(expectedValues),
+                received: ctx.parsedType,
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        if (!this._cache) {
+            this._cache = new Set(_helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.util.getValidEnumValues(this._def.values));
+        }
+        if (!this._cache.has(input.data)) {
+            const expectedValues = _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.util.objectValues(nativeEnumValues);
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                received: ctx.data,
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_enum_value,
+                options: expectedValues,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.OK)(input.data);
+    }
+    get enum() {
+        return this._def.values;
+    }
+}
+ZodNativeEnum.create = (values, params) => {
+    return new ZodNativeEnum({
+        values: values,
+        typeName: ZodFirstPartyTypeKind.ZodNativeEnum,
+        ...processCreateParams(params),
+    });
+};
+class ZodPromise extends ZodType {
+    unwrap() {
+        return this._def.type;
+    }
+    _parse(input) {
+        const { ctx } = this._processInputParams(input);
+        if (ctx.parsedType !== _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.promise && ctx.common.async === false) {
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+                expected: _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.promise,
+                received: ctx.parsedType,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        const promisified = ctx.parsedType === _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.promise ? ctx.data : Promise.resolve(ctx.data);
+        return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.OK)(promisified.then((data) => {
+            return this._def.type.parseAsync(data, {
+                path: ctx.path,
+                errorMap: ctx.common.contextualErrorMap,
+            });
+        }));
+    }
+}
+ZodPromise.create = (schema, params) => {
+    return new ZodPromise({
+        type: schema,
+        typeName: ZodFirstPartyTypeKind.ZodPromise,
+        ...processCreateParams(params),
+    });
+};
+class ZodEffects extends ZodType {
+    innerType() {
+        return this._def.schema;
+    }
+    sourceType() {
+        return this._def.schema._def.typeName === ZodFirstPartyTypeKind.ZodEffects
+            ? this._def.schema.sourceType()
+            : this._def.schema;
+    }
+    _parse(input) {
+        const { status, ctx } = this._processInputParams(input);
+        const effect = this._def.effect || null;
+        const checkCtx = {
+            addIssue: (arg) => {
+                (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, arg);
+                if (arg.fatal) {
+                    status.abort();
+                }
+                else {
+                    status.dirty();
+                }
+            },
+            get path() {
+                return ctx.path;
+            },
+        };
+        checkCtx.addIssue = checkCtx.addIssue.bind(checkCtx);
+        if (effect.type === "preprocess") {
+            const processed = effect.transform(ctx.data, checkCtx);
+            if (ctx.common.async) {
+                return Promise.resolve(processed).then(async (processed) => {
+                    if (status.value === "aborted")
+                        return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+                    const result = await this._def.schema._parseAsync({
+                        data: processed,
+                        path: ctx.path,
+                        parent: ctx,
+                    });
+                    if (result.status === "aborted")
+                        return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+                    if (result.status === "dirty")
+                        return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.DIRTY)(result.value);
+                    if (status.value === "dirty")
+                        return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.DIRTY)(result.value);
+                    return result;
+                });
+            }
+            else {
+                if (status.value === "aborted")
+                    return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+                const result = this._def.schema._parseSync({
+                    data: processed,
+                    path: ctx.path,
+                    parent: ctx,
+                });
+                if (result.status === "aborted")
+                    return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+                if (result.status === "dirty")
+                    return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.DIRTY)(result.value);
+                if (status.value === "dirty")
+                    return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.DIRTY)(result.value);
+                return result;
+            }
+        }
+        if (effect.type === "refinement") {
+            const executeRefinement = (acc) => {
+                const result = effect.refinement(acc, checkCtx);
+                if (ctx.common.async) {
+                    return Promise.resolve(result);
+                }
+                if (result instanceof Promise) {
+                    throw new Error("Async refinement encountered during synchronous parse operation. Use .parseAsync instead.");
+                }
+                return acc;
+            };
+            if (ctx.common.async === false) {
+                const inner = this._def.schema._parseSync({
+                    data: ctx.data,
+                    path: ctx.path,
+                    parent: ctx,
+                });
+                if (inner.status === "aborted")
+                    return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+                if (inner.status === "dirty")
+                    status.dirty();
+                // return value is ignored
+                executeRefinement(inner.value);
+                return { status: status.value, value: inner.value };
+            }
+            else {
+                return this._def.schema._parseAsync({ data: ctx.data, path: ctx.path, parent: ctx }).then((inner) => {
+                    if (inner.status === "aborted")
+                        return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+                    if (inner.status === "dirty")
+                        status.dirty();
+                    return executeRefinement(inner.value).then(() => {
+                        return { status: status.value, value: inner.value };
+                    });
+                });
+            }
+        }
+        if (effect.type === "transform") {
+            if (ctx.common.async === false) {
+                const base = this._def.schema._parseSync({
+                    data: ctx.data,
+                    path: ctx.path,
+                    parent: ctx,
+                });
+                if (!(0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.isValid)(base))
+                    return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+                const result = effect.transform(base.value, checkCtx);
+                if (result instanceof Promise) {
+                    throw new Error(`Asynchronous transform encountered during synchronous parse operation. Use .parseAsync instead.`);
+                }
+                return { status: status.value, value: result };
+            }
+            else {
+                return this._def.schema._parseAsync({ data: ctx.data, path: ctx.path, parent: ctx }).then((base) => {
+                    if (!(0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.isValid)(base))
+                        return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+                    return Promise.resolve(effect.transform(base.value, checkCtx)).then((result) => ({
+                        status: status.value,
+                        value: result,
+                    }));
+                });
+            }
+        }
+        _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.util.assertNever(effect);
+    }
+}
+ZodEffects.create = (schema, effect, params) => {
+    return new ZodEffects({
+        schema,
+        typeName: ZodFirstPartyTypeKind.ZodEffects,
+        effect,
+        ...processCreateParams(params),
+    });
+};
+ZodEffects.createWithPreprocess = (preprocess, schema, params) => {
+    return new ZodEffects({
+        schema,
+        effect: { type: "preprocess", transform: preprocess },
+        typeName: ZodFirstPartyTypeKind.ZodEffects,
+        ...processCreateParams(params),
+    });
+};
+
+class ZodOptional extends ZodType {
+    _parse(input) {
+        const parsedType = this._getType(input);
+        if (parsedType === _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.undefined) {
+            return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.OK)(undefined);
+        }
+        return this._def.innerType._parse(input);
+    }
+    unwrap() {
+        return this._def.innerType;
+    }
+}
+ZodOptional.create = (type, params) => {
+    return new ZodOptional({
+        innerType: type,
+        typeName: ZodFirstPartyTypeKind.ZodOptional,
+        ...processCreateParams(params),
+    });
+};
+class ZodNullable extends ZodType {
+    _parse(input) {
+        const parsedType = this._getType(input);
+        if (parsedType === _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.null) {
+            return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.OK)(null);
+        }
+        return this._def.innerType._parse(input);
+    }
+    unwrap() {
+        return this._def.innerType;
+    }
+}
+ZodNullable.create = (type, params) => {
+    return new ZodNullable({
+        innerType: type,
+        typeName: ZodFirstPartyTypeKind.ZodNullable,
+        ...processCreateParams(params),
+    });
+};
+class ZodDefault extends ZodType {
+    _parse(input) {
+        const { ctx } = this._processInputParams(input);
+        let data = ctx.data;
+        if (ctx.parsedType === _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.undefined) {
+            data = this._def.defaultValue();
+        }
+        return this._def.innerType._parse({
+            data,
+            path: ctx.path,
+            parent: ctx,
+        });
+    }
+    removeDefault() {
+        return this._def.innerType;
+    }
+}
+ZodDefault.create = (type, params) => {
+    return new ZodDefault({
+        innerType: type,
+        typeName: ZodFirstPartyTypeKind.ZodDefault,
+        defaultValue: typeof params.default === "function" ? params.default : () => params.default,
+        ...processCreateParams(params),
+    });
+};
+class ZodCatch extends ZodType {
+    _parse(input) {
+        const { ctx } = this._processInputParams(input);
+        // newCtx is used to not collect issues from inner types in ctx
+        const newCtx = {
+            ...ctx,
+            common: {
+                ...ctx.common,
+                issues: [],
+            },
+        };
+        const result = this._def.innerType._parse({
+            data: newCtx.data,
+            path: newCtx.path,
+            parent: {
+                ...newCtx,
+            },
+        });
+        if ((0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.isAsync)(result)) {
+            return result.then((result) => {
+                return {
+                    status: "valid",
+                    value: result.status === "valid"
+                        ? result.value
+                        : this._def.catchValue({
+                            get error() {
+                                return new _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodError(newCtx.common.issues);
+                            },
+                            input: newCtx.data,
+                        }),
+                };
+            });
+        }
+        else {
+            return {
+                status: "valid",
+                value: result.status === "valid"
+                    ? result.value
+                    : this._def.catchValue({
+                        get error() {
+                            return new _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodError(newCtx.common.issues);
+                        },
+                        input: newCtx.data,
+                    }),
+            };
+        }
+    }
+    removeCatch() {
+        return this._def.innerType;
+    }
+}
+ZodCatch.create = (type, params) => {
+    return new ZodCatch({
+        innerType: type,
+        typeName: ZodFirstPartyTypeKind.ZodCatch,
+        catchValue: typeof params.catch === "function" ? params.catch : () => params.catch,
+        ...processCreateParams(params),
+    });
+};
+class ZodNaN extends ZodType {
+    _parse(input) {
+        const parsedType = this._getType(input);
+        if (parsedType !== _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.nan) {
+            const ctx = this._getOrReturnCtx(input);
+            (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.addIssueToContext)(ctx, {
+                code: _ZodError_js__WEBPACK_IMPORTED_MODULE_1__.ZodIssueCode.invalid_type,
+                expected: _helpers_util_js__WEBPACK_IMPORTED_MODULE_2__.ZodParsedType.nan,
+                received: ctx.parsedType,
+            });
+            return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+        }
+        return { status: "valid", value: input.data };
+    }
+}
+ZodNaN.create = (params) => {
+    return new ZodNaN({
+        typeName: ZodFirstPartyTypeKind.ZodNaN,
+        ...processCreateParams(params),
+    });
+};
+const BRAND = Symbol("zod_brand");
+class ZodBranded extends ZodType {
+    _parse(input) {
+        const { ctx } = this._processInputParams(input);
+        const data = ctx.data;
+        return this._def.type._parse({
+            data,
+            path: ctx.path,
+            parent: ctx,
+        });
+    }
+    unwrap() {
+        return this._def.type;
+    }
+}
+class ZodPipeline extends ZodType {
+    _parse(input) {
+        const { status, ctx } = this._processInputParams(input);
+        if (ctx.common.async) {
+            const handleAsync = async () => {
+                const inResult = await this._def.in._parseAsync({
+                    data: ctx.data,
+                    path: ctx.path,
+                    parent: ctx,
+                });
+                if (inResult.status === "aborted")
+                    return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+                if (inResult.status === "dirty") {
+                    status.dirty();
+                    return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.DIRTY)(inResult.value);
+                }
+                else {
+                    return this._def.out._parseAsync({
+                        data: inResult.value,
+                        path: ctx.path,
+                        parent: ctx,
+                    });
+                }
+            };
+            return handleAsync();
+        }
+        else {
+            const inResult = this._def.in._parseSync({
+                data: ctx.data,
+                path: ctx.path,
+                parent: ctx,
+            });
+            if (inResult.status === "aborted")
+                return _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+            if (inResult.status === "dirty") {
+                status.dirty();
+                return {
+                    status: "dirty",
+                    value: inResult.value,
+                };
+            }
+            else {
+                return this._def.out._parseSync({
+                    data: inResult.value,
+                    path: ctx.path,
+                    parent: ctx,
+                });
+            }
+        }
+    }
+    static create(a, b) {
+        return new ZodPipeline({
+            in: a,
+            out: b,
+            typeName: ZodFirstPartyTypeKind.ZodPipeline,
+        });
+    }
+}
+class ZodReadonly extends ZodType {
+    _parse(input) {
+        const result = this._def.innerType._parse(input);
+        const freeze = (data) => {
+            if ((0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.isValid)(data)) {
+                data.value = Object.freeze(data.value);
+            }
+            return data;
+        };
+        return (0,_helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.isAsync)(result) ? result.then((data) => freeze(data)) : freeze(result);
+    }
+    unwrap() {
+        return this._def.innerType;
+    }
+}
+ZodReadonly.create = (type, params) => {
+    return new ZodReadonly({
+        innerType: type,
+        typeName: ZodFirstPartyTypeKind.ZodReadonly,
+        ...processCreateParams(params),
+    });
+};
+////////////////////////////////////////
+////////////////////////////////////////
+//////////                    //////////
+//////////      z.custom      //////////
+//////////                    //////////
+////////////////////////////////////////
+////////////////////////////////////////
+function cleanParams(params, data) {
+    const p = typeof params === "function" ? params(data) : typeof params === "string" ? { message: params } : params;
+    const p2 = typeof p === "string" ? { message: p } : p;
+    return p2;
+}
+function custom(check, _params = {}, 
+/**
+ * @deprecated
+ *
+ * Pass `fatal` into the params object instead:
+ *
+ * ```ts
+ * z.string().custom((val) => val.length > 5, { fatal: false })
+ * ```
+ *
+ */
+fatal) {
+    if (check)
+        return ZodAny.create().superRefine((data, ctx) => {
+            const r = check(data);
+            if (r instanceof Promise) {
+                return r.then((r) => {
+                    if (!r) {
+                        const params = cleanParams(_params, data);
+                        const _fatal = params.fatal ?? fatal ?? true;
+                        ctx.addIssue({ code: "custom", ...params, fatal: _fatal });
+                    }
+                });
+            }
+            if (!r) {
+                const params = cleanParams(_params, data);
+                const _fatal = params.fatal ?? fatal ?? true;
+                ctx.addIssue({ code: "custom", ...params, fatal: _fatal });
+            }
+            return;
+        });
+    return ZodAny.create();
+}
+
+const late = {
+    object: ZodObject.lazycreate,
+};
+var ZodFirstPartyTypeKind;
+(function (ZodFirstPartyTypeKind) {
+    ZodFirstPartyTypeKind["ZodString"] = "ZodString";
+    ZodFirstPartyTypeKind["ZodNumber"] = "ZodNumber";
+    ZodFirstPartyTypeKind["ZodNaN"] = "ZodNaN";
+    ZodFirstPartyTypeKind["ZodBigInt"] = "ZodBigInt";
+    ZodFirstPartyTypeKind["ZodBoolean"] = "ZodBoolean";
+    ZodFirstPartyTypeKind["ZodDate"] = "ZodDate";
+    ZodFirstPartyTypeKind["ZodSymbol"] = "ZodSymbol";
+    ZodFirstPartyTypeKind["ZodUndefined"] = "ZodUndefined";
+    ZodFirstPartyTypeKind["ZodNull"] = "ZodNull";
+    ZodFirstPartyTypeKind["ZodAny"] = "ZodAny";
+    ZodFirstPartyTypeKind["ZodUnknown"] = "ZodUnknown";
+    ZodFirstPartyTypeKind["ZodNever"] = "ZodNever";
+    ZodFirstPartyTypeKind["ZodVoid"] = "ZodVoid";
+    ZodFirstPartyTypeKind["ZodArray"] = "ZodArray";
+    ZodFirstPartyTypeKind["ZodObject"] = "ZodObject";
+    ZodFirstPartyTypeKind["ZodUnion"] = "ZodUnion";
+    ZodFirstPartyTypeKind["ZodDiscriminatedUnion"] = "ZodDiscriminatedUnion";
+    ZodFirstPartyTypeKind["ZodIntersection"] = "ZodIntersection";
+    ZodFirstPartyTypeKind["ZodTuple"] = "ZodTuple";
+    ZodFirstPartyTypeKind["ZodRecord"] = "ZodRecord";
+    ZodFirstPartyTypeKind["ZodMap"] = "ZodMap";
+    ZodFirstPartyTypeKind["ZodSet"] = "ZodSet";
+    ZodFirstPartyTypeKind["ZodFunction"] = "ZodFunction";
+    ZodFirstPartyTypeKind["ZodLazy"] = "ZodLazy";
+    ZodFirstPartyTypeKind["ZodLiteral"] = "ZodLiteral";
+    ZodFirstPartyTypeKind["ZodEnum"] = "ZodEnum";
+    ZodFirstPartyTypeKind["ZodEffects"] = "ZodEffects";
+    ZodFirstPartyTypeKind["ZodNativeEnum"] = "ZodNativeEnum";
+    ZodFirstPartyTypeKind["ZodOptional"] = "ZodOptional";
+    ZodFirstPartyTypeKind["ZodNullable"] = "ZodNullable";
+    ZodFirstPartyTypeKind["ZodDefault"] = "ZodDefault";
+    ZodFirstPartyTypeKind["ZodCatch"] = "ZodCatch";
+    ZodFirstPartyTypeKind["ZodPromise"] = "ZodPromise";
+    ZodFirstPartyTypeKind["ZodBranded"] = "ZodBranded";
+    ZodFirstPartyTypeKind["ZodPipeline"] = "ZodPipeline";
+    ZodFirstPartyTypeKind["ZodReadonly"] = "ZodReadonly";
+})(ZodFirstPartyTypeKind || (ZodFirstPartyTypeKind = {}));
+// requires TS 4.4+
+class Class {
+    constructor(..._) { }
+}
+const instanceOfType = (
+// const instanceOfType = <T extends new (...args: any[]) => any>(
+cls, params = {
+    message: `Input not instance of ${cls.name}`,
+}) => custom((data) => data instanceof cls, params);
+const stringType = ZodString.create;
+const numberType = ZodNumber.create;
+const nanType = ZodNaN.create;
+const bigIntType = ZodBigInt.create;
+const booleanType = ZodBoolean.create;
+const dateType = ZodDate.create;
+const symbolType = ZodSymbol.create;
+const undefinedType = ZodUndefined.create;
+const nullType = ZodNull.create;
+const anyType = ZodAny.create;
+const unknownType = ZodUnknown.create;
+const neverType = ZodNever.create;
+const voidType = ZodVoid.create;
+const arrayType = ZodArray.create;
+const objectType = ZodObject.create;
+const strictObjectType = ZodObject.strictCreate;
+const unionType = ZodUnion.create;
+const discriminatedUnionType = ZodDiscriminatedUnion.create;
+const intersectionType = ZodIntersection.create;
+const tupleType = ZodTuple.create;
+const recordType = ZodRecord.create;
+const mapType = ZodMap.create;
+const setType = ZodSet.create;
+const functionType = ZodFunction.create;
+const lazyType = ZodLazy.create;
+const literalType = ZodLiteral.create;
+const enumType = ZodEnum.create;
+const nativeEnumType = ZodNativeEnum.create;
+const promiseType = ZodPromise.create;
+const effectsType = ZodEffects.create;
+const optionalType = ZodOptional.create;
+const nullableType = ZodNullable.create;
+const preprocessType = ZodEffects.createWithPreprocess;
+const pipelineType = ZodPipeline.create;
+const ostring = () => stringType().optional();
+const onumber = () => numberType().optional();
+const oboolean = () => booleanType().optional();
+const coerce = {
+    string: ((arg) => ZodString.create({ ...arg, coerce: true })),
+    number: ((arg) => ZodNumber.create({ ...arg, coerce: true })),
+    boolean: ((arg) => ZodBoolean.create({
+        ...arg,
+        coerce: true,
+    })),
+    bigint: ((arg) => ZodBigInt.create({ ...arg, coerce: true })),
+    date: ((arg) => ZodDate.create({ ...arg, coerce: true })),
+};
+
+const NEVER = _helpers_parseUtil_js__WEBPACK_IMPORTED_MODULE_0__.INVALID;
+
+
+/***/ }),
+
 /***/ "./scripts/geointerpreter.js":
 /*!***********************************!*\
   !*** ./scripts/geointerpreter.js ***!
@@ -117989,11 +122400,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modules_orchestration_communication_bus_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./modules/orchestration/communication_bus.js */ "./scripts/modules/orchestration/communication_bus.js");
 /* harmony import */ var _modules_orchestration_react_controller_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./modules/orchestration/react_controller.js */ "./scripts/modules/orchestration/react_controller.js");
 /* harmony import */ var _modules_orchestration_embedding_manager_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./modules/orchestration/embedding_manager.js */ "./scripts/modules/orchestration/embedding_manager.js");
-/* harmony import */ var _modules_duckdb_init_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./modules/duckdb_init.js */ "./scripts/modules/duckdb_init.js");
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+/* harmony import */ var _modules_tools_tool_executor_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./modules/tools/tool_executor.js */ "./scripts/modules/tools/tool_executor.js");
+/* harmony import */ var _modules_duckdb_init_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./modules/duckdb_init.js */ "./scripts/modules/duckdb_init.js");
 function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
 function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
@@ -118011,6 +122423,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
 // Import WebLLM MLCEngine
 
 // Import Orchestration Layer components
+
 
 
 
@@ -118035,10 +122448,10 @@ function Geointerpreter() {
     return _initializeApplication.apply(this, arguments);
   }
   function _initializeApplication() {
-    _initializeApplication = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
-      var outputElement, userInputField, sendButton, chatHistoryDiv, toggleThinkingButton, thinkingProcessContent, thinkingProcessWrapper, aiCore, _yield$InitializeDuck, db, dbConn, llmProgress, embeddingProgress, updateCombinedProgress, llmInitProgressCallback, embeddingInitProgressCallback, modelId, embeddingManagerInstance, _yield$Promise$all, _yield$Promise$all2, core, _, stateManager, communicationBus, toolExecutor, reactController, _t2;
-      return _regenerator().w(function (_context2) {
-        while (1) switch (_context2.n) {
+    _initializeApplication = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+      var outputElement, userInputField, sendButton, chatHistoryDiv, toggleThinkingButton, thinkingProcessContent, thinkingProcessWrapper, aiCore, _yield$InitializeDuck, db, dbConn, llmProgress, embeddingProgress, updateCombinedProgress, llmInitProgressCallback, embeddingInitProgressCallback, modelId, embeddingManagerInstance, _yield$Promise$all, _yield$Promise$all2, core, _, stateManager, communicationBus, toolExecutorInstance, reactController, _t;
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.n) {
           case 0:
             outputElement = document.getElementById("analysis-output");
             userInputField = document.getElementById("user-input");
@@ -118055,10 +122468,10 @@ function Geointerpreter() {
                 toggleThinkingButton.innerHTML = 'Show Thinking <i class="bi bi-chevron-down toggle-icon"></i>';
               });
             }
-            _context2.n = 1;
-            return (0,_modules_duckdb_init_js__WEBPACK_IMPORTED_MODULE_9__["default"])();
+            _context.n = 1;
+            return (0,_modules_duckdb_init_js__WEBPACK_IMPORTED_MODULE_10__["default"])();
           case 1:
-            _yield$InitializeDuck = _context2.v;
+            _yield$InitializeDuck = _context.v;
             db = _yield$InitializeDuck.db;
             dbConn = _yield$InitializeDuck.dbConn;
             mDB = db;
@@ -118104,7 +122517,7 @@ function Geointerpreter() {
             // const modelId = "Qwen2-7B-Instruct-q4f32_1-MLC";
             // const modelId = "Llama-3.2-1B-Instruct-q4f16_1-MLC"; // small-fast
             modelId = "Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC"; // supports OpenAI's API for function calling
-            _context2.p = 2;
+            _context.p = 2;
             outputElement.textContent = "Initializing AI systems...";
 
             // Start updating progress immediately
@@ -118112,7 +122525,7 @@ function Geointerpreter() {
 
             // Parallel loading of models as per design document
             embeddingManagerInstance = new _modules_orchestration_embedding_manager_js__WEBPACK_IMPORTED_MODULE_8__["default"](embeddingInitProgressCallback); // Instantiate with callback
-            _context2.n = 3;
+            _context.n = 3;
             return Promise.all([
             // Await both promises concurrently
             (0,_mlc_ai_web_llm__WEBPACK_IMPORTED_MODULE_4__.CreateMLCEngine)(modelId, {
@@ -118120,7 +122533,7 @@ function Geointerpreter() {
             }), embeddingManagerInstance.readyPromise // Await the promise from the instance
             ]);
           case 3:
-            _yield$Promise$all = _context2.v;
+            _yield$Promise$all = _context.v;
             _yield$Promise$all2 = _slicedToArray(_yield$Promise$all, 2);
             core = _yield$Promise$all2[0];
             _ = _yield$Promise$all2[1];
@@ -118132,72 +122545,13 @@ function Geointerpreter() {
 
             // Orchestration Layer instances
             stateManager = new _modules_orchestration_state_manager_js__WEBPACK_IMPORTED_MODULE_5__["default"]();
-            communicationBus = new _modules_orchestration_communication_bus_js__WEBPACK_IMPORTED_MODULE_6__["default"](); // Placeholder for ToolExecutor - in a real app, this would execute SQL/JS functions
-            toolExecutor = {
-              execute: function () {
-                var _execute = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(toolName, params) {
-                  var state, observation, _t;
-                  return _regenerator().w(function (_context) {
-                    while (1) switch (_context.n) {
-                      case 0:
-                        console.log("ToolExecutor: Executing tool '".concat(toolName, "' with params:"), params);
-                        // This is where your actual tool implementations (SQL, JS functions) would go.
-                        // For now, it's a simple switch-case for demonstration.
-                        // In a real scenario, this would interact with the Analytical Engine and other subsystems.
-                        state = stateManager.getState();
-                        observation = "Tool '".concat(toolName, "' not implemented or failed.");
-                        _t = toolName;
-                        _context.n = _t === "list_available_layers" ? 1 : _t === "get_layer_summary_statistics" ? 2 : _t === "find_hotspots" ? 3 : _t === "find_intersecting_features" ? 4 : _t === "calculate_density" ? 5 : _t === "find_features_within_distance" ? 6 : _t === "sort_and_limit_features" ? 7 : 8;
-                        break;
-                      case 1:
-                        observation = "Available layers are: 'crimes', 'parks', 'rivers'.";
-                        return _context.a(3, 9);
-                      case 2:
-                        if (params.layer_name === "crimes" && params.column_name === "value") {
-                          observation = "Summary statistics for crimes.value: Min=10, Max=100, Mean=55.5, Median=50, Count=1000.";
-                        } else {
-                          observation = "Error: Layer or column not found for ".concat(params.layer_name, ".").concat(params.column_name);
-                        }
-                        return _context.a(3, 9);
-                      case 3:
-                        observation = "Successfully created temporary layer 'hotspot_areas' containing the hotspot polygons for ".concat(params.layer_name, ".");
-                        return _context.a(3, 9);
-                      case 4:
-                        if (params.layer1_name === "parks" && params.layer2_name === "hotspot_areas") {
-                          observation = "Found 5 parks: ['City Park', 'Greenway', 'Central Park', 'Riverside Park', 'Liberty Park'].";
-                        } else {
-                          observation = "Error: Could not find intersecting features for ".concat(params.layer1_name, " and ").concat(params.layer2_name, ".");
-                        }
-                        return _context.a(3, 9);
-                      case 5:
-                        observation = "Successfully calculated density for ".concat(params.layer_name, " using population from ").concat(params.population_column, " and area from ").concat(params.area_column, ". A new layer 'density_calculated_").concat(params.layer_name, "' has been created.");
-                        return _context.a(3, 9);
-                      case 6:
-                        observation = "Successfully found features in ".concat(params.layer1_name, " within ").concat(params.distance_meters, " meters of ").concat(params.layer2_name, ". A new layer 'filtered_").concat(params.layer1_name, "' has been created.");
-                        return _context.a(3, 9);
-                      case 7:
-                        if (params.layer_name === "filtered_neighborhoods" && params.sort_column === "density" && params.limit === 3) {
-                          observation = "Successfully sorted and limited features in ".concat(params.layer_name, ". Top 3 by density are: 'Neighborhood A', 'Neighborhood B', 'Neighborhood C'.");
-                        } else {
-                          observation = "Error: Could not find intersecting features for ".concat(params.layer1_name, " and ").concat(params.layer2_name, ".");
-                        }
-                        return _context.a(3, 9);
-                      case 8:
-                        // Fallback for unimplemented tools
-                        observation = "Tool '".concat(toolName, "' not implemented in ToolExecutor placeholder.");
-                        return _context.a(3, 9);
-                      case 9:
-                        return _context.a(2, observation);
-                    }
-                  }, _callee);
-                }));
-                function execute(_x, _x2) {
-                  return _execute.apply(this, arguments);
-                }
-                return execute;
-              }()
-            }; // Instantiate ReActController
-            reactController = new _modules_orchestration_react_controller_js__WEBPACK_IMPORTED_MODULE_7__["default"](stateManager, communicationBus, aiCore, toolExecutor, embeddingManagerInstance, mDBConnection); // Listen for final answer to update UI
+            communicationBus = new _modules_orchestration_communication_bus_js__WEBPACK_IMPORTED_MODULE_6__["default"](); // Instantiate the ToolExecutor with the DB connection
+            toolExecutorInstance = new _modules_tools_tool_executor_js__WEBPACK_IMPORTED_MODULE_9__["default"](mDBConnection); // Instantiate ReActController
+            reactController = new _modules_orchestration_react_controller_js__WEBPACK_IMPORTED_MODULE_7__["default"](stateManager, communicationBus, aiCore,
+            // Pass the execute method, bound to the instance to preserve its `this` context
+            {
+              execute: toolExecutorInstance.execute.bind(toolExecutorInstance)
+            }, embeddingManagerInstance, mDBConnection); // Listen for final answer to update UI
             communicationBus.addEventListener("finalAnswerReady", function (event) {
               // The final answer is already added to history by the controller.
               // We just need to ensure the UI is in the final 'idle' state.
@@ -118277,36 +122631,30 @@ function Geointerpreter() {
             stateManager.updateState({
               agentStatus: "idle"
             });
-            _context2.n = 5;
+            _context.n = 5;
             break;
           case 4:
-            _context2.p = 4;
-            _t2 = _context2.v;
+            _context.p = 4;
+            _t = _context.v;
             // Error handling remains the same
-            console.error("Initialization error:", _t2);
-            outputElement.textContent = "Error during initialization: ".concat(_t2.message || "An unknown error occurred.");
-            if (_t2.message && _t2.message.includes("Model variant not found")) {
+            console.error("Initialization error:", _t);
+            outputElement.textContent = "Error during initialization: ".concat(_t.message || "An unknown error occurred.");
+            if (_t.message && _t.message.includes("Model variant not found")) {
               outputElement.textContent += "\n\nPlease ensure the model ID '".concat(modelId, "' is correct and available in WebLLM's model list.");
             }
           case 5:
-            _context2.p = 5;
-            return _context2.f(5);
+            _context.p = 5;
+            return _context.f(5);
           case 6:
-            return _context2.a(2);
+            return _context.a(2);
         }
-      }, _callee2, null, [[2, 4, 5, 6]]);
+      }, _callee, null, [[2, 4, 5, 6]]);
     }));
     return _initializeApplication.apply(this, arguments);
   }
-  function loadCSS() {
-    // ? 23Jan2022 The bootstrap-icons css file needs to be loaded through a CDN and is specified in the <head> of DiabetesAtlas.html.
-    // ? Downloading the physical css file and loading through code does not work. A font required by bootstrap-icons is not being found after the file is loaded.
-    var cssFileNames = ["ol.css", "bootstrap.min.css", "datatables.min.css", "fontgis.min.css", "geointerpreter.css"];
-    mHelperUtil.loadCSSFiles(cssFileNames);
-  }
   publicAPI.init = function () {
     mHelperUtil = new _modules_helperutils__WEBPACK_IMPORTED_MODULE_3__["default"]();
-    loadCSS();
+
     // Check if DOM is already loaded
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", initializeApplication);
@@ -119488,6 +123836,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _tools_tool_retriever_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tools/tool_retriever.js */ "./scripts/modules/tools/tool_retriever.js");
+/* harmony import */ var zod__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! zod */ "./node_modules/zod/v3/types.js");
 function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _regeneratorValues(e) { if (null != e) { var t = e["function" == typeof Symbol && Symbol.iterator || "@@iterator"], r = 0; if (t) return t.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) return { next: function next() { return e && r >= e.length && (e = void 0), { value: e && e[r++], done: !e }; } }; } throw new TypeError(_typeof(e) + " is not iterable"); }
@@ -119511,6 +123860,7 @@ function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" 
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 // c:\Kiran\Work\GIS\DATAVIZ\GeoInterpreter\scripts\orchestration\react_controller.js
 
+
 var ReActController = /*#__PURE__*/function () {
   function ReActController(stateManager, communicationBus, aiCore, toolExecutor,
   // Placeholder for ToolExecutor
@@ -119530,6 +123880,7 @@ var ReActController = /*#__PURE__*/function () {
     this.userQuery = "";
     this.isPlanningMode = false; // Flag for hybrid Plan-and-Execute mode
     this.currentPlanStepIndex = 0; // Tracks current step in active plan
+    this.currentToolLevels = [1]; // Tool levels to use: [1] or [2, 3]
 
     // Bind event listeners
     this.communicationBus.addEventListener("userQuerySubmitted", this._handleUserQuery.bind(this));
@@ -119550,6 +123901,7 @@ var ReActController = /*#__PURE__*/function () {
               this.scratchpad = []; // Clear scratchpad for new query
               this.isPlanningMode = true; // Start in planning mode
               this.currentPlanStepIndex = 0; // Reset plan step index
+              this.currentToolLevels = [1]; // Reset to high-level tools for new query
 
               this.stateManager.updateState({
                 agentStatus: "planning",
@@ -119589,7 +123941,7 @@ var ReActController = /*#__PURE__*/function () {
               loopCount = 0;
               MAX_LOOP_ITERATIONS = 10; // Prevent infinite loops
               _loop = /*#__PURE__*/_regenerator().m(function _loop() {
-                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, chosenTool, currentStepType, _observation, observation, _t, _t2;
+                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, observation, chosenTool, currentStepType, _observation, _observation2, _t, _t2;
                 return _regenerator().w(function (_context2) {
                   while (1) switch (_context2.n) {
                     case 0:
@@ -119726,7 +124078,7 @@ var ReActController = /*#__PURE__*/function () {
                     case 12:
                       throw new Error("AI did not return a valid plan in planning mode.");
                     case 13:
-                      _context2.n = 18;
+                      _context2.n = 19;
                       break;
                     case 14:
                       if (!(action.name === "finish")) {
@@ -119746,20 +124098,40 @@ var ReActController = /*#__PURE__*/function () {
                         answer: action.params.answer
                       });
                       console.log("ReActController: AI finished with answer:", action.params.answer);
-                      _context2.n = 18;
+                      _context2.n = 19;
                       break;
                     case 15:
+                      if (!(action.name === 'escalate_tool_level')) {
+                        _context2.n = 16;
+                        break;
+                      }
+                      // Handle the AI's request to escalate to more granular tools
+                      _this.currentToolLevels = [2, 3];
+                      observation = "High-level tools were not sufficient. Providing a more granular set of tools for the same task. Please try to solve the goal again.";
+                      _this.scratchpad.push({
+                        type: "action",
+                        content: action
+                      });
+                      _this.scratchpad.push({
+                        type: "observation",
+                        content: observation
+                      });
+                      _this._dispatchScratchpadUpdate();
+                      console.log("ReActController: Escalating to lower-level tools.");
+                      // Do NOT increment plan step index, we are retrying the same step with new tools.
+                      return _context2.a(2, 1);
+                    case 16:
                       // *** NEW: Mismatch Detection Logic ***
                       chosenTool = availableTools.find(function (t) {
                         return t.name === action.name;
                       });
                       currentStepType = currentStep ? currentStep.step_type : null;
                       if (!(currentStepType === "geospatial" && chosenTool && chosenTool.category !== "geospatial")) {
-                        _context2.n = 16;
+                        _context2.n = 17;
                         break;
                       }
                       console.warn("ReActController: Mismatch detected! Step type is 'geospatial' but chosen tool '".concat(action.name, "' is category '").concat(chosenTool.category, "'."));
-                      _observation = "Correction: The current step was labeled 'geospatial', but you chose the tool '".concat(action.name, "' which is not a geospatial tool. Please reconsider and choose a tool from the 'geospatial' category to achieve the goal: \"").concat(currentGoal, "\"");
+                      _observation = "Correction: The current step was labeled 'geospatial', but you chose the tool '".concat(action.name, "' which is a '").concat(chosenTool.category, "' tool. Please reconsider and choose a tool from the 'geospatial' category to achieve the goal: \"").concat(currentGoal, "\"");
                       _this.scratchpad.push({
                         type: "thought",
                         content: thought
@@ -119775,7 +124147,7 @@ var ReActController = /*#__PURE__*/function () {
                       _this._dispatchScratchpadUpdate();
                       // Do NOT increment plan step index, we are retrying the same step.
                       return _context2.a(2, 1);
-                    case 16:
+                    case 17:
                       // *** END: Mismatch Detection Logic ***
 
                       _this.scratchpad.push({
@@ -119792,25 +124164,26 @@ var ReActController = /*#__PURE__*/function () {
                       });
 
                       // 5. Observation Handling
-                      _context2.n = 17;
-                      return _this.toolExecutor.execute(action.name, action.params);
-                    case 17:
-                      observation = _context2.v;
+                      _context2.n = 18;
+                      return _this.toolExecutor.execute(action.name, action.params, _this.stateManager.getState() // Pass current state to the executor
+                      );
+                    case 18:
+                      _observation2 = _context2.v;
                       _this._dispatchScratchpadUpdate();
                       _this.scratchpad.push({
                         type: "observation",
-                        content: observation
+                        content: _observation2
                       });
-                      console.log("ReActController: Tool Observation:", observation);
+                      console.log("ReActController: Tool Observation:", _observation2);
 
                       // Increment plan step index for next iteration
                       _this.currentPlanStepIndex++;
                       // Loop continues
-                    case 18:
-                      _context2.n = 20;
-                      break;
                     case 19:
-                      _context2.p = 19;
+                      _context2.n = 21;
+                      break;
+                    case 20:
+                      _context2.p = 20;
                       _t2 = _context2.v;
                       console.error("ReActController: Error during ReAct cycle:", _t2);
                       _this.scratchpad.push({
@@ -119828,10 +124201,10 @@ var ReActController = /*#__PURE__*/function () {
                         });
                         finished = true;
                       }
-                    case 20:
+                    case 21:
                       return _context2.a(2);
                   }
-                }, _loop, null, [[5, 9], [1, 19]]);
+                }, _loop, null, [[5, 9], [1, 20]]);
               });
             case 1:
               if (!(!finished && loopCount < MAX_LOOP_ITERATIONS)) {
@@ -119906,14 +124279,14 @@ var ReActController = /*#__PURE__*/function () {
               }
               console.log("Getting tools for the query:", toolQuery);
               _context4.n = 1;
-              return this._getRelevantTools(toolQuery);
+              return this._getRelevantTools(toolQuery, 15, this.currentToolLevels);
             case 1:
               availableTools = _context4.v;
               prompt = "";
               if (this.isPlanningMode) {
                 prompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by breaking down complex requests into a logical, step-by-step plan of discrete analytical tasks. Each step should be a self-contained action that can likely be solved by a single tool.\n              For each step, you must also provide a 'step_type' from the following list: [geospatial, aggregation, filter, data_retrieval, calculation, visualization].\n\n              You must respond in the following JSON format, including the 'step_type' for each step:\n              Thought: I need to break down the user's request into a plan with categorized steps.\n              Action: {\n                \"name\": \"create_plan\",\n                \"parameters\": {\n                  \"plan\": [\n                    {\"step\": 1, \"description\": \"Create a 500-meter buffer around parks.\", \"step_type\": \"geospatial\"},\n                    {\"step\": 2, \"description\": \"Find crimes within the park buffers.\", \"step_type\": \"geospatial\"}\n                  ]\n                }\n              }\n\n              You have access to a special tool called `create_plan`. Use this tool to output your plan as a JSON array of steps inside the 'plan' parameter.\n\n              Here is the user's request:\n              ".concat(this.userQuery, "\n              \n              Thought:");
               } else {
-                prompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by answering their questions about the data they have provided.\n\n                You have access to the following tools to help you. Select a tool if you need to use it.\n                <TOOL_DEFINITIONS_JSON>\n                  ".concat(JSON.stringify(availableTools, null, 2), "\n                </TOOL_DEFINITIONS_JSON>\n\n                To answer the user's question, you must follow this cycle:\n                1. Thought: Reason about the user's request and what you need to do next.\n                2. Action: Choose one of the provided tools and its parameters. The only valid actions are using a tool or using the special `finish(answer=...)` tool when you have the final answer.\n                3. Observation: You will be given the result of the action you took.\n                4. Repeat the cycle until you can answer the question.\n\n                Here is the current goal:\n                ").concat(currentGoal, "\n\n                Here is the history of your work on this request so far (Thought/Action/Observation):\n                ").concat(this.scratchpad.map(function (entry) {
+                prompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by answering their questions about the data they have provided.\n\n                You have access to the following tools to help you. Select a tool if you need to use it.\n                <TOOL_DEFINITIONS_JSON>\n                  ".concat(JSON.stringify(availableTools, null, 2), "\n                </TOOL_DEFINITIONS_JSON>\n\n                To answer the user's question, you must follow this cycle:\n                1. Thought: Reason about the user's request and what you need to do next.\n                2. Action: Choose one of the provided tools and its parameters. The only valid actions are using a tool or using the special `finish(answer=...)` tool when you have the final answer.\n                3. Observation: You will be given the result of the action you took.\n                4. Repeat the cycle until you can answer the question.\n                IMPORTANT: If you determine that the provided tools are not sufficient to complete the current goal, use the 'escalate_tool_level' tool to request more granular tools.\n\n                Here is the current goal:\n                ").concat(currentGoal, "\n\n                Here is the history of your work on this request so far (Thought/Action/Observation):\n                ").concat(this.scratchpad.map(function (entry) {
                   return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
                 }).join("\n"), "\n\n                Thought:");
               }
@@ -119936,6 +124309,8 @@ var ReActController = /*#__PURE__*/function () {
      * Retrieves relevant tools from the tool registry using vector similarity search against the tool descriptions.
      * @param {string} query - The user query or current plan step.
      * @returns {Promise<Array>} A promise that resolves to an array of tool definitions formatted for the AI.
+     * @param {number} [topN=15] - The number of top relevant tools to retrieve.
+     * @param {Array<number>} [levels=[1, 2, 3]] - The priority levels of tools to search for. 1=highest priority, 3=lowest priority. 1 = High-level tools (decomposable to many granular functions), 2 = Composite tools (decomposable to a few granular functions), 3 = Granular tools (sql functions, non-decomposable)
      * @private
      */
     )
@@ -119943,12 +124318,25 @@ var ReActController = /*#__PURE__*/function () {
     key: "_getRelevantTools",
     value: (function () {
       var _getRelevantTools2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(query) {
-        var dbTools, internalTools, uniqueTools, _iterator, _step, _tool, _i, _internalTools, tool;
+        var topN,
+          levels,
+          dbTools,
+          internalTools,
+          uniqueTools,
+          _iterator,
+          _step,
+          _tool,
+          _i,
+          _internalTools,
+          tool,
+          _args5 = arguments;
         return _regenerator().w(function (_context5) {
           while (1) switch (_context5.n) {
             case 0:
+              topN = _args5.length > 1 && _args5[1] !== undefined ? _args5[1] : 15;
+              levels = _args5.length > 2 && _args5[2] !== undefined ? _args5[2] : [1, 2, 3];
               _context5.n = 1;
-              return this.toolRetriever.getRelevantTools(query, 10);
+              return this.toolRetriever.getRelevantTools(query, topN, levels);
             case 1:
               dbTools = _context5.v;
               // Ensure 'create_plan' and 'finish' tools are always available, as they are internal control tools
@@ -119990,6 +124378,19 @@ var ReActController = /*#__PURE__*/function () {
                   },
                   required: ["answer"]
                 }
+              }, {
+                name: "escalate_tool_level",
+                description: "If you cannot solve the current goal with the available high-level tools, use this tool to request a more granular set of tools to break down the problem further.",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    reason: {
+                      type: "string",
+                      description: "A brief reason why the current tools are insufficient."
+                    }
+                  },
+                  required: ["reason"]
+                }
               }]; // Combine DB tools with internal tools, ensuring internal tools take precedence.
               uniqueTools = new Map();
               _iterator = _createForOfIteratorHelper(dbTools);
@@ -120027,110 +124428,11 @@ var ReActController = /*#__PURE__*/function () {
   }, {
     key: "_parseAIResponse",
     value: function _parseAIResponse(aiResponse) {
-      // Extract thought content
       var thoughtMatch = aiResponse.match(/Thought:\s*([^]*?)(?=\nAction:|$)/);
-      var thought = thoughtMatch ? thoughtMatch[1].trim() : aiResponse.trim();
-
-      // First try the specialized create_plan parser for the most common problematic case
-      var createPlanAction = this._parseCreatePlanAction(aiResponse);
-      if (createPlanAction) {
-        return {
-          thought: thought,
-          action: createPlanAction
-        };
-      }
-
-      // Try to match JSON format
-      var jsonActionMatch = aiResponse.match(/Action:\s*({[\s\S]*})/);
-
-      // Then try to match general function-call format
-      var funcActionMatch = aiResponse.match(/Action:\s*(\w+)\(([^)]*)\)/);
-      if (jsonActionMatch) {
-        // Handle JSON format
-        try {
-          var actionJSON = JSON.parse(jsonActionMatch[1]);
-          var action = {
-            name: actionJSON.name,
-            params: actionJSON.parameters || actionJSON.params || {}
-          };
-          return {
-            thought: thought,
-            action: action
-          };
-        } catch (e) {
-          console.error("ReActController: Error parsing JSON from action string:", e, "Raw action string:", jsonActionMatch[1]);
-          var _action = {
-            name: "parse_error",
-            params: {
-              raw: jsonActionMatch[1],
-              error: e.message
-            }
-          };
-          return {
-            thought: thought,
-            action: _action
-          };
-        }
-      } else if (funcActionMatch) {
-        // Handle general function-call format
-        try {
-          var actionName = funcActionMatch[1];
-          var actionParamsStr = funcActionMatch[2];
-
-          // Parse parameters from the function call format
-          var params = {};
-
-          // Handle quoted parameter values with regex
-          var paramMatches = actionParamsStr.matchAll(/(\w+)=(?:'([^']*)'|"([^"]*)")/g);
-          var _iterator2 = _createForOfIteratorHelper(paramMatches),
-            _step2;
-          try {
-            for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-              var match = _step2.value;
-              var paramName = match[1];
-              var paramValue = match[2] || match[3]; // Either single or double quoted value
-
-              // For create_plan, parse the JSON string in the plan parameter
-              if (actionName === 'create_plan' && paramName === 'plan') {
-                try {
-                  params[paramName] = JSON.parse(paramValue);
-                } catch (e) {
-                  console.error("Error parsing plan JSON:", e);
-                  params[paramName] = paramValue; // Keep as string if parsing fails
-                }
-              } else {
-                params[paramName] = paramValue;
-              }
-            }
-          } catch (err) {
-            _iterator2.e(err);
-          } finally {
-            _iterator2.f();
-          }
-          return {
-            thought: thought,
-            action: {
-              name: actionName,
-              params: params
-            }
-          };
-        } catch (e) {
-          console.error("ReActController: Error parsing function-call format:", e, "Raw action string:", funcActionMatch[0]);
-          var _action2 = {
-            name: "parse_error",
-            params: {
-              raw: funcActionMatch[0],
-              error: e.message
-            }
-          };
-          return {
-            thought: thought,
-            action: _action2
-          };
-        }
-      } else {
-        // No valid action format found
-        console.warn("ReActController: Could not parse action from AI response. Raw AI response:", aiResponse);
+      var thought = thoughtMatch ? thoughtMatch[1].trim() : "No thought provided.";
+      var actionMatch = aiResponse.match(/Action:\s*({[\s\S]*})/);
+      if (!actionMatch) {
+        console.warn("ReActController: Could not find a valid JSON Action block.", aiResponse);
         return {
           thought: thought,
           action: {
@@ -120139,122 +124441,87 @@ var ReActController = /*#__PURE__*/function () {
           }
         };
       }
-    }
+      var actionStr = actionMatch[1];
 
-    /**
-     * Helper method to parse the create_plan function call format specifically.
-     * This handles the complex case where the plan parameter contains nested quotes and special characters.
-     * @param {string} aiResponse - The raw AI response string.
-     * @returns {object|null} The parsed action object or null if parsing fails.
-     * @private
-     */
-  }, {
-    key: "_parseCreatePlanAction",
-    value: function _parseCreatePlanAction(aiResponse) {
-      // Look for different possible formats of create_plan function call
-      var patterns = [
-      // Format: create_plan(plan='[...]')
-      /Action:\s*create_plan\(plan='(\[[^]*?\])'\)/,
-      // Format: create_plan(plan="[...]")
-      /Action:\s*create_plan\(plan="(\[[^]*?\])"\)/,
-      // Format: create_plan({"plan": [...]})
-      /Action:\s*create_plan\(\s*{\s*"plan"\s*:\s*(\[[^]*?\])\s*}\s*\)/,
-      // Format: create_plan(plan=[...])
-      /Action:\s*create_plan\(plan=(\[[^]*?\])\)/];
-      var planJsonStr = null;
+      // Zod Schemas for validation
+      var planStepSchema = zod__WEBPACK_IMPORTED_MODULE_1__.object({
+        step: zod__WEBPACK_IMPORTED_MODULE_1__.number(),
+        description: zod__WEBPACK_IMPORTED_MODULE_1__.string(),
+        step_type: zod__WEBPACK_IMPORTED_MODULE_1__["enum"](["geospatial", "aggregation", "filter", "data_retrieval", "calculation", "visualization"])
+      });
+      var createPlanSchema = zod__WEBPACK_IMPORTED_MODULE_1__.object({
+        name: zod__WEBPACK_IMPORTED_MODULE_1__.literal("create_plan"),
+        parameters: zod__WEBPACK_IMPORTED_MODULE_1__.object({
+          plan: zod__WEBPACK_IMPORTED_MODULE_1__.array(planStepSchema)
+        })
+      });
+      var finishSchema = zod__WEBPACK_IMPORTED_MODULE_1__.object({
+        name: zod__WEBPACK_IMPORTED_MODULE_1__.literal("finish"),
+        parameters: zod__WEBPACK_IMPORTED_MODULE_1__.object({
+          answer: zod__WEBPACK_IMPORTED_MODULE_1__.string()
+        })
+      });
+      var escalateSchema = zod__WEBPACK_IMPORTED_MODULE_1__.object({
+        name: zod__WEBPACK_IMPORTED_MODULE_1__.literal("escalate_tool_level"),
+        parameters: zod__WEBPACK_IMPORTED_MODULE_1__.object({
+          reason: zod__WEBPACK_IMPORTED_MODULE_1__.string()
+        })
+      });
+      var genericToolSchema = zod__WEBPACK_IMPORTED_MODULE_1__.object({
+        name: zod__WEBPACK_IMPORTED_MODULE_1__.string(),
+        parameters: zod__WEBPACK_IMPORTED_MODULE_1__.record(zod__WEBPACK_IMPORTED_MODULE_1__.any()).optional()
+      });
 
-      // Try each pattern until we find a match
-      for (var _i2 = 0, _patterns = patterns; _i2 < _patterns.length; _i2++) {
-        var pattern = _patterns[_i2];
-        var match = aiResponse.match(pattern);
-        if (match) {
-          planJsonStr = match[1];
-          break;
-        }
-      }
-      if (!planJsonStr) {
-        // If no pattern matched, try to find any JSON array within the response
-        var jsonArrayMatch = aiResponse.match(/\[([^]*?)\]/);
-        if (jsonArrayMatch && aiResponse.includes('create_plan')) {
-          planJsonStr = "[".concat(jsonArrayMatch[1], "]");
-        } else {
-          return null;
-        }
-      }
+      // A discriminated union is perfect for handling different action types.
+      var actionSchema = zod__WEBPACK_IMPORTED_MODULE_1__.discriminatedUnion("name", [createPlanSchema, finishSchema, escalateSchema,
+      // genericToolSchema must be last as a fallback
+      genericToolSchema]);
       try {
-        // A robust multi-step process to clean and parse a potentially malformed JSON string from the AI.
-        // This handles cases where the AI uses single quotes instead of double quotes, and also
-        // preserves apostrophes within string values (e.g., "user's location").
-        var cleanedPlanStr = planJsonStr
-        // 1. Protect apostrophes inside words by replacing them with a temporary, unique placeholder.
-        .replace(/(\w)'(\w)/g, "$1__APOSTROPHE__$2")
-        // 2. Convert all remaining single quotes to double quotes.
-        .replace(/'/g, '"')
-        // 3. Restore the apostrophes from the placeholder.
-        .replace(/__APOSTROPHE__/g, "'");
+        // Clean the string to make it more likely to be valid JSON
+        // This is a common issue with LLM-generated JSON.
+        var cleanedActionStr = actionStr.replace(/(?<!\\)\\'/g, "'") // Unescape single quotes
+        .replace(/(\w)'(\w)/g, "$1\\'$2") // Handle apostrophes
+        .replace(/,\s*([}\]])/g, "$1"); // Remove trailing commas
 
-        // Handle potential trailing commas in arrays or objects, which are invalid in JSON.
-        cleanedPlanStr = cleanedPlanStr.replace(/,\s*([\]}])/g, '$1');
-        console.log("Attempting to parse plan JSON:", cleanedPlanStr);
-
-        // Parse the JSON array
-        var planArray = JSON.parse(cleanedPlanStr);
-        return {
-          name: "create_plan",
-          params: {
-            plan: planArray
-          }
-        };
-      } catch (e) {
-        console.error("Error parsing create_plan function:", e);
-
-        // Last resort: try to extract structured data using regex
-        try {
-          var stepsRegex = /{"step":\s*(\d+),\s*"description":\s*"([^"]+)",\s*"step_type":\s*"([^"]+)"}/g;
-          var steps = [];
-          var _match;
-          while ((_match = stepsRegex.exec(planJsonStr)) !== null) {
-            steps.push({
-              step: parseInt(_match[1], 10),
-              description: _match[2],
-              step_type: _match[3]
-            });
-          }
-          if (steps.length > 0) {
-            return {
-              name: "create_plan",
-              params: {
-                plan: steps
-              }
-            };
-          }
-        } catch (regexError) {
-          console.error("Regex extraction failed:", regexError);
-        }
-
-        // If all else fails, try a more aggressive approach to fix the JSON
-        try {
-          // Fix common possessive patterns that break JSON
-          var fixedJson = planJsonStr;
-          // Replace patterns like "user"s" with "user's"
-          fixedJson = fixedJson.replace(/(\w+)"s/g, "$1's");
-
-          // Try to parse again
-          var _planArray = JSON.parse(fixedJson);
+        var actionJSON = JSON.parse(cleanedActionStr);
+        var validationResult = actionSchema.safeParse(actionJSON);
+        if (validationResult.success) {
+          // The 'params' property from the old structure is named 'parameters' in the new schemas.
+          // We will remap it for consistency with the rest of the application.
+          var _validationResult$dat = validationResult.data,
+            name = _validationResult$dat.name,
+            parameters = _validationResult$dat.parameters;
+          var action = {
+            name: name,
+            params: parameters || {}
+          };
           return {
-            name: "create_plan",
-            params: {
-              plan: _planArray
+            thought: thought,
+            action: action
+          };
+        } else {
+          console.error("ReActController: Zod validation failed:", validationResult.error.flatten());
+          return {
+            thought: thought,
+            action: {
+              name: "parse_error",
+              params: {
+                raw: actionStr,
+                error: validationResult.error.message
+              }
             }
           };
-        } catch (finalError) {
-          console.error("Final attempt to fix JSON failed:", finalError);
         }
+      } catch (e) {
+        console.error("ReActController: Error parsing JSON from action string:", e, "Raw action string:", actionStr);
         return {
-          name: "parse_error",
-          params: {
-            raw: planJsonStr,
-            error: e.message
+          thought: thought,
+          action: {
+            name: "parse_error",
+            params: {
+              raw: actionStr,
+              error: e.message
+            }
           }
         };
       }
@@ -120393,6 +124660,220 @@ var StateManager = /*#__PURE__*/function () {
 
 /***/ }),
 
+/***/ "./scripts/modules/tools/tool_executor.js":
+/*!************************************************!*\
+  !*** ./scripts/modules/tools/tool_executor.js ***!
+  \************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+// c:\Kiran\Work\GIS\DATAVIZ\GeoInterpreter\scripts\modules\tools\tool_executor.js
+/**
+ * A class to define, register, and execute high-level tools for the AI agent.
+ * This encapsulates the tool logic, keeping the main `geointerpreter.js` file clean.
+ */
+var ToolExecutor = /*#__PURE__*/function () {
+  /**
+   * @param {import('@duckdb/duckdb-wasm').AsyncDuckDBConnection} duckdbConnection - An active DuckDB connection.
+   */
+  function ToolExecutor(duckdbConnection) {
+    _classCallCheck(this, ToolExecutor);
+    if (!duckdbConnection) {
+      throw new Error("ToolExecutor requires a DuckDB connection.");
+    }
+    this.dbConnection = duckdbConnection;
+    this.toolRegistry = new Map();
+    this._registerTools();
+  }
+
+  /**
+   * Registers all the available high-level tools.
+   * Each tool is an async function that can access `this.dbConnection`.
+   * @private
+   */
+  return _createClass(ToolExecutor, [{
+    key: "_registerTools",
+    value: function _registerTools() {
+      var _this = this;
+      this.toolRegistry.set('list_available_layers', /*#__PURE__*/function () {
+        var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(params, state) {
+          return _regenerator().w(function (_context) {
+            while (1) switch (_context.n) {
+              case 0:
+                return _context.a(2, "Available layers are: 'crimes', 'parks', 'rivers'.");
+            }
+          }, _callee);
+        }));
+        return function (_x, _x2) {
+          return _ref.apply(this, arguments);
+        };
+      }());
+      this.toolRegistry.set('get_layer_summary_statistics', /*#__PURE__*/function () {
+        var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(params, state) {
+          return _regenerator().w(function (_context2) {
+            while (1) switch (_context2.n) {
+              case 0:
+                if (!(params.layer_name === "crimes" && params.column_name === "value")) {
+                  _context2.n = 1;
+                  break;
+                }
+                return _context2.a(2, "Summary statistics for crimes.value: Min=10, Max=100, Mean=55.5, Median=50, Count=1000.");
+              case 1:
+                return _context2.a(2, "Error: Layer or column not found for ".concat(params.layer_name, ".").concat(params.column_name));
+            }
+          }, _callee2);
+        }));
+        return function (_x3, _x4) {
+          return _ref2.apply(this, arguments);
+        };
+      }());
+      this.toolRegistry.set('find_hotspots', /*#__PURE__*/function () {
+        var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(params, state) {
+          var eps, minPoints, sql, _t;
+          return _regenerator().w(function (_context3) {
+            while (1) switch (_context3.n) {
+              case 0:
+                eps = params.distance_meters || 500;
+                minPoints = params.min_points || 5;
+                sql = "\n        CREATE OR REPLACE TEMP TABLE hotspot_areas AS\n        SELECT\n            ST_ConvexHull(ST_Collect(geom)) as hotspot_geom,\n            COUNT(*) as point_count\n        FROM ".concat(params.layer_name, "\n        GROUP BY ST_ClusterDBSCAN(geom, eps := ").concat(eps, ", min_points := ").concat(minPoints, ");\n      ");
+                _context3.p = 1;
+                _context3.n = 2;
+                return _this.dbConnection.query(sql);
+              case 2:
+                return _context3.a(2, "Successfully created temporary layer 'hotspot_areas' containing hotspot polygons for '".concat(params.layer_name, "'."));
+              case 3:
+                _context3.p = 3;
+                _t = _context3.v;
+                console.error("Error executing find_hotspots for layer '".concat(params.layer_name, "':"), _t);
+                return _context3.a(2, "Error creating hotspots for layer ".concat(params.layer_name, ": ").concat(_t.message));
+            }
+          }, _callee3, null, [[1, 3]]);
+        }));
+        return function (_x5, _x6) {
+          return _ref3.apply(this, arguments);
+        };
+      }());
+      this.toolRegistry.set('find_intersecting_features', /*#__PURE__*/function () {
+        var _ref4 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(params, state) {
+          return _regenerator().w(function (_context4) {
+            while (1) switch (_context4.n) {
+              case 0:
+                if (!(params.layer1_name === "parks" && params.layer2_name === "hotspot_areas")) {
+                  _context4.n = 1;
+                  break;
+                }
+                return _context4.a(2, "Found 5 parks: ['City Park', 'Greenway', 'Central Park', 'Riverside Park', 'Liberty Park'].");
+              case 1:
+                return _context4.a(2, "Error: Could not find intersecting features for ".concat(params.layer1_name, " and ").concat(params.layer2_name, "."));
+            }
+          }, _callee4);
+        }));
+        return function (_x7, _x8) {
+          return _ref4.apply(this, arguments);
+        };
+      }());
+      this.toolRegistry.set('calculate_density', /*#__PURE__*/function () {
+        var _ref5 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(params, state) {
+          return _regenerator().w(function (_context5) {
+            while (1) switch (_context5.n) {
+              case 0:
+                return _context5.a(2, "Successfully calculated density for ".concat(params.layer_name, " using population from ").concat(params.population_column, " and area from ").concat(params.area_column, ". A new layer 'density_calculated_").concat(params.layer_name, "' has been created."));
+            }
+          }, _callee5);
+        }));
+        return function (_x9, _x0) {
+          return _ref5.apply(this, arguments);
+        };
+      }());
+      this.toolRegistry.set('find_features_within_distance', /*#__PURE__*/function () {
+        var _ref6 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(params, state) {
+          return _regenerator().w(function (_context6) {
+            while (1) switch (_context6.n) {
+              case 0:
+                return _context6.a(2, "Successfully found features in ".concat(params.layer1_name, " within ").concat(params.distance_meters, " meters of ").concat(params.layer2_name, ". A new layer 'filtered_").concat(params.layer1_name, "' has been created."));
+            }
+          }, _callee6);
+        }));
+        return function (_x1, _x10) {
+          return _ref6.apply(this, arguments);
+        };
+      }());
+      this.toolRegistry.set('sort_and_limit_features', /*#__PURE__*/function () {
+        var _ref7 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7(params, state) {
+          return _regenerator().w(function (_context7) {
+            while (1) switch (_context7.n) {
+              case 0:
+                if (!(params.layer_name === "filtered_neighborhoods" && params.sort_column === "density" && params.limit === 3)) {
+                  _context7.n = 1;
+                  break;
+                }
+                return _context7.a(2, "Successfully sorted and limited features in ".concat(params.layer_name, ". Top 3 by density are: 'Neighborhood A', 'Neighborhood B', 'Neighborhood C'."));
+              case 1:
+                return _context7.a(2, "Error: Could not sort or limit features for ".concat(params.layer_name, "."));
+            }
+          }, _callee7);
+        }));
+        return function (_x11, _x12) {
+          return _ref7.apply(this, arguments);
+        };
+      }());
+    }
+
+    /**
+     * Executes a tool by its name with the given parameters.
+     * @param {string} toolName - The name of the tool to execute.
+     * @param {object} params - The parameters for the tool.
+     * @param {object} state - The current application state from the StateManager.
+     * @returns {Promise<string>} A promise that resolves to the observation string.
+     */
+  }, {
+    key: "execute",
+    value: (function () {
+      var _execute = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8(toolName, params, state) {
+        var toolFunction;
+        return _regenerator().w(function (_context8) {
+          while (1) switch (_context8.n) {
+            case 0:
+              console.log("ToolExecutor: Executing tool '".concat(toolName, "' with params:"), params);
+              if (!this.toolRegistry.has(toolName)) {
+                _context8.n = 2;
+                break;
+              }
+              toolFunction = this.toolRegistry.get(toolName); // Use .call(this, ...) to ensure the tool function has access to `this.dbConnection`.
+              _context8.n = 1;
+              return toolFunction.call(this, params, state);
+            case 1:
+              return _context8.a(2, _context8.v);
+            case 2:
+              return _context8.a(2, "Tool '".concat(toolName, "' not implemented in ToolExecutor."));
+          }
+        }, _callee8, this);
+      }));
+      function execute(_x13, _x14, _x15) {
+        return _execute.apply(this, arguments);
+      }
+      return execute;
+    }())
+  }]);
+}();
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ToolExecutor);
+
+/***/ }),
+
 /***/ "./scripts/modules/tools/tool_retriever.js":
 /*!*************************************************!*\
   !*** ./scripts/modules/tools/tool_retriever.js ***!
@@ -120441,7 +124922,8 @@ var ToolRetriever = /*#__PURE__*/function () {
   /**
    * Retrieves relevant tools from the tool registry using vector similarity search.
    * @param {string} query - The user query or current plan step.
-   * @param {number} [topN=10] - The number of top relevant tools to retrieve.
+   * @param {number} [topN=15] - The number of top relevant tools to retrieve.
+   * @param {Array<number>} [levels=[1, 2, 3]] - The priority levels of tools to search for.
    * @returns {Promise<Array<object>>} A promise that resolves to an array of tool definitions,
    * including a `similarity` score (where 1 is a perfect match).
    */
@@ -120450,8 +124932,10 @@ var ToolRetriever = /*#__PURE__*/function () {
     value: (function () {
       var _getRelevantTools = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(query) {
         var topN,
+          levels,
           queryEmbedding,
           queryEmbeddingString,
+          levelFilter,
           querySql,
           result,
           tools,
@@ -120463,7 +124947,8 @@ var ToolRetriever = /*#__PURE__*/function () {
         return _regenerator().w(function (_context) {
           while (1) switch (_context.n) {
             case 0:
-              topN = _args.length > 1 && _args[1] !== undefined ? _args[1] : 10;
+              topN = _args.length > 1 && _args[1] !== undefined ? _args[1] : 15;
+              levels = _args.length > 2 && _args[2] !== undefined ? _args[2] : [1, 2, 3];
               _context.n = 1;
               return this.embeddingManager.readyPromise;
             case 1:
@@ -120474,9 +124959,10 @@ var ToolRetriever = /*#__PURE__*/function () {
               queryEmbeddingString = JSON.stringify(Array.from(queryEmbedding));
               console.log("ToolRetriever: Embedding generated for query: \"".concat(query, "\""));
 
-              // 2. Perform a vector similarity search in DuckDB.
+              // 2. Build the WHERE clause for tool levels.
+              levelFilter = "WHERE level IN (".concat(levels.join(','), ")"); // 2. Perform a vector similarity search in DuckDB.
               // The embeddings were generated using Xenova/all-MiniLM-L6-v2 model (384 dimensions).
-              querySql = "\n            SELECT\n                tool_id,\n                category,\n                semantic_description,\n                parameters_json,\n                array_cosine_distance(\n                    description_embedding,\n                    CAST('".concat(queryEmbeddingString, "' AS DOUBLE[384])\n                ) AS distance\n            FROM\n                tool_registry_db.duckdb_tools\n            ORDER BY\n                distance ASC\n            LIMIT ").concat(topN, ";\n        ");
+              querySql = "\n            SELECT\n                tool_id,\n                category,\n                semantic_description,\n                parameters_json,\n                array_cosine_distance(\n                    description_embedding,\n                    CAST('".concat(queryEmbeddingString, "' AS DOUBLE[384])\n                ) AS distance\n            FROM\n                tool_registry_db.duckdb_tools\n            ").concat(levelFilter, "\n            ORDER BY\n                distance ASC\n            LIMIT ").concat(topN, ";\n        ");
               _context.n = 3;
               return this.duckdbConnection.query(querySql)["catch"](function (e) {
                 console.error("ToolRetriever: Error querying tool registry:", e);
