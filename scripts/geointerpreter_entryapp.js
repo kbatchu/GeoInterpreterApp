@@ -122654,7 +122654,6 @@ function Geointerpreter() {
   }
   publicAPI.init = function () {
     mHelperUtil = new _modules_helperutils__WEBPACK_IMPORTED_MODULE_3__["default"]();
-
     // Check if DOM is already loaded
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", initializeApplication);
@@ -122813,6 +122812,126 @@ function _initDuckDB() {
   return _initDuckDB.apply(this, arguments);
 }
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (initDuckDB);
+
+/***/ }),
+
+/***/ "./scripts/modules/geolocation.js":
+/*!****************************************!*\
+  !*** ./scripts/modules/geolocation.js ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function Geolocation() {
+  var publicAPI = {};
+  var mMediator; // Not used but good to have for consistency
+
+  publicAPI.setMediator = function (m) {
+    mMediator = m;
+  };
+  publicAPI.getMediator = function () {
+    return mMediator;
+  };
+
+  /**
+   * Gets the user's geolocation using the browser's Geolocation API.
+   * This is the most accurate and recommended method.
+   *
+   * @returns {Promise<GeolocationPosition>} A promise that resolves with the
+   *   GeolocationPosition object on success, or rejects with an Error on failure.
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API
+   */
+  publicAPI.getBrowserGeolocation = function () {
+    return new Promise(function (resolve, reject) {
+      if (!("geolocation" in navigator)) {
+        return reject(new Error("Geolocation is not supported by your browser."));
+      }
+      var options = {
+        enableHighAccuracy: true,
+        // Use GPS if available
+        timeout: 10000,
+        // 10 seconds before timing out
+        maximumAge: 0 // Do not use a cached position
+      };
+      var onSuccess = function onSuccess(position) {
+        resolve(position);
+      };
+      var onError = function onError(error) {
+        var errorMessage = "An unknown error occurred.";
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = "User denied the request for Geolocation.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = "Location information is unavailable.";
+            break;
+          case error.TIMEOUT:
+            errorMessage = "The request to get user location timed out.";
+            break;
+        }
+        reject(new Error(errorMessage));
+      };
+      navigator.geolocation.getCurrentPosition(onSuccess, onError, options);
+    });
+  };
+
+  /**
+   * Gets an estimated geolocation based on the user's public IP address
+   * by calling a third-party API. This is less accurate than the Geolocation API.
+   *
+   * @returns {Promise<object>} A promise that resolves with the location data object from the API.
+   */
+  publicAPI.getIPGeolocation = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+    var response, data, _t;
+    return _regenerator().w(function (_context) {
+      while (1) switch (_context.n) {
+        case 0:
+          _context.p = 0;
+          _context.n = 1;
+          return fetch("https://ip-api.com/json");
+        case 1:
+          response = _context.v;
+          if (response.ok) {
+            _context.n = 2;
+            break;
+          }
+          throw new Error("Failed to fetch IP geolocation: ".concat(response.statusText));
+        case 2:
+          _context.n = 3;
+          return response.json();
+        case 3:
+          data = _context.v;
+          if (!(data.status === "fail")) {
+            _context.n = 4;
+            break;
+          }
+          throw new Error("IP Geolocation API error: ".concat(data.message || "Unknown error"));
+        case 4:
+          return _context.a(2, data);
+        case 5:
+          _context.p = 5;
+          _t = _context.v;
+          console.error("Could not retrieve IP geolocation:", _t);
+          throw _t;
+        case 6:
+          return _context.a(2);
+      }
+    }, _callee, null, [[0, 5]]);
+  }));
+  publicAPI.init = function () {
+    console.log("Geolocation module initialized.");
+  };
+  return publicAPI;
+}
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Geolocation);
 
 /***/ }),
 
@@ -123861,6 +123980,8 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 // c:\Kiran\Work\GIS\DATAVIZ\GeoInterpreter\scripts\orchestration\react_controller.js
 
 
+// Keep the last 10 pairs of Thought/Action/Observation to prevent excessive token usage.
+var MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT = 30; // 19Jul2025
 var ReActController = /*#__PURE__*/function () {
   function ReActController(stateManager, communicationBus, aiCore, toolExecutor,
   // Placeholder for ToolExecutor
@@ -123941,7 +124062,7 @@ var ReActController = /*#__PURE__*/function () {
               loopCount = 0;
               MAX_LOOP_ITERATIONS = 10; // Prevent infinite loops
               _loop = /*#__PURE__*/_regenerator().m(function _loop() {
-                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, observation, chosenTool, currentStepType, _observation, _observation2, _t, _t2;
+                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, correctedPlan, observation, chosenTool, currentStepType, _observation, _observation2, _t, _t2;
                 return _regenerator().w(function (_context2) {
                   while (1) switch (_context2.n) {
                     case 0:
@@ -124048,16 +124169,22 @@ var ReActController = /*#__PURE__*/function () {
                       return _context2.a(2, 1);
                     case 11:
                       if (!_this.isPlanningMode) {
-                        _context2.n = 14;
+                        _context2.n = 15;
                         break;
                       }
                       if (!(action.name === "create_plan" && action.params.plan)) {
-                        _context2.n = 12;
+                        _context2.n = 13;
                         break;
                       }
+                      _context2.n = 12;
+                      return _this._correctPlanStepTypes(action.params.plan);
+                    case 12:
+                      correctedPlan = _context2.v;
+                      // Correct the plan
                       _this.stateManager.updateState({
                         activePlan: {
-                          steps: action.params.plan,
+                          steps: correctedPlan,
+                          // Use the corrected plan
                           currentStepIndex: 0
                         }
                       });
@@ -124066,23 +124193,23 @@ var ReActController = /*#__PURE__*/function () {
                         type: "action",
                         content: {
                           name: "plan_created",
-                          plan: action.params.plan
-                        }
+                          plan: correctedPlan
+                        } // Log corrected plan
                       });
                       _this._dispatchScratchpadUpdate();
                       console.log("ReActController: Plan created and stored.");
-                      console.log("ReActController: Generated Plan:", action.params.plan);
+                      console.log("ReActController: Generated Plan:", correctedPlan); // Log corrected plan
                       // Continue to next loop iteration to execute first step
-                      _context2.n = 13;
+                      _context2.n = 14;
                       break;
-                    case 12:
-                      throw new Error("AI did not return a valid plan in planning mode.");
                     case 13:
-                      _context2.n = 19;
-                      break;
+                      throw new Error("AI did not return a valid plan in planning mode.");
                     case 14:
+                      _context2.n = 20;
+                      break;
+                    case 15:
                       if (!(action.name === "finish")) {
-                        _context2.n = 15;
+                        _context2.n = 16;
                         break;
                       }
                       finished = true;
@@ -124098,11 +124225,11 @@ var ReActController = /*#__PURE__*/function () {
                         answer: action.params.answer
                       });
                       console.log("ReActController: AI finished with answer:", action.params.answer);
-                      _context2.n = 19;
+                      _context2.n = 20;
                       break;
-                    case 15:
-                      if (!(action.name === 'escalate_tool_level')) {
-                        _context2.n = 16;
+                    case 16:
+                      if (!(action.name === "escalate_tool_level")) {
+                        _context2.n = 17;
                         break;
                       }
                       // Handle the AI's request to escalate to more granular tools
@@ -124120,14 +124247,14 @@ var ReActController = /*#__PURE__*/function () {
                       console.log("ReActController: Escalating to lower-level tools.");
                       // Do NOT increment plan step index, we are retrying the same step with new tools.
                       return _context2.a(2, 1);
-                    case 16:
+                    case 17:
                       // *** NEW: Mismatch Detection Logic ***
                       chosenTool = availableTools.find(function (t) {
                         return t.name === action.name;
                       });
                       currentStepType = currentStep ? currentStep.step_type : null;
-                      if (!(currentStepType === "geospatial" && chosenTool && chosenTool.category !== "geospatial")) {
-                        _context2.n = 17;
+                      if (!(currentStepType === "geospatial" && chosenTool && chosenTool.category.toLowerCase() !== "geospatial")) {
+                        _context2.n = 18;
                         break;
                       }
                       console.warn("ReActController: Mismatch detected! Step type is 'geospatial' but chosen tool '".concat(action.name, "' is category '").concat(chosenTool.category, "'."));
@@ -124147,7 +124274,7 @@ var ReActController = /*#__PURE__*/function () {
                       _this._dispatchScratchpadUpdate();
                       // Do NOT increment plan step index, we are retrying the same step.
                       return _context2.a(2, 1);
-                    case 17:
+                    case 18:
                       // *** END: Mismatch Detection Logic ***
 
                       _this.scratchpad.push({
@@ -124164,26 +124291,37 @@ var ReActController = /*#__PURE__*/function () {
                       });
 
                       // 5. Observation Handling
-                      _context2.n = 18;
+                      _context2.n = 19;
                       return _this.toolExecutor.execute(action.name, action.params, _this.stateManager.getState() // Pass current state to the executor
                       );
-                    case 18:
-                      _observation2 = _context2.v;
-                      _this._dispatchScratchpadUpdate();
-                      _this.scratchpad.push({
-                        type: "observation",
-                        content: _observation2
-                      });
-                      console.log("ReActController: Tool Observation:", _observation2);
-
-                      // Increment plan step index for next iteration
-                      _this.currentPlanStepIndex++;
-                      // Loop continues
                     case 19:
-                      _context2.n = 21;
-                      break;
+                      _observation2 = _context2.v;
+                      // If the tool was not found, do not advance the plan.
+                      // The loop will re-run with the failure observation in the scratchpad,
+                      // forcing the AI to reconsider its action for the current step.
+                      if (typeof _observation2 === "string" && _observation2.startsWith("Tool '") && _observation2.endsWith("' not implemented in ToolExecutor.")) {
+                        console.log("ReActController: Tool not found, re-evaluating current step. The system prompt will guide recovery.");
+                        _this.scratchpad.push({
+                          type: "observation",
+                          content: _observation2
+                        });
+                        console.log("ReActController: Tool Observation:", _observation2);
+                        // Do NOT increment plan step index.
+                      } else {
+                        _this.scratchpad.push({
+                          type: "observation",
+                          content: _observation2
+                        });
+                        console.log("ReActController: Tool Observation:", _observation2);
+                        // Only increment the plan step if the tool was successfully executed (or at least found).
+                        _this.currentPlanStepIndex++;
+                      }
+                      _this._dispatchScratchpadUpdate();
                     case 20:
-                      _context2.p = 20;
+                      _context2.n = 22;
+                      break;
+                    case 21:
+                      _context2.p = 21;
                       _t2 = _context2.v;
                       console.error("ReActController: Error during ReAct cycle:", _t2);
                       _this.scratchpad.push({
@@ -124201,10 +124339,10 @@ var ReActController = /*#__PURE__*/function () {
                         });
                         finished = true;
                       }
-                    case 21:
+                    case 22:
                       return _context2.a(2);
                   }
-                }, _loop, null, [[5, 9], [1, 20]]);
+                }, _loop, null, [[5, 9], [1, 21]]);
               });
             case 1:
               if (!(!finished && loopCount < MAX_LOOP_ITERATIONS)) {
@@ -124265,7 +124403,12 @@ var ReActController = /*#__PURE__*/function () {
           state,
           toolQuery,
           availableTools,
-          prompt,
+          toolNames,
+          messages,
+          systemPrompt,
+          userPrompt,
+          _systemPrompt,
+          _userPrompt,
           _args4 = arguments;
         return _regenerator().w(function (_context4) {
           while (1) switch (_context4.n) {
@@ -124282,19 +124425,38 @@ var ReActController = /*#__PURE__*/function () {
               return this._getRelevantTools(toolQuery, 15, this.currentToolLevels);
             case 1:
               availableTools = _context4.v;
-              prompt = "";
+              toolNames = availableTools.map(function (t) {
+                return t.name;
+              });
+              console.log("ReActController: Retrieved available tools: [".concat(toolNames.join(", "), "]"));
+              messages = [];
               if (this.isPlanningMode) {
-                prompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by breaking down complex requests into a logical, step-by-step plan of discrete analytical tasks. Each step should be a self-contained action that can likely be solved by a single tool.\n              For each step, you must also provide a 'step_type' from the following list: [geospatial, aggregation, filter, data_retrieval, calculation, visualization].\n\n              You must respond in the following JSON format, including the 'step_type' for each step:\n              Thought: I need to break down the user's request into a plan with categorized steps.\n              Action: {\n                \"name\": \"create_plan\",\n                \"parameters\": {\n                  \"plan\": [\n                    {\"step\": 1, \"description\": \"Create a 500-meter buffer around parks.\", \"step_type\": \"geospatial\"},\n                    {\"step\": 2, \"description\": \"Find crimes within the park buffers.\", \"step_type\": \"geospatial\"}\n                  ]\n                }\n              }\n\n              You have access to a special tool called `create_plan`. Use this tool to output your plan as a JSON array of steps inside the 'plan' parameter.\n\n              Here is the user's request:\n              ".concat(this.userQuery, "\n              \n              Thought:");
+                systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by breaking down complex requests into a logical, step-by-step plan of discrete analytical tasks. Each step should be a self-contained action that can likely be solved by a single tool.\nFor each step, you must also provide a 'step_type' from the following list: [geospatial, aggregation, filter, data_retrieval, calculation, visualization].\n\nYou must respond in the following JSON format, with no other text before or after:\nThought: [Your reasoning for the plan.]\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [{\"step\": 1, \"description\": \"...\", \"step_type\": \"...\"}] } }";
+                userPrompt = "You have access to a special tool called `create_plan`. Use this tool to output your plan as a JSON array of steps inside the 'plan' parameter.\n\nHere is the user's request:\n".concat(this.userQuery, "\n\nThought:");
+                messages.push({
+                  role: "system",
+                  content: systemPrompt
+                });
+                messages.push({
+                  role: "user",
+                  content: userPrompt
+                });
               } else {
-                prompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by answering their questions about the data they have provided.\n\n                You have access to the following tools to help you. Select a tool if you need to use it.\n                <TOOL_DEFINITIONS_JSON>\n                  ".concat(JSON.stringify(availableTools, null, 2), "\n                </TOOL_DEFINITIONS_JSON>\n\n                To answer the user's question, you must follow this cycle:\n                1. Thought: Reason about the user's request and what you need to do next.\n                2. Action: Choose one of the provided tools and its parameters. The only valid actions are using a tool or using the special `finish(answer=...)` tool when you have the final answer.\n                3. Observation: You will be given the result of the action you took.\n                4. Repeat the cycle until you can answer the question.\n                IMPORTANT: If you determine that the provided tools are not sufficient to complete the current goal, use the 'escalate_tool_level' tool to request more granular tools.\n\n                Here is the current goal:\n                ").concat(currentGoal, "\n\n                Here is the history of your work on this request so far (Thought/Action/Observation):\n                ").concat(this.scratchpad.map(function (entry) {
+                _systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by executing a pre-defined plan.\n\n## RESPONSE FORMAT\nYou MUST respond in the following format, with no other text before or after:\nThought: [Your reasoning about the current step, what tool to use, and why. If a tool doesn't exist, explain your recovery strategy based on the guidelines below.]\nAction: { \"name\": \"tool_name\", \"parameters\": { \"param1\": \"value1\" } }\n\n## AVAILABLE ACTIONS\n- Use one of the provided tools.\n- Use the 'finish(answer=...)' tool when you have the final answer.\n- Use the 'escalate_tool_level' tool if the current tools are insufficient.\n\n## RECOVERY STRATEGY (If a tool is not available)\nIf you receive an observation that a tool is not implemented, DO NOT skip the step. Instead, you must reason about how to achieve the goal differently.\n1.  **Re-evaluate the Goal:** Can the current step be broken down into smaller, more fundamental steps?\n2.  **Seek Data:** Do you need to find data first? Look for tools that can query external data sources (like OpenStreetMap).\n3.  **Alternative Tools:** Is there another available tool that can achieve a similar outcome?\n4.  **Escalate:** If you are truly stuck, use the 'escalate_tool_level' tool to request more granular functions.";
+                _userPrompt = "You have access to the following tools to help you. Select ONE tool to achieve the current goal.\n<TOOL_DEFINITIONS_JSON>\n  ".concat(JSON.stringify(availableTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is the current goal:\n").concat(currentGoal, "\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
                   return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
-                }).join("\n"), "\n\n                Thought:");
+                }).join("\n"), "\n\nThought:");
+                messages.push({
+                  role: "system",
+                  content: _systemPrompt
+                });
+                messages.push({
+                  role: "user",
+                  content: _userPrompt
+                });
               }
               return _context4.a(2, {
-                messages: [{
-                  role: "user",
-                  content: prompt
-                }],
+                messages: messages,
                 availableTools: availableTools
               });
           }
@@ -124339,10 +124501,19 @@ var ReActController = /*#__PURE__*/function () {
               return this.toolRetriever.getRelevantTools(query, topN, levels);
             case 1:
               dbTools = _context5.v;
-              // Ensure 'create_plan' and 'finish' tools are always available, as they are internal control tools
-              internalTools = [{
+              if (dbTools.length > 0) {
+                console.log("ReActController: Tools retrieved from DB: [".concat(dbTools.map(function (t) {
+                  return t.name;
+                }).join(", "), "]"));
+              } else {
+                console.log("ReActController: No tools retrieved from DB for query: \"".concat(query, "\""));
+              }
+
+              // Conditionally add internal tools based on the agent's mode.
+              internalTools = []; // The 'create_plan' tool is always available for initial planning or for course-correction via re-planning.
+              internalTools.push({
                 name: "create_plan",
-                description: "Internal tool used by the AI to break down a complex user request into a logical, step-by-step plan of discrete analytical tasks. Each step should be a self-contained action that can likely be solved by a single tool. The plan is returned as a JSON array of objects, each with a 'step' number and 'description'.",
+                description: "Breaks down a complex user request into a logical, step-by-step plan. Use this for initial planning or to create a new plan if the current one is flawed.",
                 parameters: {
                   type: "object",
                   properties: {
@@ -124357,15 +124528,22 @@ var ReActController = /*#__PURE__*/function () {
                           },
                           description: {
                             type: "string"
+                          },
+                          step_type: {
+                            type: "string",
+                            "enum": ["geospatial", "aggregation", "filter", "data_retrieval", "calculation", "visualization"]
                           }
                         },
-                        required: ["step", "description"]
+                        required: ["step", "description", "step_type"]
                       }
                     }
                   },
                   required: ["plan"]
                 }
-              }, {
+              });
+
+              // 'finish' and 'escalate_tool_level' are always needed for control flow during execution.
+              internalTools.push({
                 name: "finish",
                 description: "Call this tool when you have fully answered the user's request. Provide the final answer in the 'answer' parameter.",
                 parameters: {
@@ -124391,7 +124569,9 @@ var ReActController = /*#__PURE__*/function () {
                   },
                   required: ["reason"]
                 }
-              }]; // Combine DB tools with internal tools, ensuring internal tools take precedence.
+              });
+
+              // Combine DB tools with internal tools, ensuring internal tools take precedence.
               uniqueTools = new Map();
               _iterator = _createForOfIteratorHelper(dbTools);
               try {
@@ -124471,23 +124651,28 @@ var ReActController = /*#__PURE__*/function () {
         name: zod__WEBPACK_IMPORTED_MODULE_1__.string(),
         parameters: zod__WEBPACK_IMPORTED_MODULE_1__.record(zod__WEBPACK_IMPORTED_MODULE_1__.any()).optional()
       });
-
-      // A discriminated union is perfect for handling different action types.
-      var actionSchema = zod__WEBPACK_IMPORTED_MODULE_1__.discriminatedUnion("name", [createPlanSchema, finishSchema, escalateSchema,
-      // genericToolSchema must be last as a fallback
-      genericToolSchema]);
       try {
-        // Clean the string to make it more likely to be valid JSON
-        // This is a common issue with LLM-generated JSON.
-        var cleanedActionStr = actionStr.replace(/(?<!\\)\\'/g, "'") // Unescape single quotes
-        .replace(/(\w)'(\w)/g, "$1\\'$2") // Handle apostrophes
-        .replace(/,\s*([}\]])/g, "$1"); // Remove trailing commas
+        var actionJSON = JSON.parse(actionStr);
+        console.log("ReActController: Parsed action JSON:", actionJSON);
 
-        var actionJSON = JSON.parse(cleanedActionStr);
-        var validationResult = actionSchema.safeParse(actionJSON);
+        // Validate based on the action name instead of using discriminated union
+        var validationResult;
+        var actionName = actionJSON.name;
+        switch (actionName) {
+          case "create_plan":
+            validationResult = createPlanSchema.safeParse(actionJSON);
+            break;
+          case "finish":
+            validationResult = finishSchema.safeParse(actionJSON);
+            break;
+          case "escalate_tool_level":
+            validationResult = escalateSchema.safeParse(actionJSON);
+            break;
+          default:
+            validationResult = genericToolSchema.safeParse(actionJSON);
+            break;
+        }
         if (validationResult.success) {
-          // The 'params' property from the old structure is named 'parameters' in the new schemas.
-          // We will remap it for consistency with the rest of the application.
           var _validationResult$dat = validationResult.data,
             name = _validationResult$dat.name,
             parameters = _validationResult$dat.parameters;
@@ -124501,15 +124686,72 @@ var ReActController = /*#__PURE__*/function () {
           };
         } else {
           console.error("ReActController: Zod validation failed:", validationResult.error.flatten());
+          // Fall back to basic parsing without strict validation
+          var _name = actionJSON.name,
+            _parameters = actionJSON.parameters;
+          var _action = {
+            name: _name,
+            params: _parameters || {}
+          };
           return {
             thought: thought,
-            action: {
-              name: "parse_error",
-              params: {
-                raw: actionStr,
-                error: validationResult.error.message
-              }
-            }
+            action: _action
+          };
+        }
+      } catch (e) {
+        console.error("ReActController: Error parsing JSON or validating schema:", e);
+      }
+
+      // Clean the string to make it more likely to be valid JSON
+      // This is a common issue with LLM-generated JSON.
+      try {
+        var cleanedActionStr = actionStr.replace(/(?<!\\)\\'/g, "'") // Unescape single quotes
+        .replace(/(\w)'(\w)/g, "$1\\'$2") // Handle apostrophes
+        .replace(/,\s*([}\]])/g, "$1"); // Remove trailing commas
+
+        var _actionJSON = JSON.parse(cleanedActionStr);
+
+        // Validate based on the action name
+        var _validationResult;
+        var _actionName = _actionJSON.name;
+        switch (_actionName) {
+          case "create_plan":
+            _validationResult = createPlanSchema.safeParse(_actionJSON);
+            break;
+          case "finish":
+            _validationResult = finishSchema.safeParse(_actionJSON);
+            break;
+          case "escalate_tool_level":
+            _validationResult = escalateSchema.safeParse(_actionJSON);
+            break;
+          default:
+            _validationResult = genericToolSchema.safeParse(_actionJSON);
+            break;
+        }
+        if (_validationResult.success) {
+          var _validationResult$dat2 = _validationResult.data,
+            _name2 = _validationResult$dat2.name,
+            _parameters2 = _validationResult$dat2.parameters;
+          var _action2 = {
+            name: _name2,
+            params: _parameters2 || {}
+          };
+          return {
+            thought: thought,
+            action: _action2
+          };
+        } else {
+          console.error("ReActController: Zod validation failed:", _validationResult.error.flatten());
+          // Fall back to basic parsing without strict validation
+          var _name3 = _actionJSON.name,
+            _parameters3 = _actionJSON.parameters;
+          var _action3 = {
+            name: _name3,
+            params: _parameters3 || {}
+          };
+          return {
+            thought: thought,
+            action: _action3
           };
         }
       } catch (e) {
@@ -124526,7 +124768,91 @@ var ReActController = /*#__PURE__*/function () {
         };
       }
     }
-
+  }, {
+    key: "_correctPlanStepTypes",
+    value: function () {
+      var _correctPlanStepTypes2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(plan) {
+        var _this2 = this;
+        var SIMILARITY_THRESHOLD, correctedPlanPromises;
+        return _regenerator().w(function (_context7) {
+          while (1) switch (_context7.n) {
+            case 0:
+              SIMILARITY_THRESHOLD = 0.6; // Min similarity to be considered 'geospatial'.
+              // This assumes a table 'geospatial_term_embeddings' exists with 'term' and 'embedding' columns.
+              correctedPlanPromises = plan.map(/*#__PURE__*/function () {
+                var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(step) {
+                  var descriptionEmbedding, descriptionEmbeddingString, querySql, result, rows, similarity, _t3;
+                  return _regenerator().w(function (_context6) {
+                    while (1) switch (_context6.n) {
+                      case 0:
+                        if (["data_retrieval", "calculation", "filter", "aggregation"].includes(step.step_type)) {
+                          _context6.n = 1;
+                          break;
+                        }
+                        return _context6.a(2, step);
+                      case 1:
+                        console.log("ReActController: Evaluating step ".concat(step.step, " with step_type '").concat(step.step_type, "' and description: \"").concat(step.description, "\""));
+                        _context6.p = 2;
+                        _context6.n = 3;
+                        return _this2.embeddingManager.generateEmbedding(step.description);
+                      case 3:
+                        descriptionEmbedding = _context6.v;
+                        descriptionEmbeddingString = JSON.stringify(Array.from(descriptionEmbedding)); // Query the geospatial terms database for the most similar term
+                        querySql = "\n        SELECT\n          array_cosine_distance(\n              embedding,\n              CAST('".concat(descriptionEmbeddingString, "' AS DOUBLE[384])\n          ) AS distance\n        FROM\n          tool_registry_db.geospatial_term_embeddings\n        ORDER BY\n          distance ASC\n        LIMIT 1;\n      ");
+                        _context6.n = 4;
+                        return _this2.duckdbConnection.query(querySql);
+                      case 4:
+                        result = _context6.v;
+                        rows = result.toArray();
+                        if (!(rows.length > 0)) {
+                          _context6.n = 7;
+                          break;
+                        }
+                        // Convert distance to similarity for threshold comparison
+                        similarity = 1 - rows[0].distance;
+                        console.log("ReActController: Step ".concat(step.step, " (").concat(step.step_type, ") similarity to geospatial terms: ").concat(similarity.toFixed(4), " (threshold: ").concat(SIMILARITY_THRESHOLD, ")"));
+                        if (!(similarity >= SIMILARITY_THRESHOLD)) {
+                          _context6.n = 5;
+                          break;
+                        }
+                        console.log("ReActController: Correcting step ".concat(step.step, " from '").concat(step.step_type, "' to 'geospatial' based on semantic similarity (").concat(similarity.toFixed(2), ")."));
+                        return _context6.a(2, _objectSpread(_objectSpread({}, step), {}, {
+                          step_type: "geospatial"
+                        }));
+                      case 5:
+                        console.log("ReActController: Step ".concat(step.step, " (").concat(step.step_type, ") similarity ").concat(similarity.toFixed(4), " below threshold, keeping original step_type."));
+                      case 6:
+                        _context6.n = 8;
+                        break;
+                      case 7:
+                        console.log("ReActController: No geospatial terms found in database for step ".concat(step.step, "."));
+                      case 8:
+                        _context6.n = 10;
+                        break;
+                      case 9:
+                        _context6.p = 9;
+                        _t3 = _context6.v;
+                        console.error("ReActController: Could not query geospatial term embeddings. Does the table exist? Error: ".concat(_t3.message));
+                        // If the query fails, just return the original step.
+                        return _context6.a(2, step);
+                      case 10:
+                        return _context6.a(2, step);
+                    }
+                  }, _callee5, null, [[2, 9]]);
+                }));
+                return function (_x5) {
+                  return _ref.apply(this, arguments);
+                };
+              }());
+              return _context7.a(2, Promise.all(correctedPlanPromises));
+          }
+        }, _callee6);
+      }));
+      function _correctPlanStepTypes(_x4) {
+        return _correctPlanStepTypes2.apply(this, arguments);
+      }
+      return _correctPlanStepTypes;
+    }()
     /**
      * Dispatches a custom event with the current scratchpad content.
      */
@@ -124671,6 +124997,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+/* harmony import */ var _geolocation_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geolocation.js */ "./scripts/modules/geolocation.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
 function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
@@ -124682,6 +125009,9 @@ function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), 
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 // c:\Kiran\Work\GIS\DATAVIZ\GeoInterpreter\scripts\modules\tools\tool_executor.js
+
+
+
 /**
  * A class to define, register, and execute high-level tools for the AI agent.
  * This encapsulates the tool logic, keeping the main `geointerpreter.js` file clean.
@@ -124696,6 +125026,8 @@ var ToolExecutor = /*#__PURE__*/function () {
       throw new Error("ToolExecutor requires a DuckDB connection.");
     }
     this.dbConnection = duckdbConnection;
+    this.geolocation = new _geolocation_js__WEBPACK_IMPORTED_MODULE_0__["default"]();
+    this.geolocation.init();
     this.toolRegistry = new Map();
     this._registerTools();
   }
@@ -124831,6 +125163,43 @@ var ToolExecutor = /*#__PURE__*/function () {
           return _ref7.apply(this, arguments);
         };
       }());
+      this.toolRegistry.set('get_user_location', /*#__PURE__*/function () {
+        var _ref8 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8(params, state) {
+          var position, _position$coords, latitude, longitude, accuracy, ipLocation, lat, lon, city, country, query, _t2, _t3;
+          return _regenerator().w(function (_context8) {
+            while (1) switch (_context8.n) {
+              case 0:
+                _context8.p = 0;
+                console.log("Attempting to get location via Browser Geolocation API...");
+                _context8.n = 1;
+                return _this.geolocation.getBrowserGeolocation();
+              case 1:
+                position = _context8.v;
+                _position$coords = position.coords, latitude = _position$coords.latitude, longitude = _position$coords.longitude, accuracy = _position$coords.accuracy;
+                return _context8.a(2, "Successfully found user location using Browser API. Latitude: ".concat(latitude.toFixed(6), ", Longitude: ").concat(longitude.toFixed(6), ", Accuracy: ").concat(accuracy.toFixed(0), " meters."));
+              case 2:
+                _context8.p = 2;
+                _t2 = _context8.v;
+                console.warn("Browser Geolocation failed: ".concat(_t2.message, ". Falling back to IP-based Geolocation."));
+                _context8.p = 3;
+                _context8.n = 4;
+                return _this.geolocation.getIPGeolocation();
+              case 4:
+                ipLocation = _context8.v;
+                lat = ipLocation.lat, lon = ipLocation.lon, city = ipLocation.city, country = ipLocation.country, query = ipLocation.query;
+                return _context8.a(2, "Successfully found user's approximate location via IP address (".concat(query, "). City: ").concat(city, ", Country: ").concat(country, ", Latitude: ").concat(lat, ", Longitude: ").concat(lon, ". Note: This location is an estimate."));
+              case 5:
+                _context8.p = 5;
+                _t3 = _context8.v;
+                console.error("IP Geolocation also failed: ".concat(_t3.message));
+                return _context8.a(2, "Error: Could not determine user location. Both Browser and IP Geolocation methods failed. Browser API error: ".concat(_t2.message, ". IP API error: ").concat(_t3.message));
+            }
+          }, _callee8, null, [[3, 5], [0, 2]]);
+        }));
+        return function (_x13, _x14) {
+          return _ref8.apply(this, arguments);
+        };
+      }());
     }
 
     /**
@@ -124843,27 +125212,27 @@ var ToolExecutor = /*#__PURE__*/function () {
   }, {
     key: "execute",
     value: (function () {
-      var _execute = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8(toolName, params, state) {
+      var _execute = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee9(toolName, params, state) {
         var toolFunction;
-        return _regenerator().w(function (_context8) {
-          while (1) switch (_context8.n) {
+        return _regenerator().w(function (_context9) {
+          while (1) switch (_context9.n) {
             case 0:
               console.log("ToolExecutor: Executing tool '".concat(toolName, "' with params:"), params);
               if (!this.toolRegistry.has(toolName)) {
-                _context8.n = 2;
+                _context9.n = 2;
                 break;
               }
               toolFunction = this.toolRegistry.get(toolName); // Use .call(this, ...) to ensure the tool function has access to `this.dbConnection`.
-              _context8.n = 1;
+              _context9.n = 1;
               return toolFunction.call(this, params, state);
             case 1:
-              return _context8.a(2, _context8.v);
+              return _context9.a(2, _context9.v);
             case 2:
-              return _context8.a(2, "Tool '".concat(toolName, "' not implemented in ToolExecutor."));
+              return _context9.a(2, "Tool '".concat(toolName, "' not implemented in ToolExecutor."));
           }
-        }, _callee8, this);
+        }, _callee9, this);
       }));
-      function execute(_x13, _x14, _x15) {
+      function execute(_x15, _x16, _x17) {
         return _execute.apply(this, arguments);
       }
       return execute;
@@ -124962,7 +125331,7 @@ var ToolRetriever = /*#__PURE__*/function () {
               // 2. Build the WHERE clause for tool levels.
               levelFilter = "WHERE level IN (".concat(levels.join(','), ")"); // 2. Perform a vector similarity search in DuckDB.
               // The embeddings were generated using Xenova/all-MiniLM-L6-v2 model (384 dimensions).
-              querySql = "\n            SELECT\n                tool_id,\n                category,\n                semantic_description,\n                parameters_json,\n                array_cosine_distance(\n                    description_embedding,\n                    CAST('".concat(queryEmbeddingString, "' AS DOUBLE[384])\n                ) AS distance\n            FROM\n                tool_registry_db.duckdb_tools\n            ").concat(levelFilter, "\n            ORDER BY\n                distance ASC\n            LIMIT ").concat(topN, ";\n        ");
+              querySql = "\n            SELECT\n                tool_id,\n                category,\n                semantic_description,\n                parameters_json,\n                array_cosine_distance(\n                    semantic_description_embedding,\n                    CAST('".concat(queryEmbeddingString, "' AS DOUBLE[384])\n                ) AS distance\n            FROM\n                tool_registry_db.duckdb_tools\n            ").concat(levelFilter, "\n            ORDER BY\n                distance ASC\n            LIMIT ").concat(topN, ";\n        ");
               _context.n = 3;
               return this.duckdbConnection.query(querySql)["catch"](function (e) {
                 console.error("ToolRetriever: Error querying tool registry:", e);
