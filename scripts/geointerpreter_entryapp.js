@@ -122404,8 +122404,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modules_duckdb_init_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./modules/duckdb_init.js */ "./scripts/modules/duckdb_init.js");
 function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
 function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
@@ -122558,24 +122556,11 @@ function Geointerpreter() {
               outputElement.textContent = "Analysis complete."; // Update status
             });
 
-            // Listen for scratchpad updates from ReActController to show the AI's thought process
-            window.addEventListener("scratchpadUpdated", function (event) {
-              var scratchpad = event.detail.scratchpad;
-              var formattedScratchpad = "";
-              var _iterator = _createForOfIteratorHelper(scratchpad),
-                _step;
-              try {
-                for (_iterator.s(); !(_step = _iterator.n()).done;) {
-                  var entry = _step.value;
-                  var content = _typeof(entry.content) === "object" ? JSON.stringify(entry.content, null, 2) : entry.content;
-                  formattedScratchpad += "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(content, "\n\n");
-                }
-              } catch (err) {
-                _iterator.e(err);
-              } finally {
-                _iterator.f();
-              }
-              thinkingProcessContent.textContent = formattedScratchpad;
+            // Listen for the AI's streaming thought process
+            communicationBus.addEventListener("aiThinkingStream", function (event) {
+              var thinkingProcess = event.detail.content;
+              // Use textContent to prevent HTML injection and preserve formatting like newlines
+              thinkingProcessContent.textContent = thinkingProcess;
             });
 
             // Listen for agent status updates to show thinking/executing indicators
@@ -122828,8 +122813,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
 function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+/**
+ * @module Geolocation
+ * @description Provides methods to obtain the user's geographical location using a
+ * fallback strategy: first, it tries the high-accuracy Browser Geolocation API,
+ * and if that fails or is denied, it falls back to a less-accurate IP-based lookup.
+ *
+ * Best Practice: Use the `getUserLocation()` method for general-purpose location
+ * fetching, as it encapsulates the recommended fallback and error handling logic.
+ */
 function Geolocation() {
   var publicAPI = {};
   var mMediator; // Not used but good to have for consistency
@@ -122842,8 +122839,113 @@ function Geolocation() {
   };
 
   /**
+   * Attempts to get the user's location by first trying the highly accurate
+   * Browser Geolocation API, and falling back to the less accurate IP-based
+   * geolocation if the first attempt fails. This is the recommended function to use.
+   *
+   * @param {object} [options] - Configuration options.
+   * @param {string[]} [options.priority=['browser', 'ip']] - The order of methods to try.
+   * @returns {Promise<object>} A promise that resolves with a normalized location object.
+   *   The object will have a `source` property ('browser' or 'ip') and location data.
+   */
+  publicAPI.getUserLocation = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+    var options,
+      _options$priority,
+      priority,
+      _iterator,
+      _step,
+      method,
+      position,
+      ipLocation,
+      _args = arguments,
+      _t,
+      _t2;
+    return _regenerator().w(function (_context) {
+      while (1) switch (_context.n) {
+        case 0:
+          options = _args.length > 0 && _args[0] !== undefined ? _args[0] : {};
+          _options$priority = options.priority, priority = _options$priority === void 0 ? ["browser", "ip"] : _options$priority;
+          _iterator = _createForOfIteratorHelper(priority);
+          _context.p = 1;
+          _iterator.s();
+        case 2:
+          if ((_step = _iterator.n()).done) {
+            _context.n = 10;
+            break;
+          }
+          method = _step.value;
+          _context.p = 3;
+          if (!(method === "browser")) {
+            _context.n = 5;
+            break;
+          }
+          _context.n = 4;
+          return publicAPI.getBrowserGeolocation();
+        case 4:
+          position = _context.v;
+          console.log("Geolocation: Obtained location via Browser API.");
+          return _context.a(2, {
+            source: "browser",
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracy: position.coords.accuracy,
+            // in meters
+            raw: position // include original object
+          });
+        case 5:
+          if (!(method === "ip")) {
+            _context.n = 7;
+            break;
+          }
+          _context.n = 6;
+          return publicAPI.getIPGeolocation();
+        case 6:
+          ipLocation = _context.v;
+          console.log("Geolocation: Obtained location via IP address.");
+          return _context.a(2, {
+            source: "ip",
+            latitude: ipLocation.lat,
+            longitude: ipLocation.lon,
+            accuracy: null,
+            // IP-based location doesn't provide an accuracy radius
+            city: ipLocation.city,
+            country: ipLocation.country,
+            raw: ipLocation // include original object
+          });
+        case 7:
+          _context.n = 9;
+          break;
+        case 8:
+          _context.p = 8;
+          _t = _context.v;
+          console.warn("Geolocation: Method '".concat(method, "' failed:"), _t.message);
+          // Continue to the next method in the priority list.
+        case 9:
+          _context.n = 2;
+          break;
+        case 10:
+          _context.n = 12;
+          break;
+        case 11:
+          _context.p = 11;
+          _t2 = _context.v;
+          _iterator.e(_t2);
+        case 12:
+          _context.p = 12;
+          _iterator.f();
+          return _context.f(12);
+        case 13:
+          throw new Error("All geolocation methods failed. Please consider providing location manually.");
+        case 14:
+          return _context.a(2);
+      }
+    }, _callee, null, [[3, 8], [1, 11, 12, 13]]);
+  }));
+
+  /**
    * Gets the user's geolocation using the browser's Geolocation API.
-   * This is the most accurate and recommended method.
+   * This is the most accurate method. It is recommended to use `getUserLocation`
+   * which uses this function as part of a fallback strategy.
    *
    * @returns {Promise<GeolocationPosition>} A promise that resolves with the
    *   GeolocationPosition object on success, or rejects with an Error on failure.
@@ -122885,46 +122987,47 @@ function Geolocation() {
 
   /**
    * Gets an estimated geolocation based on the user's public IP address
-   * by calling a third-party API. This is less accurate than the Geolocation API.
+   * by calling a third-party API. This is less accurate than the Geolocation API
+   * and should be used as a fallback.
    *
    * @returns {Promise<object>} A promise that resolves with the location data object from the API.
    */
-  publicAPI.getIPGeolocation = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
-    var response, data, _t;
-    return _regenerator().w(function (_context) {
-      while (1) switch (_context.n) {
+  publicAPI.getIPGeolocation = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
+    var response, data, _t3;
+    return _regenerator().w(function (_context2) {
+      while (1) switch (_context2.n) {
         case 0:
-          _context.p = 0;
-          _context.n = 1;
+          _context2.p = 0;
+          _context2.n = 1;
           return fetch("https://ip-api.com/json");
         case 1:
-          response = _context.v;
+          response = _context2.v;
           if (response.ok) {
-            _context.n = 2;
+            _context2.n = 2;
             break;
           }
           throw new Error("Failed to fetch IP geolocation: ".concat(response.statusText));
         case 2:
-          _context.n = 3;
+          _context2.n = 3;
           return response.json();
         case 3:
-          data = _context.v;
+          data = _context2.v;
           if (!(data.status === "fail")) {
-            _context.n = 4;
+            _context2.n = 4;
             break;
           }
           throw new Error("IP Geolocation API error: ".concat(data.message || "Unknown error"));
         case 4:
-          return _context.a(2, data);
+          return _context2.a(2, data);
         case 5:
-          _context.p = 5;
-          _t = _context.v;
-          console.error("Could not retrieve IP geolocation:", _t);
-          throw _t;
+          _context2.p = 5;
+          _t3 = _context2.v;
+          console.error("Could not retrieve IP geolocation:", _t3);
+          throw _t3;
         case 6:
-          return _context.a(2);
+          return _context2.a(2);
       }
-    }, _callee, null, [[0, 5]]);
+    }, _callee2, null, [[0, 5]]);
   }));
   publicAPI.init = function () {
     console.log("Geolocation module initialized.");
@@ -124062,7 +124165,7 @@ var ReActController = /*#__PURE__*/function () {
               loopCount = 0;
               MAX_LOOP_ITERATIONS = 10; // Prevent infinite loops
               _loop = /*#__PURE__*/_regenerator().m(function _loop() {
-                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, correctedPlan, observation, chosenTool, currentStepType, _observation, _observation2, _t, _t2;
+                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, correctedPlan, currentState, observation, chosenTool, currentStepType, _observation, _observation2, _t, _t2;
                 return _regenerator().w(function (_context2) {
                   while (1) switch (_context2.n) {
                     case 0:
@@ -124218,8 +124321,13 @@ var ReActController = /*#__PURE__*/function () {
                         content: action
                       });
                       _this._dispatchScratchpadUpdate();
+                      currentState = _this.stateManager.getState();
                       _this.stateManager.updateState({
-                        agentStatus: "idle"
+                        agentStatus: "idle",
+                        conversationHistory: [].concat(_toConsumableArray(currentState.conversationHistory), [{
+                          role: "assistant",
+                          content: action.params.answer
+                        }])
                       });
                       _this.communicationBus.dispatchEvent("finalAnswerReady", {
                         answer: action.params.answer
@@ -124431,7 +124539,7 @@ var ReActController = /*#__PURE__*/function () {
               console.log("ReActController: Retrieved available tools: [".concat(toolNames.join(", "), "]"));
               messages = [];
               if (this.isPlanningMode) {
-                systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by breaking down complex requests into a logical, step-by-step plan of discrete analytical tasks. Each step should be a self-contained action that can likely be solved by a single tool.\nFor each step, you must also provide a 'step_type' from the following list: [geospatial, aggregation, filter, data_retrieval, calculation, visualization].\n\nYou must respond in the following JSON format, with no other text before or after:\nThought: [Your reasoning for the plan.]\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [{\"step\": 1, \"description\": \"...\", \"step_type\": \"...\"}] } }";
+                systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your primary goal is to help the user by breaking down complex requests into a logical, step-by-step plan.\n\n## RESPONSE FORMAT\nYou MUST respond in the following format, with no other text before or after. Your entire response must start with \"Thought:\".\n\nThought: [Your reasoning for the plan you are about to create.]\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"...\", \"step_type\": \"...\" }, ... ] } }\n\n## PLAN REQUIREMENTS\n- Each step in the plan should be a discrete, self-contained analytical task.\n- For each step, you must provide a 'step_type' from this exact list: [geospatial, aggregation, filter, data_retrieval, calculation, visualization].";
                 userPrompt = "You have access to a special tool called `create_plan`. Use this tool to output your plan as a JSON array of steps inside the 'plan' parameter.\n\nHere is the user's request:\n".concat(this.userQuery, "\n\nThought:");
                 messages.push({
                   role: "system",
@@ -124442,8 +124550,8 @@ var ReActController = /*#__PURE__*/function () {
                   content: userPrompt
                 });
               } else {
-                _systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by executing a pre-defined plan.\n\n## RESPONSE FORMAT\nYou MUST respond in the following format, with no other text before or after:\nThought: [Your reasoning about the current step, what tool to use, and why. If a tool doesn't exist, explain your recovery strategy based on the guidelines below.]\nAction: { \"name\": \"tool_name\", \"parameters\": { \"param1\": \"value1\" } }\n\n## AVAILABLE ACTIONS\n- Use one of the provided tools.\n- Use the 'finish(answer=...)' tool when you have the final answer.\n- Use the 'escalate_tool_level' tool if the current tools are insufficient.\n\n## RECOVERY STRATEGY (If a tool is not available)\nIf you receive an observation that a tool is not implemented, DO NOT skip the step. Instead, you must reason about how to achieve the goal differently.\n1.  **Re-evaluate the Goal:** Can the current step be broken down into smaller, more fundamental steps?\n2.  **Seek Data:** Do you need to find data first? Look for tools that can query external data sources (like OpenStreetMap).\n3.  **Alternative Tools:** Is there another available tool that can achieve a similar outcome?\n4.  **Escalate:** If you are truly stuck, use the 'escalate_tool_level' tool to request more granular functions.";
-                _userPrompt = "You have access to the following tools to help you. Select ONE tool to achieve the current goal.\n<TOOL_DEFINITIONS_JSON>\n  ".concat(JSON.stringify(availableTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is the current goal:\n").concat(currentGoal, "\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
+                _systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by executing a pre-defined plan.\n\n## RESPONSE FORMAT\nYou MUST respond in the following format, with no other text before or after. Your entire response must start with \"Thought:\".\n\nThought: [Your reasoning about the current step, what tool to use, and why. If a tool doesn't exist, explain your recovery strategy here based on the guidelines below.]\nAction: { \"name\": \"tool_name\", \"parameters\": { \"param1\": \"value1\" } }\n\n## AVAILABLE ACTIONS\n- Use one of the provided tools.\n- Use the 'finish(answer=...)' tool when you have the final answer.\n- Use the 'escalate_tool_level' tool if the current tools are insufficient.\n\n## RECOVERY STRATEGY (If a tool is not available)\nIf you receive an observation that a tool is not implemented, DO NOT skip the step. Instead, you must reason about how to achieve the goal differently inside your 'Thought' block.\n1.  **Re-evaluate the Goal:** Can the current step be broken down into smaller, more fundamental steps?\n2.  **Seek Data:** Do you need to find data first? Look for tools that can query external data sources (like OpenStreetMap).\n3.  **Alternative Tools:** Is there another available tool that can achieve a similar outcome?\n4.  **Escalate:** If you are truly stuck, use the 'escalate_tool_level' tool to request more granular functions.";
+                _userPrompt = "You have access to the following tools to help you. Select ONE tool to achieve the current goal.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(availableTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is the current goal:\n").concat(currentGoal, "\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
                   return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
                 }).join("\n"), "\n\nThought:");
                 messages.push({
@@ -124608,9 +124716,26 @@ var ReActController = /*#__PURE__*/function () {
   }, {
     key: "_parseAIResponse",
     value: function _parseAIResponse(aiResponse) {
-      var thoughtMatch = aiResponse.match(/Thought:\s*([^]*?)(?=\nAction:|$)/);
+      // Allow for optional whitespace between Thought/Action and their content, and be more robust.
+      var thoughtMatch = aiResponse.match(/Thought:\s*([^]*?)(?=\s*Action:|$)/);
       var thought = thoughtMatch ? thoughtMatch[1].trim() : "No thought provided.";
       var actionMatch = aiResponse.match(/Action:\s*({[\s\S]*})/);
+
+      // Fallback for thought if the "Thought:" prefix is missing.
+      if (!thoughtMatch) {
+        // If there's an action, assume the text before it is the thought.
+        if (actionMatch) {
+          var actionIndex = aiResponse.indexOf(actionMatch[0]);
+          var potentialThought = aiResponse.substring(0, actionIndex).trim();
+          if (potentialThought) {
+            thought = potentialThought;
+          }
+        }
+        // If there's no action, assume the entire response is the thought.
+        else if (aiResponse.trim()) {
+          thought = aiResponse.trim();
+        }
+      }
       if (!actionMatch) {
         console.warn("ReActController: Could not find a valid JSON Action block.", aiResponse);
         return {
