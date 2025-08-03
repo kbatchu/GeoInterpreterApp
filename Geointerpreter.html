@@ -531,6 +531,18 @@
           </div>
         </div>
 
+        <!-- Container for the agent to ask the user for input -->
+        <div id="user-prompt-container" style="display: none; padding: 15px; background-color: #fff8e1; border-top: 1px solid #eee; border-bottom: 1px solid #eee;">
+          <div id="user-prompt-question" style="font-weight: bold; margin-bottom: 10px; color: #6d4c41;"></div>
+          <div id="user-prompt-options" style="margin-bottom: 10px;">
+            <!-- Buttons for options will be dynamically inserted here -->
+          </div>
+          <div id="user-prompt-input-wrapper">
+            <input type="text" id="user-prompt-input" class="form-control" style="display: inline-block; width: calc(100% - 95px);">
+            <button id="user-prompt-submit" class="btn btn-warning" style="margin-left: 10px;">Submit</button>
+          </div>
+        </div>
+
         <div id="chat-input-container">
           <input
             type="text"

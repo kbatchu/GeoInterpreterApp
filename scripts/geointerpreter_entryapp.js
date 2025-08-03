@@ -122447,7 +122447,7 @@ function Geointerpreter() {
   }
   function _initializeApplication() {
     _initializeApplication = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
-      var outputElement, userInputField, sendButton, chatHistoryDiv, toggleThinkingButton, thinkingProcessContent, thinkingProcessWrapper, aiCore, _yield$InitializeDuck, db, dbConn, llmProgress, embeddingProgress, updateCombinedProgress, llmInitProgressCallback, embeddingInitProgressCallback, modelId, embeddingManagerInstance, _yield$Promise$all, _yield$Promise$all2, core, _, stateManager, communicationBus, toolExecutorInstance, reactController, _t;
+      var outputElement, userInputField, sendButton, chatHistoryDiv, toggleThinkingButton, thinkingProcessContent, thinkingProcessWrapper, chatInputContainer, userPromptContainer, userPromptQuestion, userPromptInput, userPromptSubmit, userPromptOptions, aiCore, _yield$InitializeDuck, db, dbConn, llmProgress, embeddingProgress, updateCombinedProgress, llmInitProgressCallback, embeddingInitProgressCallback, modelId, embeddingManagerInstance, _yield$Promise$all, _yield$Promise$all2, core, _, stateManager, communicationBus, toolExecutorInstance, reactController, submitUserResponse, _t;
       return _regenerator().w(function (_context) {
         while (1) switch (_context.n) {
           case 0:
@@ -122457,7 +122457,13 @@ function Geointerpreter() {
             chatHistoryDiv = document.getElementById("chat-history");
             toggleThinkingButton = document.getElementById("toggle-thinking-button");
             thinkingProcessContent = document.getElementById("thinking-process-content");
-            thinkingProcessWrapper = document.getElementById("thinking-process-wrapper"); // Handle button text change on collapse toggle for the "Show Thinking" UI
+            thinkingProcessWrapper = document.getElementById("thinking-process-wrapper");
+            chatInputContainer = document.getElementById("chat-input-container"); // Get references to the new user prompt elements
+            userPromptContainer = document.getElementById("user-prompt-container");
+            userPromptQuestion = document.getElementById("user-prompt-question");
+            userPromptInput = document.getElementById("user-prompt-input");
+            userPromptSubmit = document.getElementById("user-prompt-submit");
+            userPromptOptions = document.getElementById("user-prompt-options"); // Handle button text change on collapse toggle for the "Show Thinking" UI
             if (thinkingProcessWrapper && toggleThinkingButton) {
               thinkingProcessWrapper.addEventListener("show.bs.collapse", function () {
                 toggleThinkingButton.innerHTML = 'Hide Thinking <i class="bi bi-chevron-up toggle-icon"></i>';
@@ -122571,10 +122577,15 @@ function Geointerpreter() {
                 outputElement.textContent = "Ready for your questions.";
                 userInputField.disabled = false;
                 sendButton.disabled = false;
+                chatInputContainer.style.display = "flex"; // Ensure main input is visible
+                userPromptContainer.style.display = "none"; // Ensure prompt is hidden
               } else {
                 outputElement.textContent = "Agent Status: ".concat(state.agentStatus.replace(/_/g, " "), "...");
                 userInputField.disabled = true;
                 sendButton.disabled = true;
+                if (state.agentStatus !== "waiting_for_user") {
+                  chatInputContainer.style.display = "flex";
+                }
               }
 
               // Update conversation history in UI
@@ -122602,6 +122613,57 @@ function Geointerpreter() {
               if (event.key === "Enter") {
                 sendButton.click(); // Simulate a click on the send button
               }
+            });
+
+            // Listen for the agent asking the user a question
+            communicationBus.addEventListener("promptUserForInput", function (event) {
+              var _event$detail = event.detail,
+                question = _event$detail.question,
+                options = _event$detail.options;
+
+              // Show the prompt UI and hide the normal chat input
+              chatInputContainer.style.display = "none";
+              userPromptContainer.style.display = "block";
+              userPromptQuestion.textContent = question;
+
+              // Clear previous options and input
+              userPromptOptions.innerHTML = "";
+              userPromptInput.value = "";
+              if (options && options.length > 0) {
+                // If options are provided, create buttons and hide the text input
+                userPromptInput.parentElement.style.display = "none";
+                options.forEach(function (optionText) {
+                  var button = document.createElement("button");
+                  button.textContent = optionText;
+                  button.className = "btn btn-outline-primary me-2 mb-2"; // Bootstrap styling
+                  button.addEventListener("click", function () {
+                    communicationBus.dispatchEvent("userInputProvided", {
+                      response: optionText
+                    });
+                    userPromptContainer.style.display = "none"; // Hide after click
+                  });
+                  userPromptOptions.appendChild(button);
+                });
+              } else {
+                // If no options, show the text input and submit button
+                userPromptInput.parentElement.style.display = "block";
+                userPromptInput.focus();
+              }
+            });
+
+            // Handle submission from the text input prompt
+            submitUserResponse = function submitUserResponse() {
+              var response = userPromptInput.value.trim();
+              if (response) {
+                communicationBus.dispatchEvent("userInputProvided", {
+                  response: response
+                });
+                userPromptContainer.style.display = "none"; // Hide after submit
+              }
+            };
+            userPromptSubmit.addEventListener("click", submitUserResponse);
+            userPromptInput.addEventListener("keypress", function (event) {
+              if (event.key === "Enter") submitUserResponse();
             });
 
             // Handle button text change on collapse toggle for the "Show Thinking" UI
@@ -124108,6 +124170,7 @@ var ReActController = /*#__PURE__*/function () {
 
     // Bind event listeners
     this.communicationBus.addEventListener("userQuerySubmitted", this._handleUserQuery.bind(this));
+    this.communicationBus.addEventListener("userInputProvided", this._handleUserInput.bind(this));
   }
 
   /**
@@ -124308,7 +124371,7 @@ var ReActController = /*#__PURE__*/function () {
                     case 13:
                       throw new Error("AI did not return a valid plan in planning mode.");
                     case 14:
-                      _context2.n = 20;
+                      _context2.n = 21;
                       break;
                     case 15:
                       if (!(action.name === "finish")) {
@@ -124333,7 +124396,7 @@ var ReActController = /*#__PURE__*/function () {
                         answer: action.params.answer
                       });
                       console.log("ReActController: AI finished with answer:", action.params.answer);
-                      _context2.n = 20;
+                      _context2.n = 21;
                       break;
                     case 16:
                       if (!(action.name === "escalate_tool_level")) {
@@ -124356,13 +124419,35 @@ var ReActController = /*#__PURE__*/function () {
                       // Do NOT increment plan step index, we are retrying the same step with new tools.
                       return _context2.a(2, 1);
                     case 17:
+                      if (!(action.name === "ask_user")) {
+                        _context2.n = 18;
+                        break;
+                      }
+                      _this.scratchpad.push({
+                        type: "action",
+                        content: action
+                      });
+                      _this._dispatchScratchpadUpdate();
+                      _this.stateManager.updateState({
+                        agentStatus: "waiting_for_user"
+                      });
+                      _this.communicationBus.dispatchEvent("promptUserForInput", {
+                        question: action.params.question,
+                        options: action.params.options || []
+                      });
+                      // The run loop will be paused here. It will be resumed by a new event
+                      // handler that listens for the user's response.
+                      return _context2.a(2, {
+                        v: void 0
+                      });
+                    case 18:
                       // *** NEW: Mismatch Detection Logic ***
                       chosenTool = availableTools.find(function (t) {
                         return t.name === action.name;
                       });
                       currentStepType = currentStep ? currentStep.step_type : null;
                       if (!(currentStepType === "geospatial" && chosenTool && chosenTool.category.toLowerCase() !== "geospatial")) {
-                        _context2.n = 18;
+                        _context2.n = 19;
                         break;
                       }
                       console.warn("ReActController: Mismatch detected! Step type is 'geospatial' but chosen tool '".concat(action.name, "' is category '").concat(chosenTool.category, "'."));
@@ -124382,7 +124467,7 @@ var ReActController = /*#__PURE__*/function () {
                       _this._dispatchScratchpadUpdate();
                       // Do NOT increment plan step index, we are retrying the same step.
                       return _context2.a(2, 1);
-                    case 18:
+                    case 19:
                       // *** END: Mismatch Detection Logic ***
 
                       _this.scratchpad.push({
@@ -124399,10 +124484,10 @@ var ReActController = /*#__PURE__*/function () {
                       });
 
                       // 5. Observation Handling
-                      _context2.n = 19;
+                      _context2.n = 20;
                       return _this.toolExecutor.execute(action.name, action.params, _this.stateManager.getState() // Pass current state to the executor
                       );
-                    case 19:
+                    case 20:
                       _observation2 = _context2.v;
                       // If the tool was not found, do not advance the plan.
                       // The loop will re-run with the failure observation in the scratchpad,
@@ -124425,11 +124510,11 @@ var ReActController = /*#__PURE__*/function () {
                         _this.currentPlanStepIndex++;
                       }
                       _this._dispatchScratchpadUpdate();
-                    case 20:
-                      _context2.n = 22;
-                      break;
                     case 21:
-                      _context2.p = 21;
+                      _context2.n = 23;
+                      break;
+                    case 22:
+                      _context2.p = 22;
                       _t2 = _context2.v;
                       console.error("ReActController: Error during ReAct cycle:", _t2);
                       _this.scratchpad.push({
@@ -124447,14 +124532,14 @@ var ReActController = /*#__PURE__*/function () {
                         });
                         finished = true;
                       }
-                    case 22:
+                    case 23:
                       return _context2.a(2);
                   }
-                }, _loop, null, [[5, 9], [1, 21]]);
+                }, _loop, null, [[5, 9], [1, 22]]);
               });
             case 1:
               if (!(!finished && loopCount < MAX_LOOP_ITERATIONS)) {
-                _context3.n = 5;
+                _context3.n = 6;
                 break;
               }
               return _context3.d(_regeneratorValues(_loop()), 2);
@@ -124464,7 +124549,7 @@ var ReActController = /*#__PURE__*/function () {
                 _context3.n = 3;
                 break;
               }
-              return _context3.a(3, 5);
+              return _context3.a(3, 6);
             case 3:
               if (!(_ret === 1)) {
                 _context3.n = 4;
@@ -124472,9 +124557,15 @@ var ReActController = /*#__PURE__*/function () {
               }
               return _context3.a(3, 1);
             case 4:
+              if (!_ret) {
+                _context3.n = 5;
+                break;
+              }
+              return _context3.a(2, _ret.v);
+            case 5:
               _context3.n = 1;
               break;
-            case 5:
+            case 6:
               if (!finished) {
                 console.warn("ReActController: Max loop iterations reached without finishing.");
                 this.stateManager.updateState({
@@ -124484,7 +124575,7 @@ var ReActController = /*#__PURE__*/function () {
                   answer: "I could not complete the task within the maximum number of steps."
                 });
               }
-            case 6:
+            case 7:
               return _context3.a(2);
           }
         }, _callee2, this);
@@ -124493,6 +124584,48 @@ var ReActController = /*#__PURE__*/function () {
         return _run.apply(this, arguments);
       }
       return run;
+    }()
+    /**
+     * Handles the user's response to a prompt from the `ask_user` tool.
+     * @param {CustomEvent} event - The event containing the user's response.
+     * @private
+     */
+    )
+  }, {
+    key: "_handleUserInput",
+    value: (function () {
+      var _handleUserInput2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(event) {
+        var userResponse;
+        return _regenerator().w(function (_context4) {
+          while (1) switch (_context4.n) {
+            case 0:
+              userResponse = event.detail.response;
+              console.log("ReActController: Received user input:", userResponse);
+
+              // Add the user's response to the scratchpad as an observation
+              this.scratchpad.push({
+                type: "observation",
+                content: "User provided the following information: \"".concat(userResponse, "\"")
+              });
+              this._dispatchScratchpadUpdate();
+
+              // The agent is no longer waiting, it's thinking about the new info
+              this.stateManager.updateState({
+                agentStatus: "thinking"
+              });
+
+              // Resume the execution loop
+              _context4.n = 1;
+              return this.run();
+            case 1:
+              return _context4.a(2);
+          }
+        }, _callee3, this);
+      }));
+      function _handleUserInput(_x2) {
+        return _handleUserInput2.apply(this, arguments);
+      }
+      return _handleUserInput;
     }()
     /**
      * Assembles the context for the AI Core.
@@ -124506,7 +124639,7 @@ var ReActController = /*#__PURE__*/function () {
   }, {
     key: "_assembleContext",
     value: (function () {
-      var _assembleContext2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(currentGoal) {
+      var _assembleContext2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(currentGoal) {
         var currentStep,
           state,
           toolQuery,
@@ -124517,11 +124650,11 @@ var ReActController = /*#__PURE__*/function () {
           userPrompt,
           _systemPrompt,
           _userPrompt,
-          _args4 = arguments;
-        return _regenerator().w(function (_context4) {
-          while (1) switch (_context4.n) {
+          _args5 = arguments;
+        return _regenerator().w(function (_context5) {
+          while (1) switch (_context5.n) {
             case 0:
-              currentStep = _args4.length > 1 && _args4[1] !== undefined ? _args4[1] : null;
+              currentStep = _args5.length > 1 && _args5[1] !== undefined ? _args5[1] : null;
               state = this.stateManager.getState();
               toolQuery = currentGoal;
               if (currentStep && currentStep.step_type) {
@@ -124529,10 +124662,10 @@ var ReActController = /*#__PURE__*/function () {
                 toolQuery = "".concat(currentStep.step_type, ": ").concat(currentGoal);
               }
               console.log("Getting tools for the query:", toolQuery);
-              _context4.n = 1;
+              _context5.n = 1;
               return this._getRelevantTools(toolQuery, 15, this.currentToolLevels);
             case 1:
-              availableTools = _context4.v;
+              availableTools = _context5.v;
               toolNames = availableTools.map(function (t) {
                 return t.name;
               });
@@ -124563,14 +124696,14 @@ var ReActController = /*#__PURE__*/function () {
                   content: _userPrompt
                 });
               }
-              return _context4.a(2, {
+              return _context5.a(2, {
                 messages: messages,
                 availableTools: availableTools
               });
           }
-        }, _callee3, this);
+        }, _callee4, this);
       }));
-      function _assembleContext(_x2) {
+      function _assembleContext(_x3) {
         return _assembleContext2.apply(this, arguments);
       }
       return _assembleContext;
@@ -124587,7 +124720,7 @@ var ReActController = /*#__PURE__*/function () {
   }, {
     key: "_getRelevantTools",
     value: (function () {
-      var _getRelevantTools2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(query) {
+      var _getRelevantTools2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(query) {
         var topN,
           levels,
           dbTools,
@@ -124599,16 +124732,16 @@ var ReActController = /*#__PURE__*/function () {
           _i,
           _internalTools,
           tool,
-          _args5 = arguments;
-        return _regenerator().w(function (_context5) {
-          while (1) switch (_context5.n) {
+          _args6 = arguments;
+        return _regenerator().w(function (_context6) {
+          while (1) switch (_context6.n) {
             case 0:
-              topN = _args5.length > 1 && _args5[1] !== undefined ? _args5[1] : 15;
-              levels = _args5.length > 2 && _args5[2] !== undefined ? _args5[2] : [1, 2, 3];
-              _context5.n = 1;
+              topN = _args6.length > 1 && _args6[1] !== undefined ? _args6[1] : 15;
+              levels = _args6.length > 2 && _args6[2] !== undefined ? _args6[2] : [1, 2, 3];
+              _context6.n = 1;
               return this.toolRetriever.getRelevantTools(query, topN, levels);
             case 1:
-              dbTools = _context5.v;
+              dbTools = _context6.v;
               if (dbTools.length > 0) {
                 console.log("ReActController: Tools retrieved from DB: [".concat(dbTools.map(function (t) {
                   return t.name;
@@ -124696,11 +124829,11 @@ var ReActController = /*#__PURE__*/function () {
                 tool = _internalTools[_i];
                 uniqueTools.set(tool.name, tool); // Internal tools always override or add
               }
-              return _context5.a(2, Array.from(uniqueTools.values()));
+              return _context6.a(2, Array.from(uniqueTools.values()));
           }
-        }, _callee4, this);
+        }, _callee5, this);
       }));
-      function _getRelevantTools(_x3) {
+      function _getRelevantTools(_x4) {
         return _getRelevantTools2.apply(this, arguments);
       }
       return _getRelevantTools;
@@ -124896,84 +125029,84 @@ var ReActController = /*#__PURE__*/function () {
   }, {
     key: "_correctPlanStepTypes",
     value: function () {
-      var _correctPlanStepTypes2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(plan) {
+      var _correctPlanStepTypes2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7(plan) {
         var _this2 = this;
         var SIMILARITY_THRESHOLD, correctedPlanPromises;
-        return _regenerator().w(function (_context7) {
-          while (1) switch (_context7.n) {
+        return _regenerator().w(function (_context8) {
+          while (1) switch (_context8.n) {
             case 0:
               SIMILARITY_THRESHOLD = 0.6; // Min similarity to be considered 'geospatial'.
               // This assumes a table 'geospatial_term_embeddings' exists with 'term' and 'embedding' columns.
               correctedPlanPromises = plan.map(/*#__PURE__*/function () {
-                var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(step) {
+                var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(step) {
                   var descriptionEmbedding, descriptionEmbeddingString, querySql, result, rows, similarity, _t3;
-                  return _regenerator().w(function (_context6) {
-                    while (1) switch (_context6.n) {
+                  return _regenerator().w(function (_context7) {
+                    while (1) switch (_context7.n) {
                       case 0:
                         if (["data_retrieval", "calculation", "filter", "aggregation"].includes(step.step_type)) {
-                          _context6.n = 1;
+                          _context7.n = 1;
                           break;
                         }
-                        return _context6.a(2, step);
+                        return _context7.a(2, step);
                       case 1:
                         console.log("ReActController: Evaluating step ".concat(step.step, " with step_type '").concat(step.step_type, "' and description: \"").concat(step.description, "\""));
-                        _context6.p = 2;
-                        _context6.n = 3;
+                        _context7.p = 2;
+                        _context7.n = 3;
                         return _this2.embeddingManager.generateEmbedding(step.description);
                       case 3:
-                        descriptionEmbedding = _context6.v;
+                        descriptionEmbedding = _context7.v;
                         descriptionEmbeddingString = JSON.stringify(Array.from(descriptionEmbedding)); // Query the geospatial terms database for the most similar term
                         querySql = "\n        SELECT\n          array_cosine_distance(\n              embedding,\n              CAST('".concat(descriptionEmbeddingString, "' AS DOUBLE[384])\n          ) AS distance\n        FROM\n          tool_registry_db.geospatial_term_embeddings\n        ORDER BY\n          distance ASC\n        LIMIT 1;\n      ");
-                        _context6.n = 4;
+                        _context7.n = 4;
                         return _this2.duckdbConnection.query(querySql);
                       case 4:
-                        result = _context6.v;
+                        result = _context7.v;
                         rows = result.toArray();
                         if (!(rows.length > 0)) {
-                          _context6.n = 7;
+                          _context7.n = 7;
                           break;
                         }
                         // Convert distance to similarity for threshold comparison
                         similarity = 1 - rows[0].distance;
                         console.log("ReActController: Step ".concat(step.step, " (").concat(step.step_type, ") similarity to geospatial terms: ").concat(similarity.toFixed(4), " (threshold: ").concat(SIMILARITY_THRESHOLD, ")"));
                         if (!(similarity >= SIMILARITY_THRESHOLD)) {
-                          _context6.n = 5;
+                          _context7.n = 5;
                           break;
                         }
                         console.log("ReActController: Correcting step ".concat(step.step, " from '").concat(step.step_type, "' to 'geospatial' based on semantic similarity (").concat(similarity.toFixed(2), ")."));
-                        return _context6.a(2, _objectSpread(_objectSpread({}, step), {}, {
+                        return _context7.a(2, _objectSpread(_objectSpread({}, step), {}, {
                           step_type: "geospatial"
                         }));
                       case 5:
                         console.log("ReActController: Step ".concat(step.step, " (").concat(step.step_type, ") similarity ").concat(similarity.toFixed(4), " below threshold, keeping original step_type."));
                       case 6:
-                        _context6.n = 8;
+                        _context7.n = 8;
                         break;
                       case 7:
                         console.log("ReActController: No geospatial terms found in database for step ".concat(step.step, "."));
                       case 8:
-                        _context6.n = 10;
+                        _context7.n = 10;
                         break;
                       case 9:
-                        _context6.p = 9;
-                        _t3 = _context6.v;
+                        _context7.p = 9;
+                        _t3 = _context7.v;
                         console.error("ReActController: Could not query geospatial term embeddings. Does the table exist? Error: ".concat(_t3.message));
                         // If the query fails, just return the original step.
-                        return _context6.a(2, step);
+                        return _context7.a(2, step);
                       case 10:
-                        return _context6.a(2, step);
+                        return _context7.a(2, step);
                     }
-                  }, _callee5, null, [[2, 9]]);
+                  }, _callee6, null, [[2, 9]]);
                 }));
-                return function (_x5) {
+                return function (_x6) {
                   return _ref.apply(this, arguments);
                 };
               }());
-              return _context7.a(2, Promise.all(correctedPlanPromises));
+              return _context8.a(2, Promise.all(correctedPlanPromises));
           }
-        }, _callee6);
+        }, _callee7);
       }));
-      function _correctPlanStepTypes(_x4) {
+      function _correctPlanStepTypes(_x5) {
         return _correctPlanStepTypes2.apply(this, arguments);
       }
       return _correctPlanStepTypes;
