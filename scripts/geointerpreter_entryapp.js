@@ -124979,16 +124979,17 @@ var ReActController = /*#__PURE__*/function () {
       return _correctPlanStepTypes;
     }()
     /**
-     * Dispatches a custom event with the current scratchpad content.
+     * Dispatches an event to update the UI with the current scratchpad content.
      */
   }, {
     key: "_dispatchScratchpadUpdate",
     value: function _dispatchScratchpadUpdate() {
-      window.dispatchEvent(new CustomEvent("scratchpadUpdated", {
-        detail: {
-          scratchpad: this.scratchpad
-        }
-      }));
+      var thinkingProcess = this.scratchpad.map(function (entry) {
+        return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content, null, 2) : entry.content);
+      }).join("\n\n");
+      this.communicationBus.dispatchEvent("aiThinkingStream", {
+        content: thinkingProcess
+      });
     }
   }]);
 }();
