@@ -124852,7 +124852,7 @@ var ReActController = /*#__PURE__*/function () {
       // Allow for optional whitespace between Thought/Action and their content, and be more robust.
       var thoughtMatch = aiResponse.match(/Thought:\s*([^]*?)(?=\s*Action:|$)/);
       var thought = thoughtMatch ? thoughtMatch[1].trim() : "No thought provided.";
-      var actionMatch = aiResponse.match(/Action:\s*({[\s\S]*})/);
+      var actionMatch = aiResponse.match(/Action:\s*({[\s\S]*?})/);
 
       // Fallback for thought if the "Thought:" prefix is missing.
       if (!thoughtMatch) {
@@ -124882,145 +124882,39 @@ var ReActController = /*#__PURE__*/function () {
       var actionStr = actionMatch[1];
 
       // Zod Schemas for validation
-      var planStepSchema = zod__WEBPACK_IMPORTED_MODULE_1__.object({
-        step: zod__WEBPACK_IMPORTED_MODULE_1__.number(),
-        description: zod__WEBPACK_IMPORTED_MODULE_1__.string(),
-        step_type: zod__WEBPACK_IMPORTED_MODULE_1__["enum"](["geospatial", "aggregation", "filter", "data_retrieval", "calculation", "visualization"])
-      });
-      var createPlanSchema = zod__WEBPACK_IMPORTED_MODULE_1__.object({
-        name: zod__WEBPACK_IMPORTED_MODULE_1__.literal("create_plan"),
-        parameters: zod__WEBPACK_IMPORTED_MODULE_1__.object({
-          plan: zod__WEBPACK_IMPORTED_MODULE_1__.array(planStepSchema)
-        })
-      });
-      var finishSchema = zod__WEBPACK_IMPORTED_MODULE_1__.object({
-        name: zod__WEBPACK_IMPORTED_MODULE_1__.literal("finish"),
-        parameters: zod__WEBPACK_IMPORTED_MODULE_1__.object({
-          answer: zod__WEBPACK_IMPORTED_MODULE_1__.string()
-        })
-      });
-      var escalateSchema = zod__WEBPACK_IMPORTED_MODULE_1__.object({
-        name: zod__WEBPACK_IMPORTED_MODULE_1__.literal("escalate_tool_level"),
-        parameters: zod__WEBPACK_IMPORTED_MODULE_1__.object({
-          reason: zod__WEBPACK_IMPORTED_MODULE_1__.string()
-        })
-      });
-      var genericToolSchema = zod__WEBPACK_IMPORTED_MODULE_1__.object({
+      var ActionSchema = zod__WEBPACK_IMPORTED_MODULE_1__.object({
         name: zod__WEBPACK_IMPORTED_MODULE_1__.string(),
-        parameters: zod__WEBPACK_IMPORTED_MODULE_1__.record(zod__WEBPACK_IMPORTED_MODULE_1__.any()).optional()
+        parameters: zod__WEBPACK_IMPORTED_MODULE_1__.record(zod__WEBPACK_IMPORTED_MODULE_1__.any()).optional(),
+        params: zod__WEBPACK_IMPORTED_MODULE_1__.record(zod__WEBPACK_IMPORTED_MODULE_1__.any()).optional()
       });
       try {
-        var actionJSON = JSON.parse(actionStr);
-        console.log("ReActController: Parsed action JSON:", actionJSON);
+        var actionJson = JSON.parse(actionStr);
+        var validatedAction = ActionSchema.parse(actionJson);
 
-        // Validate based on the action name instead of using discriminated union
-        var validationResult;
-        var actionName = actionJSON.name;
-        switch (actionName) {
-          case "create_plan":
-            validationResult = createPlanSchema.safeParse(actionJSON);
-            break;
-          case "finish":
-            validationResult = finishSchema.safeParse(actionJSON);
-            break;
-          case "escalate_tool_level":
-            validationResult = escalateSchema.safeParse(actionJSON);
-            break;
-          default:
-            validationResult = genericToolSchema.safeParse(actionJSON);
-            break;
-        }
-        if (validationResult.success) {
-          var _validationResult$dat = validationResult.data,
-            name = _validationResult$dat.name,
-            parameters = _validationResult$dat.parameters;
-          var action = {
-            name: name,
-            params: parameters || {}
-          };
-          return {
-            thought: thought,
-            action: action
-          };
-        } else {
-          console.error("ReActController: Zod validation failed:", validationResult.error.flatten());
-          // Fall back to basic parsing without strict validation
-          var _name = actionJSON.name,
-            _parameters = actionJSON.parameters;
-          var _action = {
-            name: _name,
-            params: _parameters || {}
-          };
-          return {
-            thought: thought,
-            action: _action
-          };
-        }
-      } catch (e) {
-        console.error("ReActController: Error parsing JSON or validating schema:", e);
-      }
-
-      // Clean the string to make it more likely to be valid JSON
-      // This is a common issue with LLM-generated JSON.
-      try {
-        var cleanedActionStr = actionStr.replace(/(?<!\\)\\'/g, "'") // Unescape single quotes
-        .replace(/(\w)'(\w)/g, "$1\\'$2") // Handle apostrophes
-        .replace(/,\s*([}\]])/g, "$1"); // Remove trailing commas
-
-        var _actionJSON = JSON.parse(cleanedActionStr);
-
-        // Validate based on the action name
-        var _validationResult;
-        var _actionName = _actionJSON.name;
-        switch (_actionName) {
-          case "create_plan":
-            _validationResult = createPlanSchema.safeParse(_actionJSON);
-            break;
-          case "finish":
-            _validationResult = finishSchema.safeParse(_actionJSON);
-            break;
-          case "escalate_tool_level":
-            _validationResult = escalateSchema.safeParse(_actionJSON);
-            break;
-          default:
-            _validationResult = genericToolSchema.safeParse(_actionJSON);
-            break;
-        }
-        if (_validationResult.success) {
-          var _validationResult$dat2 = _validationResult.data,
-            _name2 = _validationResult$dat2.name,
-            _parameters2 = _validationResult$dat2.parameters;
-          var _action2 = {
-            name: _name2,
-            params: _parameters2 || {}
-          };
-          return {
-            thought: thought,
-            action: _action2
-          };
-        } else {
-          console.error("ReActController: Zod validation failed:", _validationResult.error.flatten());
-          // Fall back to basic parsing without strict validation
-          var _name3 = _actionJSON.name,
-            _parameters3 = _actionJSON.parameters;
-          var _action3 = {
-            name: _name3,
-            params: _parameters3 || {}
-          };
-          return {
-            thought: thought,
-            action: _action3
-          };
-        }
-      } catch (e) {
-        console.error("ReActController: Error parsing JSON from action string:", e, "Raw action string:", actionStr);
+        // Normalize parameters vs params
+        var params = validatedAction.parameters || validatedAction.params || {};
         return {
           thought: thought,
           action: {
-            name: "parse_error",
+            name: validatedAction.name,
+            params: params
+          }
+        };
+      } catch (parseError) {
+        console.error("ReActController: JSON parsing error:", parseError);
+        console.error("ReActController: Raw action string:", actionStr);
+
+        // Try to extract tool name even if JSON is malformed
+        var nameMatch = actionStr.match(/"name"\s*:\s*"([^"]+)"/);
+        var toolName = nameMatch ? nameMatch[1] : "unknown";
+        return {
+          thought: thought,
+          action: {
+            name: "continue",
             params: {
-              raw: actionStr,
-              error: e.message
+              error: "Failed to parse action JSON: ".concat(parseError.message),
+              raw_action: actionStr,
+              attempted_tool: toolName
             }
           }
         };
@@ -125029,82 +124923,23 @@ var ReActController = /*#__PURE__*/function () {
   }, {
     key: "_correctPlanStepTypes",
     value: function () {
-      var _correctPlanStepTypes2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7(plan) {
-        var _this2 = this;
-        var SIMILARITY_THRESHOLD, correctedPlanPromises;
-        return _regenerator().w(function (_context8) {
-          while (1) switch (_context8.n) {
+      var _correctPlanStepTypes2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(plan) {
+        var allowedStepTypes;
+        return _regenerator().w(function (_context7) {
+          while (1) switch (_context7.n) {
             case 0:
-              SIMILARITY_THRESHOLD = 0.6; // Min similarity to be considered 'geospatial'.
-              // This assumes a table 'geospatial_term_embeddings' exists with 'term' and 'embedding' columns.
-              correctedPlanPromises = plan.map(/*#__PURE__*/function () {
-                var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(step) {
-                  var descriptionEmbedding, descriptionEmbeddingString, querySql, result, rows, similarity, _t3;
-                  return _regenerator().w(function (_context7) {
-                    while (1) switch (_context7.n) {
-                      case 0:
-                        if (["data_retrieval", "calculation", "filter", "aggregation"].includes(step.step_type)) {
-                          _context7.n = 1;
-                          break;
-                        }
-                        return _context7.a(2, step);
-                      case 1:
-                        console.log("ReActController: Evaluating step ".concat(step.step, " with step_type '").concat(step.step_type, "' and description: \"").concat(step.description, "\""));
-                        _context7.p = 2;
-                        _context7.n = 3;
-                        return _this2.embeddingManager.generateEmbedding(step.description);
-                      case 3:
-                        descriptionEmbedding = _context7.v;
-                        descriptionEmbeddingString = JSON.stringify(Array.from(descriptionEmbedding)); // Query the geospatial terms database for the most similar term
-                        querySql = "\n        SELECT\n          array_cosine_distance(\n              embedding,\n              CAST('".concat(descriptionEmbeddingString, "' AS DOUBLE[384])\n          ) AS distance\n        FROM\n          tool_registry_db.geospatial_term_embeddings\n        ORDER BY\n          distance ASC\n        LIMIT 1;\n      ");
-                        _context7.n = 4;
-                        return _this2.duckdbConnection.query(querySql);
-                      case 4:
-                        result = _context7.v;
-                        rows = result.toArray();
-                        if (!(rows.length > 0)) {
-                          _context7.n = 7;
-                          break;
-                        }
-                        // Convert distance to similarity for threshold comparison
-                        similarity = 1 - rows[0].distance;
-                        console.log("ReActController: Step ".concat(step.step, " (").concat(step.step_type, ") similarity to geospatial terms: ").concat(similarity.toFixed(4), " (threshold: ").concat(SIMILARITY_THRESHOLD, ")"));
-                        if (!(similarity >= SIMILARITY_THRESHOLD)) {
-                          _context7.n = 5;
-                          break;
-                        }
-                        console.log("ReActController: Correcting step ".concat(step.step, " from '").concat(step.step_type, "' to 'geospatial' based on semantic similarity (").concat(similarity.toFixed(2), ")."));
-                        return _context7.a(2, _objectSpread(_objectSpread({}, step), {}, {
-                          step_type: "geospatial"
-                        }));
-                      case 5:
-                        console.log("ReActController: Step ".concat(step.step, " (").concat(step.step_type, ") similarity ").concat(similarity.toFixed(4), " below threshold, keeping original step_type."));
-                      case 6:
-                        _context7.n = 8;
-                        break;
-                      case 7:
-                        console.log("ReActController: No geospatial terms found in database for step ".concat(step.step, "."));
-                      case 8:
-                        _context7.n = 10;
-                        break;
-                      case 9:
-                        _context7.p = 9;
-                        _t3 = _context7.v;
-                        console.error("ReActController: Could not query geospatial term embeddings. Does the table exist? Error: ".concat(_t3.message));
-                        // If the query fails, just return the original step.
-                        return _context7.a(2, step);
-                      case 10:
-                        return _context7.a(2, step);
-                    }
-                  }, _callee6, null, [[2, 9]]);
-                }));
-                return function (_x6) {
-                  return _ref.apply(this, arguments);
-                };
-              }());
-              return _context8.a(2, Promise.all(correctedPlanPromises));
+              allowedStepTypes = ["geospatial", "aggregation", "filter", "data_retrieval", "calculation", "visualization"];
+              return _context7.a(2, plan.map(function (step) {
+                if (!allowedStepTypes.includes(step.step_type)) {
+                  console.warn("ReActController: Invalid step_type '".concat(step.step_type, "' in step ").concat(step.step, ". Defaulting to 'data_retrieval'."));
+                  return _objectSpread(_objectSpread({}, step), {}, {
+                    step_type: "data_retrieval"
+                  });
+                }
+                return step;
+              }));
           }
-        }, _callee7);
+        }, _callee6);
       }));
       function _correctPlanStepTypes(_x5) {
         return _correctPlanStepTypes2.apply(this, arguments);
@@ -125112,16 +124947,14 @@ var ReActController = /*#__PURE__*/function () {
       return _correctPlanStepTypes;
     }()
     /**
-     * Dispatches an event to update the UI with the current scratchpad content.
+     * Dispatches an event to update the UI with the current scratchpad state.
+     * @private
      */
   }, {
     key: "_dispatchScratchpadUpdate",
     value: function _dispatchScratchpadUpdate() {
-      var thinkingProcess = this.scratchpad.map(function (entry) {
-        return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content, null, 2) : entry.content);
-      }).join("\n\n");
-      this.communicationBus.dispatchEvent("aiThinkingStream", {
-        content: thinkingProcess
+      this.communicationBus.dispatchEvent("scratchpadUpdated", {
+        scratchpad: _toConsumableArray(this.scratchpad)
       });
     }
   }]);
