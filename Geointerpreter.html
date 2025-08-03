@@ -206,10 +206,16 @@
         display: none !important;
       }
 
-      #thinking-process -content {
+      #thinking-process-content {
         font-size: 14px;
         line-height: 1.5;
-        color: #5f6368;
+        color: #333; /* Darker text for better readability */
+        background-color: #f8f9fa; /* Light background for the code area */
+        padding: 1rem;
+        border-radius: 5px;
+        max-height: 400px; /* Set a maximum height */
+        overflow-y: auto;  /* Add a vertical scrollbar when content overflows */
+        white-space: pre-wrap; /* Ensures long lines wrap */
       }
 
       .thinking-header {
