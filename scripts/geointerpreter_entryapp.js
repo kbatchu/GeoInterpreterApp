@@ -120522,17 +120522,21 @@ var ReActController = /*#__PURE__*/function () {
           }
         }
       }
+      var actionStr;
       if (braceCount !== 0) {
-        console.warn("ReActController: Unbalanced braces in Action JSON:", aiResponse);
-        return {
-          thought: thought,
-          action: {
-            name: "continue",
-            params: {}
-          }
-        };
+        console.warn("ReActController: Unbalanced braces in Action JSON, attempting to fix...");
+        // Try to extract what we have and add missing closing braces
+        actionStr = aiResponse.substring(startIndex);
+
+        // Add missing closing braces
+        var missingBraces = braceCount;
+        for (var _i2 = 0; _i2 < missingBraces; _i2++) {
+          actionStr += '}';
+        }
+        console.log("ReActController: Attempted fix by adding closing braces:", actionStr);
+      } else {
+        actionStr = aiResponse.substring(startIndex, endIndex + 1);
       }
-      var actionStr = aiResponse.substring(startIndex, endIndex + 1);
 
       // Clean up common JSON formatting issues
       actionStr = actionStr.replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Remove control characters
