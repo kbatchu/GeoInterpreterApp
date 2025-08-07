@@ -120054,12 +120054,12 @@ var ReActController = /*#__PURE__*/function () {
                         return t.name === action.name;
                       });
                       currentStepType = currentStep ? currentStep.step_type : null;
-                      if (!(currentStepType === "geospatial" && chosenTool && chosenTool.category.toLowerCase() !== "geospatial")) {
+                      if (!(currentStepType === "geospatial" && chosenTool && !["geospatial", "data_retrieval"].includes(chosenTool.category.toLowerCase()))) {
                         _context2.n = 20;
                         break;
                       }
                       console.warn("ReActController: Mismatch detected! Step type is 'geospatial' but chosen tool '".concat(action.name, "' is category '").concat(chosenTool.category, "'."));
-                      _observation2 = "Correction: The current step was labeled 'geospatial', but you chose the tool '".concat(action.name, "' which is a '").concat(chosenTool.category, "' tool. Please reconsider and choose a tool from the 'geospatial' category to achieve the goal: \"").concat(currentGoal, "\"");
+                      _observation2 = "Correction: The current step was labeled 'geospatial', but you chose the tool '".concat(action.name, "' which is a '").concat(chosenTool.category, "' tool. Please reconsider and choose a tool from the 'geospatial' or 'data_retrieval' category to achieve the goal: \"").concat(currentGoal, "\"");
                       _this.scratchpad.push({
                         type: "thought",
                         content: thought
@@ -121309,13 +121309,13 @@ var ToolExecutor = /*#__PURE__*/function () {
           return _ref9.apply(this, arguments);
         };
       }());
-      this.toolRegistry.set('find_places_nearby', /*#__PURE__*/function () {
+      this.toolRegistry.set('reverse_geocode', /*#__PURE__*/function () {
         var _ref0 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee0(params, state) {
           return _regenerator().w(function (_context0) {
             while (1) switch (_context0.n) {
               case 0:
                 _context0.n = 1;
-                return (0,_overpass_tools_js__WEBPACK_IMPORTED_MODULE_0__.findPlacesNearby)(params);
+                return (0,_geocoding_tool_js__WEBPACK_IMPORTED_MODULE_1__.reverseGeocode)(params.latitude, params.longitude);
               case 1:
                 return _context0.a(2, _context0.v);
             }
@@ -121323,6 +121323,22 @@ var ToolExecutor = /*#__PURE__*/function () {
         }));
         return function (_x17, _x18) {
           return _ref0.apply(this, arguments);
+        };
+      }());
+      this.toolRegistry.set('find_places_nearby', /*#__PURE__*/function () {
+        var _ref1 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1(params, state) {
+          return _regenerator().w(function (_context1) {
+            while (1) switch (_context1.n) {
+              case 0:
+                _context1.n = 1;
+                return (0,_overpass_tools_js__WEBPACK_IMPORTED_MODULE_0__.findPlacesNearby)(params);
+              case 1:
+                return _context1.a(2, _context1.v);
+            }
+          }, _callee1);
+        }));
+        return function (_x19, _x20) {
+          return _ref1.apply(this, arguments);
         };
       }());
     }
@@ -121337,27 +121353,27 @@ var ToolExecutor = /*#__PURE__*/function () {
   }, {
     key: "execute",
     value: (function () {
-      var _execute = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1(toolName, params, state) {
+      var _execute = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee10(toolName, params, state) {
         var toolFunction;
-        return _regenerator().w(function (_context1) {
-          while (1) switch (_context1.n) {
+        return _regenerator().w(function (_context10) {
+          while (1) switch (_context10.n) {
             case 0:
               console.log("ToolExecutor: Executing tool '".concat(toolName, "' with params:"), params);
               if (!this.toolRegistry.has(toolName)) {
-                _context1.n = 2;
+                _context10.n = 2;
                 break;
               }
               toolFunction = this.toolRegistry.get(toolName); // Use .call(this, ...) to ensure the tool function has access to `this.dbConnection`.
-              _context1.n = 1;
+              _context10.n = 1;
               return toolFunction.call(this, params, state);
             case 1:
-              return _context1.a(2, _context1.v);
+              return _context10.a(2, _context10.v);
             case 2:
-              return _context1.a(2, "Tool '".concat(toolName, "' not implemented in ToolExecutor."));
+              return _context10.a(2, "Tool '".concat(toolName, "' not implemented in ToolExecutor."));
           }
-        }, _callee1, this);
+        }, _callee10, this);
       }));
-      function execute(_x19, _x20, _x21) {
+      function execute(_x21, _x22, _x23) {
         return _execute.apply(this, arguments);
       }
       return execute;
