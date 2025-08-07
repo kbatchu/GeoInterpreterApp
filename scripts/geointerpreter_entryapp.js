@@ -120601,14 +120601,13 @@ var ReActController = /*#__PURE__*/function () {
         actionStr = aiResponse.substring(startIndex, endIndex + 1);
       }
 
-      // Clean up common JSON formatting issues
+      // Clean up common JSON formatting issues, including trailing commas which LLMs often produce.
       actionStr = actionStr.replace(/[\u0000-\u001F\u007F-\u009F]/g, "") // Remove control characters
-      .replace(/\n/g, " ") // Replace newlines with spaces
-      .replace(/\r/g, "") // Remove carriage returns
-      .replace(/\t/g, " ") // Replace tabs with spaces
-      .replace(/\s+/g, " ") // Collapse multiple spaces
-      .trim();
-      console.log("ReActController: Extracted action string:", actionStr);
+      .replace(/\s+/g, " ") // Collapse all whitespace to single spaces.
+      .replace(/,(\s*[}\]])/g, "$1") // Remove trailing commas before a closing brace or bracket.
+      .trim(); // remove leading/trailing whitespace
+
+      console.log("ReActController: Extracted and cleaned action string:", actionStr);
       try {
         var actionObj = JSON.parse(actionStr);
 
