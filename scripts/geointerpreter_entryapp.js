@@ -119755,6 +119755,8 @@ var ReActController = /*#__PURE__*/function () {
     this.isPlanningMode = false; // Flag for hybrid Plan-and-Execute mode
     this.currentPlanStepIndex = 0; // Tracks current step in active plan
     this.currentToolLevels = [1]; // Tool levels to use: [1] or [2, 3]
+    // ?Level 1: High-level, self-contained tools that directly map to a likely step in an analysis plan (e.g., "get user location," "find coordinates for an address," "find hotspots").
+    // ? Level 3: Granular, primitive functions that act as building blocks when higher-level tools are not specific enough (e.g., your SQL functions like st_area, less_than, count).
 
     // Bind event listeners
     this.communicationBus.addEventListener("userQuerySubmitted", this._handleUserQuery.bind(this));
@@ -120324,6 +120326,8 @@ var ReActController = /*#__PURE__*/function () {
      * @param {Array<number>} [levels=[1, 2, 3]] - The priority levels of tools to search for. 1=highest priority, 3=lowest priority. 1 = High-level tools (decomposable to many granular functions), 2 = Composite tools (decomposable to a few granular functions), 3 = Granular tools (sql functions, non-decomposable)
      * @private
      */
+    // ? Level 1: High-level, self-contained tools that directly map to a likely step in an analysis plan (e.g., "get user location," "find coordinates for an address," "find hotspots").
+    // ? Level 3: Granular, primitive functions that act as building blocks when higher-level tools are not specific enough (e.g., your SQL functions like st_area, less_than, count).
     )
   }, {
     key: "_getRelevantTools",
@@ -120502,7 +120506,7 @@ var ReActController = /*#__PURE__*/function () {
           escapeNext = false;
           continue;
         }
-        if (_char === '\\') {
+        if (_char === "\\") {
           escapeNext = true;
           continue;
         }
@@ -120511,9 +120515,9 @@ var ReActController = /*#__PURE__*/function () {
           continue;
         }
         if (!inString) {
-          if (_char === '{') {
+          if (_char === "{") {
             braceCount++;
-          } else if (_char === '}') {
+          } else if (_char === "}") {
             braceCount--;
             if (braceCount === 0) {
               endIndex = i;
@@ -120531,7 +120535,7 @@ var ReActController = /*#__PURE__*/function () {
         // Add missing closing braces
         var missingBraces = braceCount;
         for (var _i2 = 0; _i2 < missingBraces; _i2++) {
-          actionStr += '}';
+          actionStr += "}";
         }
         console.log("ReActController: Attempted fix by adding closing braces:", actionStr);
       } else {
@@ -120539,11 +120543,11 @@ var ReActController = /*#__PURE__*/function () {
       }
 
       // Clean up common JSON formatting issues
-      actionStr = actionStr.replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Remove control characters
-      .replace(/\n/g, ' ') // Replace newlines with spaces
-      .replace(/\r/g, '') // Remove carriage returns
-      .replace(/\t/g, ' ') // Replace tabs with spaces
-      .replace(/\s+/g, ' ') // Collapse multiple spaces
+      actionStr = actionStr.replace(/[\u0000-\u001F\u007F-\u009F]/g, "") // Remove control characters
+      .replace(/\n/g, " ") // Replace newlines with spaces
+      .replace(/\r/g, "") // Remove carriage returns
+      .replace(/\t/g, " ") // Replace tabs with spaces
+      .replace(/\s+/g, " ") // Collapse multiple spaces
       .trim();
       console.log("ReActController: Extracted action string:", actionStr);
       try {
@@ -120807,6 +120811,270 @@ var StateManager = /*#__PURE__*/function () {
 
 /***/ }),
 
+/***/ "./scripts/modules/tools/geocoding_tool.js":
+/*!*************************************************!*\
+  !*** ./scripts/modules/tools/geocoding_tool.js ***!
+  \*************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   geocodeAddress: () => (/* binding */ geocodeAddress),
+/* harmony export */   reverseGeocode: () => (/* binding */ reverseGeocode)
+/* harmony export */ });
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+// c:\Kiran\Work\GIS\DATAVIZ\GeoInterpreter\scripts\modules\tools\geocoding_tool.js
+
+/**
+ * Geocodes a street address using the Nominatim API.
+ * @param {string} address The street address to geocode.
+ * @returns {Promise<object>} A promise that resolves to an object containing latitude and longitude.
+ */
+function geocodeAddress(_x) {
+  return _geocodeAddress.apply(this, arguments);
+}
+
+/**
+ * Reverse geocodes geographic coordinates to a street address using the Nominatim API.
+ * @param {number} latitude The latitude to reverse geocode.
+ * @param {number} longitude The longitude to reverse geocode.
+ * @returns {Promise<object>} A promise that resolves to an object containing the address string.
+ */
+function _geocodeAddress() {
+  _geocodeAddress = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(address) {
+    var encodedAddress, url, response, data, _t;
+    return _regenerator().w(function (_context) {
+      while (1) switch (_context.n) {
+        case 0:
+          if (!(!address || typeof address !== "string")) {
+            _context.n = 1;
+            break;
+          }
+          return _context.a(2, {
+            error: "Invalid address provided. Please provide a valid street address as a string."
+          });
+        case 1:
+          encodedAddress = encodeURIComponent(address); // Nominatim API Usage Policy requires a custom User-Agent.
+          // See: https://operations.osmfoundation.org/policies/nominatim/
+          url = "https://nominatim.openstreetmap.org/search?q=".concat(encodedAddress, "&format=json&limit=1");
+          _context.p = 2;
+          _context.n = 3;
+          return fetch(url, {
+            headers: {
+              "User-Agent": "GeoInterpreter/1.0 (https://your-app-url.com)" // Replace with your app's info
+            }
+          });
+        case 3:
+          response = _context.v;
+          if (response.ok) {
+            _context.n = 4;
+            break;
+          }
+          return _context.a(2, {
+            error: "Nominatim API request failed with status: ".concat(response.status)
+          });
+        case 4:
+          _context.n = 5;
+          return response.json();
+        case 5:
+          data = _context.v;
+          if (!(data && data.length > 0)) {
+            _context.n = 6;
+            break;
+          }
+          return _context.a(2, {
+            latitude: parseFloat(data[0].lat),
+            longitude: parseFloat(data[0].lon)
+          });
+        case 6:
+          return _context.a(2, {
+            error: "No results found for address: \"".concat(address, "\"")
+          });
+        case 7:
+          _context.n = 9;
+          break;
+        case 8:
+          _context.p = 8;
+          _t = _context.v;
+          console.error("Geocoding error:", _t);
+          return _context.a(2, {
+            error: "An error occurred during geocoding: ".concat(_t.message)
+          });
+        case 9:
+          return _context.a(2);
+      }
+    }, _callee, null, [[2, 8]]);
+  }));
+  return _geocodeAddress.apply(this, arguments);
+}
+function reverseGeocode(_x2, _x3) {
+  return _reverseGeocode.apply(this, arguments);
+}
+function _reverseGeocode() {
+  _reverseGeocode = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(latitude, longitude) {
+    var url, response, data, _t2;
+    return _regenerator().w(function (_context2) {
+      while (1) switch (_context2.n) {
+        case 0:
+          if (!(typeof latitude !== 'number' || typeof longitude !== 'number')) {
+            _context2.n = 1;
+            break;
+          }
+          return _context2.a(2, {
+            error: "Invalid coordinates provided. Please provide valid latitude and longitude as numbers."
+          });
+        case 1:
+          // Nominatim API Usage Policy requires a custom User-Agent.
+          // See: https://operations.osmfoundation.org/policies/nominatim/
+          url = "https://nominatim.openstreetmap.org/reverse?lat=".concat(latitude, "&lon=").concat(longitude, "&format=json");
+          _context2.p = 2;
+          _context2.n = 3;
+          return fetch(url, {
+            headers: {
+              "User-Agent": "GeoInterpreter/1.0 (https://your-app-url.com)" // Replace with your app's info
+            }
+          });
+        case 3:
+          response = _context2.v;
+          if (response.ok) {
+            _context2.n = 4;
+            break;
+          }
+          return _context2.a(2, {
+            error: "Nominatim API request failed with status: ".concat(response.status)
+          });
+        case 4:
+          _context2.n = 5;
+          return response.json();
+        case 5:
+          data = _context2.v;
+          if (!(data && data.display_name)) {
+            _context2.n = 6;
+            break;
+          }
+          return _context2.a(2, {
+            address: data.display_name
+          });
+        case 6:
+          if (!data.error) {
+            _context2.n = 7;
+            break;
+          }
+          return _context2.a(2, {
+            error: "Nominatim API error: ".concat(data.error)
+          });
+        case 7:
+          return _context2.a(2, {
+            error: "No address found for coordinates: lat=".concat(latitude, ", lon=").concat(longitude)
+          });
+        case 8:
+          _context2.n = 10;
+          break;
+        case 9:
+          _context2.p = 9;
+          _t2 = _context2.v;
+          console.error("Reverse geocoding error:", _t2);
+          return _context2.a(2, {
+            error: "An error occurred during reverse geocoding: ".concat(_t2.message)
+          });
+        case 10:
+          return _context2.a(2);
+      }
+    }, _callee2, null, [[2, 9]]);
+  }));
+  return _reverseGeocode.apply(this, arguments);
+}
+
+/***/ }),
+
+/***/ "./scripts/modules/tools/overpass_tools.js":
+/*!*************************************************!*\
+  !*** ./scripts/modules/tools/overpass_tools.js ***!
+  \*************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   findPlacesNearby: () => (/* binding */ findPlacesNearby)
+/* harmony export */ });
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+// c:\Kiran\Work\GIS\DATAVIZ\GeoInterpreter\scripts\modules\tools\overpass_tools.js
+
+/**
+ * Finds places of interest near a given geographic point using the Overpass API.
+ * @param {object} params - The parameters for the search.
+ * @param {number} params.latitude - The latitude of the center point.
+ * @param {number} params.longitude - The longitude of the center point.
+ * @param {string} params.amenity - The type of place to search for (e.g., 'restaurant', 'hospital').
+ * @param {string} [params.cuisine] - Optional cuisine type for restaurants.
+ * @param {number} [params.radius_meters=1000] - The search radius in meters.
+ * @returns {Promise<string>} A promise that resolves to a string summarizing the found places.
+ */
+function findPlacesNearby(_x) {
+  return _findPlacesNearby.apply(this, arguments);
+}
+function _findPlacesNearby() {
+  _findPlacesNearby = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(params) {
+    var latitude, longitude, amenity, cuisine, _params$radius_meters, radius_meters, filters, query, response, data, placeNames, _t;
+    return _regenerator().w(function (_context) {
+      while (1) switch (_context.n) {
+        case 0:
+          latitude = params.latitude, longitude = params.longitude, amenity = params.amenity, cuisine = params.cuisine, _params$radius_meters = params.radius_meters, radius_meters = _params$radius_meters === void 0 ? 1000 : _params$radius_meters;
+          if (!(!latitude || !longitude || !amenity)) {
+            _context.n = 1;
+            break;
+          }
+          return _context.a(2, "Error: Missing required parameters. 'latitude', 'longitude', and 'amenity' are required.");
+        case 1:
+          // Build the Overpass QL query filters
+          filters = "[\"amenity\"=\"".concat(amenity, "\"]");
+          if (cuisine) {
+            filters += "[\"cuisine\"=\"".concat(cuisine, "\"]");
+          }
+          query = "\n    [out:json][timeout:25];\n    (\n      node".concat(filters, "(around:").concat(radius_meters, ",").concat(latitude, ",").concat(longitude, ");\n      way").concat(filters, "(around:").concat(radius_meters, ",").concat(latitude, ",").concat(longitude, ");\n      relation").concat(filters, "(around:").concat(radius_meters, ",").concat(latitude, ",").concat(longitude, ");\n    );\n    out body;\n    >;\n    out skel qt;\n  ");
+          _context.p = 2;
+          _context.n = 3;
+          return fetch("https://overpass-api.de/api/interpreter", {
+            method: "POST",
+            body: query
+          });
+        case 3:
+          response = _context.v;
+          if (response.ok) {
+            _context.n = 4;
+            break;
+          }
+          return _context.a(2, "Error: Overpass API request failed with status ".concat(response.status, "."));
+        case 4:
+          _context.n = 5;
+          return response.json();
+        case 5:
+          data = _context.v;
+          placeNames = data.elements.map(function (el) {
+            return el.tags && el.tags.name;
+          }).filter(Boolean); // Filter out elements without a name
+          return _context.a(2, "Found ".concat(placeNames.length, " places: [").concat(placeNames.join(", "), "]"));
+        case 6:
+          _context.p = 6;
+          _t = _context.v;
+          console.error("Overpass API error:", _t);
+          return _context.a(2, "Error executing Overpass query: ".concat(_t.message));
+      }
+    }, _callee, null, [[2, 6]]);
+  }));
+  return _findPlacesNearby.apply(this, arguments);
+}
+
+/***/ }),
+
 /***/ "./scripts/modules/tools/tool_executor.js":
 /*!************************************************!*\
   !*** ./scripts/modules/tools/tool_executor.js ***!
@@ -120818,7 +121086,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _geolocation_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geolocation.js */ "./scripts/modules/geolocation.js");
+/* harmony import */ var _overpass_tools_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./overpass_tools.js */ "./scripts/modules/tools/overpass_tools.js");
+/* harmony import */ var _geocoding_tool_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geocoding_tool.js */ "./scripts/modules/tools/geocoding_tool.js");
+/* harmony import */ var _geolocation_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geolocation.js */ "./scripts/modules/geolocation.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
 function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
@@ -120830,6 +121100,8 @@ function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), 
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 // c:\Kiran\Work\GIS\DATAVIZ\GeoInterpreter\scripts\modules\tools\tool_executor.js
+
+
 
 
 
@@ -120847,7 +121119,7 @@ var ToolExecutor = /*#__PURE__*/function () {
       throw new Error("ToolExecutor requires a DuckDB connection.");
     }
     this.dbConnection = duckdbConnection;
-    this.geolocation = new _geolocation_js__WEBPACK_IMPORTED_MODULE_0__["default"]();
+    this.geolocation = new _geolocation_js__WEBPACK_IMPORTED_MODULE_2__["default"]();
     this.geolocation.init();
     this.toolRegistry = new Map();
     this._registerTools();
@@ -121021,6 +121293,38 @@ var ToolExecutor = /*#__PURE__*/function () {
           return _ref8.apply(this, arguments);
         };
       }());
+      this.toolRegistry.set('geocode_address', /*#__PURE__*/function () {
+        var _ref9 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee9(params, state) {
+          return _regenerator().w(function (_context9) {
+            while (1) switch (_context9.n) {
+              case 0:
+                _context9.n = 1;
+                return (0,_geocoding_tool_js__WEBPACK_IMPORTED_MODULE_1__.geocodeAddress)(params.address);
+              case 1:
+                return _context9.a(2, _context9.v);
+            }
+          }, _callee9);
+        }));
+        return function (_x15, _x16) {
+          return _ref9.apply(this, arguments);
+        };
+      }());
+      this.toolRegistry.set('find_places_nearby', /*#__PURE__*/function () {
+        var _ref0 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee0(params, state) {
+          return _regenerator().w(function (_context0) {
+            while (1) switch (_context0.n) {
+              case 0:
+                _context0.n = 1;
+                return (0,_overpass_tools_js__WEBPACK_IMPORTED_MODULE_0__.findPlacesNearby)(params);
+              case 1:
+                return _context0.a(2, _context0.v);
+            }
+          }, _callee0);
+        }));
+        return function (_x17, _x18) {
+          return _ref0.apply(this, arguments);
+        };
+      }());
     }
 
     /**
@@ -121033,27 +121337,27 @@ var ToolExecutor = /*#__PURE__*/function () {
   }, {
     key: "execute",
     value: (function () {
-      var _execute = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee9(toolName, params, state) {
+      var _execute = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1(toolName, params, state) {
         var toolFunction;
-        return _regenerator().w(function (_context9) {
-          while (1) switch (_context9.n) {
+        return _regenerator().w(function (_context1) {
+          while (1) switch (_context1.n) {
             case 0:
               console.log("ToolExecutor: Executing tool '".concat(toolName, "' with params:"), params);
               if (!this.toolRegistry.has(toolName)) {
-                _context9.n = 2;
+                _context1.n = 2;
                 break;
               }
               toolFunction = this.toolRegistry.get(toolName); // Use .call(this, ...) to ensure the tool function has access to `this.dbConnection`.
-              _context9.n = 1;
+              _context1.n = 1;
               return toolFunction.call(this, params, state);
             case 1:
-              return _context9.a(2, _context9.v);
+              return _context1.a(2, _context1.v);
             case 2:
-              return _context9.a(2, "Tool '".concat(toolName, "' not implemented in ToolExecutor."));
+              return _context1.a(2, "Tool '".concat(toolName, "' not implemented in ToolExecutor."));
           }
-        }, _callee9, this);
+        }, _callee1, this);
       }));
-      function execute(_x15, _x16, _x17) {
+      function execute(_x19, _x20, _x21) {
         return _execute.apply(this, arguments);
       }
       return execute;
