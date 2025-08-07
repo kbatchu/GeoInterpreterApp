@@ -120461,14 +120461,14 @@ var ReActController = /*#__PURE__*/function () {
       var thoughtMatch = aiResponse.match(/Thought:\s*([^]*?)(?=\s*Action:|$)/);
       var thought = thoughtMatch ? thoughtMatch[1].trim() : "No thought provided.";
 
-      // Updated regex to capture only the first Action block and stop at the next Thought or end
-      var actionMatch = aiResponse.match(/Action:\s*({[^}]*(?:{[^}]*}[^}]*)*})(?=\s*Thought:|$)/);
+      // Find the start of the Action block
+      var actionStartMatch = aiResponse.match(/Action:\s*({)/);
 
       // Fallback for thought if the "Thought:" prefix is missing.
       if (!thoughtMatch) {
         // If there's an action, assume the text before it is the thought.
-        if (actionMatch) {
-          var actionIndex = aiResponse.indexOf(actionMatch[0]);
+        if (actionStartMatch) {
+          var actionIndex = aiResponse.indexOf(actionStartMatch[0]);
           var potentialThought = aiResponse.substring(0, actionIndex).trim();
           if (potentialThought) {
             thought = potentialThought;
@@ -120479,7 +120479,7 @@ var ReActController = /*#__PURE__*/function () {
           thought = aiResponse.trim();
         }
       }
-      if (!actionMatch) {
+      if (!actionStartMatch) {
         console.warn("ReActController: Could not find a valid JSON Action block.", aiResponse);
         return {
           thought: thought,
@@ -120489,7 +120489,34 @@ var ReActController = /*#__PURE__*/function () {
           }
         };
       }
-      var actionStr = actionMatch[1];
+
+      // Extract JSON by counting braces to handle nested structures
+      var startIndex = actionStartMatch.index + actionStartMatch[0].length - 1; // Position of the opening brace
+      var braceCount = 0;
+      var endIndex = startIndex;
+      for (var i = startIndex; i < aiResponse.length; i++) {
+        var _char = aiResponse[i];
+        if (_char === '{') {
+          braceCount++;
+        } else if (_char === '}') {
+          braceCount--;
+          if (braceCount === 0) {
+            endIndex = i;
+            break;
+          }
+        }
+      }
+      if (braceCount !== 0) {
+        console.warn("ReActController: Unbalanced braces in Action JSON:", aiResponse);
+        return {
+          thought: thought,
+          action: {
+            name: "continue",
+            params: {}
+          }
+        };
+      }
+      var actionStr = aiResponse.substring(startIndex, endIndex + 1);
       try {
         // Parse the JSON action
         var actionObj = JSON.parse(actionStr);
