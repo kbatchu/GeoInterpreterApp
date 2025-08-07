@@ -119830,77 +119830,69 @@ var ReActController = /*#__PURE__*/function () {
                       _context2.p = 1;
                       currentGoal = _this.userQuery;
                       currentStep = null; // Will hold the full step object {description, step_type}
-                      if (!(!_this.isPlanningMode && _this.stateManager.getState().activePlan)) {
-                        _context2.n = 3;
-                        break;
+                      if (!_this.isPlanningMode && _this.stateManager.getState().activePlan) {
+                        activePlan = _this.stateManager.getState().activePlan;
+                        if (_this.currentPlanStepIndex < activePlan.steps.length) {
+                          currentStep = activePlan.steps[_this.currentPlanStepIndex];
+                          currentGoal = activePlan.steps[_this.currentPlanStepIndex].description;
+                          _this.stateManager.updateState({
+                            activePlan: _objectSpread(_objectSpread({}, activePlan), {}, {
+                              currentStepIndex: _this.currentPlanStepIndex
+                            })
+                          });
+                          console.log("ReActController: Executing plan step ".concat(_this.currentPlanStepIndex + 1, ": ").concat(currentGoal));
+                        } else {
+                          // All plan steps completed
+                          // All plan steps have been executed. The AI now needs to be prompted to
+                          // synthesize the results from the scratchpad and provide a final answer.
+                          currentGoal = "All plan steps have been executed. Review the scratchpad and provide a final, comprehensive answer to the user's original query: \"".concat(_this.userQuery, "\". Use the 'finish' tool to provide the answer.");
+                          currentStep = null; // No longer tied to a specific step
+                          console.log("ReActController: All planned steps completed. Now generating final answer.");
+                          // Do not break the loop. Let it run one more time for the final answer.
+                        }
                       }
-                      activePlan = _this.stateManager.getState().activePlan;
-                      if (!(_this.currentPlanStepIndex < activePlan.steps.length)) {
-                        _context2.n = 2;
-                        break;
-                      }
-                      currentStep = activePlan.steps[_this.currentPlanStepIndex];
-                      currentGoal = activePlan.steps[_this.currentPlanStepIndex].description;
-                      _this.stateManager.updateState({
-                        activePlan: _objectSpread(_objectSpread({}, activePlan), {}, {
-                          currentStepIndex: _this.currentPlanStepIndex
-                        })
-                      });
-                      console.log("ReActController: Executing plan step ".concat(_this.currentPlanStepIndex + 1, ": ").concat(currentGoal));
-                      _context2.n = 3;
-                      break;
-                    case 2:
-                      // All plan steps completed
-                      finished = true;
-                      _this.stateManager.updateState({
-                        agentStatus: "idle"
-                      });
-                      _this.communicationBus.dispatchEvent("finalAnswerReady", {
-                        answer: "All planned steps have been executed."
-                      });
-                      console.log("ReActController: All planned steps completed.");
-                      return _context2.a(2, 0);
-                    case 3:
-                      _context2.n = 4;
+
+                      // 1. Context Assembly
+                      _context2.n = 2;
                       return _this._assembleContext(currentGoal, currentStep);
-                    case 4:
+                    case 2:
                       _yield$_this$_assembl = _context2.v;
                       messages = _yield$_this$_assembl.messages;
                       availableTools = _yield$_this$_assembl.availableTools;
                       console.log("ReActController: Assembled context for AI invocation:", messages);
 
                       // 2. AI Invocation
-                      _context2.p = 5;
+                      _context2.p = 3;
                       console.log("ReActController: Invoking AI core with messages...");
-                      _context2.n = 6;
+                      _context2.n = 4;
                       return _this.aiCore.chat.completions.create({
                         messages: messages,
                         temperature: 0.1,
                         // A low temperature for more predictable tool usage.
                         max_gen_len: 512 // A reasonable limit for a thought/action response.
                       });
-                    case 6:
+                    case 4:
                       reply = _context2.v;
                       console.log("ReActController: AI core responded. Full reply object:", reply);
                       if (!(reply && reply.choices && reply.choices.length > 0 && reply.choices[0].message)) {
-                        _context2.n = 7;
+                        _context2.n = 5;
                         break;
                       }
                       aiResponse = reply.choices[0].message.content;
                       console.log("ReActController: Extracted AI response content:", aiResponse);
+                      _context2.n = 6;
+                      break;
+                    case 5:
+                      throw new Error("AI response structure is unexpected or empty.");
+                    case 6:
                       _context2.n = 8;
                       break;
                     case 7:
-                      throw new Error("AI response structure is unexpected or empty.");
-                    case 8:
-                      _context2.n = 10;
-                      break;
-                    case 9:
-                      _context2.p = 9;
+                      _context2.p = 7;
                       _t = _context2.v;
                       console.error("ReActController: Error during AI invocation:", _t);
                       throw new Error("AI invocation failed: ".concat(_t.message));
-                    case 10:
+                    case 8:
                       // 3. Response Parsing
                       _this$_parseAIRespons = _this._parseAIResponse(aiResponse), thought = _this$_parseAIRespons.thought, action = _this$_parseAIRespons.action;
                       _this.scratchpad.push({
@@ -119914,7 +119906,7 @@ var ReActController = /*#__PURE__*/function () {
                       // If the AI did not return a valid action, we add an observation to the scratchpad
                       // and let the loop continue, prompting the AI again with the new context.
                       if (!(action.name === "continue")) {
-                        _context2.n = 11;
+                        _context2.n = 9;
                         break;
                       }
                       _this.scratchpad.push({
@@ -119922,19 +119914,19 @@ var ReActController = /*#__PURE__*/function () {
                         content: "No valid action was taken. Please provide an action in the correct format."
                       });
                       // This will cause the loop to run again with the new thought and observation in the scratchpad
-                      return _context2.a(2, 1);
-                    case 11:
+                      return _context2.a(2, 0);
+                    case 9:
                       if (!_this.isPlanningMode) {
-                        _context2.n = 15;
-                        break;
-                      }
-                      if (!(action.name === "create_plan" && action.params.plan)) {
                         _context2.n = 13;
                         break;
                       }
-                      _context2.n = 12;
+                      if (!(action.name === "create_plan" && action.params.plan)) {
+                        _context2.n = 11;
+                        break;
+                      }
+                      _context2.n = 10;
                       return _this._correctPlanStepTypes(action.params.plan);
-                    case 12:
+                    case 10:
                       correctedPlan = _context2.v;
                       // Correct the plan
                       _this.stateManager.updateState({
@@ -119956,16 +119948,16 @@ var ReActController = /*#__PURE__*/function () {
                       console.log("ReActController: Plan created and stored.");
                       console.log("ReActController: Generated Plan:", correctedPlan); // Log corrected plan
                       // Continue to next loop iteration to execute first step
-                      _context2.n = 14;
+                      _context2.n = 12;
+                      break;
+                    case 11:
+                      throw new Error("AI did not return a valid plan in planning mode.");
+                    case 12:
+                      _context2.n = 20;
                       break;
                     case 13:
-                      throw new Error("AI did not return a valid plan in planning mode.");
-                    case 14:
-                      _context2.n = 22;
-                      break;
-                    case 15:
                       if (!(action.name === "finish")) {
-                        _context2.n = 16;
+                        _context2.n = 14;
                         break;
                       }
                       finished = true;
@@ -119986,11 +119978,11 @@ var ReActController = /*#__PURE__*/function () {
                         answer: action.params.answer
                       });
                       console.log("ReActController: AI finished with answer:", action.params.answer);
-                      _context2.n = 22;
+                      _context2.n = 20;
                       break;
-                    case 16:
+                    case 14:
                       if (!(action.name === "escalate_tool_level")) {
-                        _context2.n = 17;
+                        _context2.n = 15;
                         break;
                       }
                       // Handle the AI's request to escalate to more granular tools
@@ -120007,10 +119999,10 @@ var ReActController = /*#__PURE__*/function () {
                       _this._dispatchScratchpadUpdate();
                       console.log("ReActController: Escalating to lower-level tools.");
                       // Do NOT increment plan step index, we are retrying the same step with new tools.
-                      return _context2.a(2, 1);
-                    case 17:
+                      return _context2.a(2, 0);
+                    case 15:
                       if (!(action.name === "ask_user")) {
-                        _context2.n = 18;
+                        _context2.n = 16;
                         break;
                       }
                       _this.scratchpad.push({
@@ -120030,9 +120022,9 @@ var ReActController = /*#__PURE__*/function () {
                       return _context2.a(2, {
                         v: void 0
                       });
-                    case 18:
+                    case 16:
                       if (!(action.name === "parse_error")) {
-                        _context2.n = 19;
+                        _context2.n = 17;
                         break;
                       }
                       _observation = "Parse error occurred. The AI response format was incorrect. Please respond with exactly one Thought and one Action in the specified format. Error: ".concat(action.params.error);
@@ -120047,15 +120039,15 @@ var ReActController = /*#__PURE__*/function () {
                       _this._dispatchScratchpadUpdate();
                       console.log("ReActController: Parse error, prompting AI to correct format.");
                       // Do NOT increment plan step index, we are retrying the same step.
-                      return _context2.a(2, 1);
-                    case 19:
+                      return _context2.a(2, 0);
+                    case 17:
                       // *** NEW: Mismatch Detection Logic ***
                       chosenTool = availableTools.find(function (t) {
                         return t.name === action.name;
                       });
                       currentStepType = currentStep ? currentStep.step_type : null;
                       if (!(currentStepType === "geospatial" && chosenTool && !["geospatial", "data_retrieval"].includes(chosenTool.category.toLowerCase()))) {
-                        _context2.n = 20;
+                        _context2.n = 18;
                         break;
                       }
                       console.warn("ReActController: Mismatch detected! Step type is 'geospatial' but chosen tool '".concat(action.name, "' is category '").concat(chosenTool.category, "'."));
@@ -120074,8 +120066,8 @@ var ReActController = /*#__PURE__*/function () {
                       });
                       _this._dispatchScratchpadUpdate();
                       // Do NOT increment plan step index, we are retrying the same step.
-                      return _context2.a(2, 1);
-                    case 20:
+                      return _context2.a(2, 0);
+                    case 18:
                       // *** END: Mismatch Detection Logic ***
 
                       _this.scratchpad.push({
@@ -120092,10 +120084,10 @@ var ReActController = /*#__PURE__*/function () {
                       });
 
                       // 5. Observation Handling
-                      _context2.n = 21;
+                      _context2.n = 19;
                       return _this.toolExecutor.execute(action.name, action.params, _this.stateManager.getState() // Pass current state to the executor
                       );
-                    case 21:
+                    case 19:
                       _observation3 = _context2.v;
                       // If the tool was not found, do not advance the plan.
                       // The loop will re-run with the failure observation in the scratchpad,
@@ -120118,11 +120110,11 @@ var ReActController = /*#__PURE__*/function () {
                         _this.currentPlanStepIndex++;
                       }
                       _this._dispatchScratchpadUpdate();
-                    case 22:
-                      _context2.n = 24;
+                    case 20:
+                      _context2.n = 22;
                       break;
-                    case 23:
-                      _context2.p = 23;
+                    case 21:
+                      _context2.p = 21;
                       _t2 = _context2.v;
                       console.error("ReActController: Error during ReAct cycle:", _t2);
                       _this.scratchpad.push({
@@ -120140,14 +120132,14 @@ var ReActController = /*#__PURE__*/function () {
                         });
                         finished = true;
                       }
-                    case 24:
+                    case 22:
                       return _context2.a(2);
                   }
-                }, _loop, null, [[5, 9], [1, 23]]);
+                }, _loop, null, [[3, 7], [1, 21]]);
               });
             case 1:
               if (!(!finished && loopCount < MAX_LOOP_ITERATIONS)) {
-                _context3.n = 6;
+                _context3.n = 5;
                 break;
               }
               return _context3.d(_regeneratorValues(_loop()), 2);
@@ -120157,23 +120149,17 @@ var ReActController = /*#__PURE__*/function () {
                 _context3.n = 3;
                 break;
               }
-              return _context3.a(3, 6);
+              return _context3.a(3, 1);
             case 3:
-              if (!(_ret === 1)) {
+              if (!_ret) {
                 _context3.n = 4;
                 break;
               }
-              return _context3.a(3, 1);
-            case 4:
-              if (!_ret) {
-                _context3.n = 5;
-                break;
-              }
               return _context3.a(2, _ret.v);
-            case 5:
+            case 4:
               _context3.n = 1;
               break;
-            case 6:
+            case 5:
               if (!finished) {
                 console.warn("ReActController: Max loop iterations reached without finishing.");
                 this.stateManager.updateState({
@@ -120183,7 +120169,7 @@ var ReActController = /*#__PURE__*/function () {
                   answer: "I could not complete the task within the maximum number of steps."
                 });
               }
-            case 7:
+            case 6:
               return _context3.a(2);
           }
         }, _callee2, this);
