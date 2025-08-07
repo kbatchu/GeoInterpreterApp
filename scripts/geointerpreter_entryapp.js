@@ -120494,15 +120494,31 @@ var ReActController = /*#__PURE__*/function () {
       var startIndex = actionStartMatch.index + actionStartMatch[0].length - 1; // Position of the opening brace
       var braceCount = 0;
       var endIndex = startIndex;
+      var inString = false;
+      var escapeNext = false;
       for (var i = startIndex; i < aiResponse.length; i++) {
         var _char = aiResponse[i];
-        if (_char === '{') {
-          braceCount++;
-        } else if (_char === '}') {
-          braceCount--;
-          if (braceCount === 0) {
-            endIndex = i;
-            break;
+        if (escapeNext) {
+          escapeNext = false;
+          continue;
+        }
+        if (_char === '\\') {
+          escapeNext = true;
+          continue;
+        }
+        if (_char === '"') {
+          inString = !inString;
+          continue;
+        }
+        if (!inString) {
+          if (_char === '{') {
+            braceCount++;
+          } else if (_char === '}') {
+            braceCount--;
+            if (braceCount === 0) {
+              endIndex = i;
+              break;
+            }
           }
         }
       }
@@ -120517,13 +120533,21 @@ var ReActController = /*#__PURE__*/function () {
         };
       }
       var actionStr = aiResponse.substring(startIndex, endIndex + 1);
+
+      // Clean up common JSON formatting issues
+      actionStr = actionStr.replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Remove control characters
+      .replace(/\n/g, ' ') // Replace newlines with spaces
+      .replace(/\r/g, '') // Remove carriage returns
+      .replace(/\t/g, ' ') // Replace tabs with spaces
+      .replace(/\s+/g, ' ') // Collapse multiple spaces
+      .trim();
+      console.log("ReActController: Extracted action string:", actionStr);
       try {
-        // Parse the JSON action
         var actionObj = JSON.parse(actionStr);
 
-        // Validate the structure
+        // Validate the action object structure
         if (!actionObj.name) {
-          console.warn("ReActController: Action missing 'name' field:", actionObj);
+          console.warn("ReActController: Action object missing 'name' property:", actionObj);
           return {
             thought: thought,
             action: {
@@ -120532,25 +120556,29 @@ var ReActController = /*#__PURE__*/function () {
             }
           };
         }
+
+        // Ensure params exists
+        var params = actionObj.parameters || actionObj.params || {};
         return {
           thought: thought,
           action: {
             name: actionObj.name,
-            params: actionObj.parameters || actionObj.params || {}
+            params: params
           }
         };
       } catch (parseError) {
         console.error("ReActController: JSON parsing error:", parseError);
-        console.error("ReActController: Raw action string:", actionStr);
+        console.error("ReActController: Failed to parse action string:", actionStr);
+        console.error("ReActController: Original AI response:", aiResponse);
 
-        // Return a parse error action that includes the problematic response
+        // Return a parse error action that the system can handle
         return {
           thought: thought,
           action: {
             name: "parse_error",
             params: {
-              raw: aiResponse,
-              error: parseError.message
+              error: parseError.message,
+              originalResponse: aiResponse.substring(0, 500) // Truncate for logging
             }
           }
         };
