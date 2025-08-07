@@ -119810,19 +119810,25 @@ var ReActController = /*#__PURE__*/function () {
     value: (function () {
       var _run = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
         var _this = this;
-        var finished, loopCount, MAX_LOOP_ITERATIONS, _loop, _ret;
+        var finished, loopCount, MAX_LOOP_ITERATIONS, REPETITION_LIMIT, lastActionHistory, _loop, _ret, reason, finalMessage;
         return _regenerator().w(function (_context3) {
           while (1) switch (_context3.n) {
             case 0:
               finished = false;
               loopCount = 0;
-              MAX_LOOP_ITERATIONS = 10; // Prevent infinite loops
+              MAX_LOOP_ITERATIONS = 25; // Increased to allow for more complex reasoning and recovery.
+              REPETITION_LIMIT = 3; // Number of times the same action can be repeated before halting.
+              lastActionHistory = []; // Tracks the last few actions to detect loops.
               _loop = /*#__PURE__*/_regenerator().m(function _loop() {
-                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, correctedPlan, currentState, observation, _observation, chosenTool, currentStepType, _observation2, _observation3, _t, _t2;
+                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, correctedPlan, currentState, observation, _observation, chosenTool, currentStepType, _observation2, _observation3, _t, _t2;
                 return _regenerator().w(function (_context2) {
                   while (1) switch (_context2.n) {
                     case 0:
                       loopCount++;
+                      _this.communicationBus.dispatchEvent('agentLoopUpdate', {
+                        loopCount: loopCount,
+                        maxLoops: MAX_LOOP_ITERATIONS
+                      });
                       _this.stateManager.updateState({
                         agentStatus: "thinking"
                       });
@@ -119903,10 +119909,47 @@ var ReActController = /*#__PURE__*/function () {
                       _this._dispatchScratchpadUpdate();
                       console.log("ReActController: AI Action:", action);
 
-                      // If the AI did not return a valid action, we add an observation to the scratchpad
-                      // and let the loop continue, prompting the AI again with the new context.
-                      if (!(action.name === "continue")) {
+                      // *** Repetition Detection Logic ***
+                      // Check if the agent is stuck repeating the same action.
+                      if (!(action.name !== 'continue' && action.name !== 'parse_error')) {
+                        _context2.n = 10;
+                        break;
+                      }
+                      actionSignature = JSON.stringify({
+                        name: action.name,
+                        params: action.params
+                      });
+                      lastActionHistory.push(actionSignature);
+                      if (lastActionHistory.length > REPETITION_LIMIT) {
+                        lastActionHistory.shift(); // Keep history size limited
+                      }
+
+                      // Check if the last `REPETITION_LIMIT` actions are all identical
+                      if (!(lastActionHistory.length === REPETITION_LIMIT && new Set(lastActionHistory).size === 1)) {
                         _context2.n = 9;
+                        break;
+                      }
+                      errorMsg = "Error: The agent appears to be stuck in a loop, repeating the action '".concat(action.name, "'. Halting execution to prevent further issues.");
+                      console.error("ReActController: ".concat(errorMsg));
+                      _this.scratchpad.push({
+                        type: "observation",
+                        content: errorMsg
+                      });
+                      _this._dispatchScratchpadUpdate();
+                      _this.communicationBus.dispatchEvent("finalAnswerReady", {
+                        answer: errorMsg
+                      });
+                      finished = true;
+                      return _context2.a(2, 0);
+                    case 9:
+                      _context2.n = 11;
+                      break;
+                    case 10:
+                      // Reset history on non-tool or error actions to not penalize recovery attempts
+                      lastActionHistory = [];
+                    case 11:
+                      if (!(action.name === "continue")) {
+                        _context2.n = 12;
                         break;
                       }
                       _this.scratchpad.push({
@@ -119915,18 +119958,18 @@ var ReActController = /*#__PURE__*/function () {
                       });
                       // This will cause the loop to run again with the new thought and observation in the scratchpad
                       return _context2.a(2, 0);
-                    case 9:
+                    case 12:
                       if (!_this.isPlanningMode) {
-                        _context2.n = 13;
+                        _context2.n = 16;
                         break;
                       }
                       if (!(action.name === "create_plan" && action.params.plan)) {
-                        _context2.n = 11;
+                        _context2.n = 14;
                         break;
                       }
-                      _context2.n = 10;
+                      _context2.n = 13;
                       return _this._correctPlanStepTypes(action.params.plan);
-                    case 10:
+                    case 13:
                       correctedPlan = _context2.v;
                       // Correct the plan
                       _this.stateManager.updateState({
@@ -119948,16 +119991,16 @@ var ReActController = /*#__PURE__*/function () {
                       console.log("ReActController: Plan created and stored.");
                       console.log("ReActController: Generated Plan:", correctedPlan); // Log corrected plan
                       // Continue to next loop iteration to execute first step
-                      _context2.n = 12;
+                      _context2.n = 15;
                       break;
-                    case 11:
+                    case 14:
                       throw new Error("AI did not return a valid plan in planning mode.");
-                    case 12:
-                      _context2.n = 20;
+                    case 15:
+                      _context2.n = 23;
                       break;
-                    case 13:
+                    case 16:
                       if (!(action.name === "finish")) {
-                        _context2.n = 14;
+                        _context2.n = 17;
                         break;
                       }
                       finished = true;
@@ -119978,11 +120021,11 @@ var ReActController = /*#__PURE__*/function () {
                         answer: action.params.answer
                       });
                       console.log("ReActController: AI finished with answer:", action.params.answer);
-                      _context2.n = 20;
+                      _context2.n = 23;
                       break;
-                    case 14:
+                    case 17:
                       if (!(action.name === "escalate_tool_level")) {
-                        _context2.n = 15;
+                        _context2.n = 18;
                         break;
                       }
                       // Handle the AI's request to escalate to more granular tools
@@ -120000,9 +120043,9 @@ var ReActController = /*#__PURE__*/function () {
                       console.log("ReActController: Escalating to lower-level tools.");
                       // Do NOT increment plan step index, we are retrying the same step with new tools.
                       return _context2.a(2, 0);
-                    case 15:
+                    case 18:
                       if (!(action.name === "ask_user")) {
-                        _context2.n = 16;
+                        _context2.n = 19;
                         break;
                       }
                       _this.scratchpad.push({
@@ -120022,9 +120065,9 @@ var ReActController = /*#__PURE__*/function () {
                       return _context2.a(2, {
                         v: void 0
                       });
-                    case 16:
+                    case 19:
                       if (!(action.name === "parse_error")) {
-                        _context2.n = 17;
+                        _context2.n = 20;
                         break;
                       }
                       _observation = "Parse error occurred. The AI response format was incorrect. Please respond with exactly one Thought and one Action in the specified format. Error: ".concat(action.params.error);
@@ -120040,14 +120083,14 @@ var ReActController = /*#__PURE__*/function () {
                       console.log("ReActController: Parse error, prompting AI to correct format.");
                       // Do NOT increment plan step index, we are retrying the same step.
                       return _context2.a(2, 0);
-                    case 17:
+                    case 20:
                       // *** NEW: Mismatch Detection Logic ***
                       chosenTool = availableTools.find(function (t) {
                         return t.name === action.name;
                       });
                       currentStepType = currentStep ? currentStep.step_type : null;
                       if (!(currentStepType === "geospatial" && chosenTool && !["geospatial", "data_retrieval"].includes(chosenTool.category.toLowerCase()))) {
-                        _context2.n = 18;
+                        _context2.n = 21;
                         break;
                       }
                       console.warn("ReActController: Mismatch detected! Step type is 'geospatial' but chosen tool '".concat(action.name, "' is category '").concat(chosenTool.category, "'."));
@@ -120067,7 +120110,7 @@ var ReActController = /*#__PURE__*/function () {
                       _this._dispatchScratchpadUpdate();
                       // Do NOT increment plan step index, we are retrying the same step.
                       return _context2.a(2, 0);
-                    case 18:
+                    case 21:
                       // *** END: Mismatch Detection Logic ***
 
                       _this.scratchpad.push({
@@ -120084,10 +120127,10 @@ var ReActController = /*#__PURE__*/function () {
                       });
 
                       // 5. Observation Handling
-                      _context2.n = 19;
+                      _context2.n = 22;
                       return _this.toolExecutor.execute(action.name, action.params, _this.stateManager.getState() // Pass current state to the executor
                       );
-                    case 19:
+                    case 22:
                       _observation3 = _context2.v;
                       // If the tool was not found, do not advance the plan.
                       // The loop will re-run with the failure observation in the scratchpad,
@@ -120110,11 +120153,11 @@ var ReActController = /*#__PURE__*/function () {
                         _this.currentPlanStepIndex++;
                       }
                       _this._dispatchScratchpadUpdate();
-                    case 20:
-                      _context2.n = 22;
+                    case 23:
+                      _context2.n = 25;
                       break;
-                    case 21:
-                      _context2.p = 21;
+                    case 24:
+                      _context2.p = 24;
                       _t2 = _context2.v;
                       console.error("ReActController: Error during ReAct cycle:", _t2);
                       _this.scratchpad.push({
@@ -120132,10 +120175,10 @@ var ReActController = /*#__PURE__*/function () {
                         });
                         finished = true;
                       }
-                    case 22:
+                    case 25:
                       return _context2.a(2);
                   }
-                }, _loop, null, [[3, 7], [1, 21]]);
+                }, _loop, null, [[3, 7], [1, 24]]);
               });
             case 1:
               if (!(!finished && loopCount < MAX_LOOP_ITERATIONS)) {
@@ -120161,12 +120204,14 @@ var ReActController = /*#__PURE__*/function () {
               break;
             case 5:
               if (!finished) {
-                console.warn("ReActController: Max loop iterations reached without finishing.");
+                reason = loopCount >= MAX_LOOP_ITERATIONS ? "the maximum number of steps" : "an unrecoverable state";
+                finalMessage = "I could not complete the task within ".concat(reason, ".");
+                console.warn("ReActController: Task ended without finishing. Reason: ".concat(reason, "."));
                 this.stateManager.updateState({
                   agentStatus: "idle"
                 });
                 this.communicationBus.dispatchEvent("finalAnswerReady", {
-                  answer: "I could not complete the task within the maximum number of steps."
+                  answer: finalMessage
                 });
               }
             case 6:
