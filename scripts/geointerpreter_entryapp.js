@@ -120279,7 +120279,9 @@ var ReActController = /*#__PURE__*/function () {
               messages = [];
               if (this.isPlanningMode) {
                 systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your primary goal is to help the user by breaking down complex requests into a logical, step-by-step plan.\n\n## RESPONSE FORMAT\nYou MUST respond in the following format, with no other text before or after. Your entire response must start with \"Thought:\".\n\nThought: [Your reasoning for the plan you are about to create.]\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"...\", \"step_type\": \"...\" }, ... ] } }\n\n## PLAN REQUIREMENTS\n- Each step in the plan should be a discrete, self-contained analytical task.\n- For each step, you must provide a 'step_type' from this exact list: [geospatial, aggregation, filter, data_retrieval, calculation, visualization].";
-                userPrompt = "You have access to a special tool called `create_plan`. Use this tool to output your plan as a JSON array of steps inside the 'plan' parameter.\n\nHere is the user's request:\n".concat(this.userQuery, "\n\nThought:");
+                userPrompt = "You have access to a special tool called `create_plan`. Use this tool to output your plan as a JSON array of steps inside the 'plan' parameter.\n\nHere is the user's request:\n".concat(this.userQuery, "\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
+                  return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
+                }).join("\n"), "\n\nThought:");
                 messages.push({
                   role: "system",
                   content: systemPrompt
