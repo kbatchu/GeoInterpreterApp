@@ -119820,7 +119820,7 @@ var ReActController = /*#__PURE__*/function () {
               REPETITION_LIMIT = 3; // Number of times the same action can be repeated before halting.
               lastActionHistory = []; // Tracks the last few actions to detect loops.
               _loop = /*#__PURE__*/_regenerator().m(function _loop() {
-                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, correctedPlan, currentState, observation, _observation, chosenTool, currentStepType, _observation2, _observation3, _t, _t2;
+                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, correctedPlan, currentState, observation, _currentState, _observation, chosenTool, currentStepType, _observation2, _observation3, _t, _t2;
                 return _regenerator().w(function (_context2) {
                   while (1) switch (_context2.n) {
                     case 0:
@@ -120053,8 +120053,15 @@ var ReActController = /*#__PURE__*/function () {
                         content: action
                       });
                       _this._dispatchScratchpadUpdate();
+                      _currentState = _this.stateManager.getState();
                       _this.stateManager.updateState({
-                        agentStatus: "waiting_for_user"
+                        agentStatus: "waiting_for_user",
+                        conversationHistory: [].concat(_toConsumableArray(_currentState.conversationHistory), [
+                        // Add the AI's question to the main chat history
+                        {
+                          role: "assistant",
+                          content: action.params.question
+                        }])
                       });
                       _this.communicationBus.dispatchEvent("promptUserForInput", {
                         question: action.params.question,
@@ -120234,14 +120241,13 @@ var ReActController = /*#__PURE__*/function () {
     key: "_handleUserInput",
     value: (function () {
       var _handleUserInput2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(event) {
-        var userResponse;
+        var userResponse, currentState;
         return _regenerator().w(function (_context4) {
           while (1) switch (_context4.n) {
             case 0:
               userResponse = event.detail.response;
               console.log("ReActController: Received user input:", userResponse);
-
-              // Add the user's response to the scratchpad as an observation
+              currentState = this.stateManager.getState(); // Add the user's response to the scratchpad as an observation
               this.scratchpad.push({
                 type: "observation",
                 content: "User provided the following information: \"".concat(userResponse, "\"")
@@ -120250,7 +120256,12 @@ var ReActController = /*#__PURE__*/function () {
 
               // The agent is no longer waiting, it's thinking about the new info
               this.stateManager.updateState({
-                agentStatus: "thinking"
+                agentStatus: "thinking",
+                // Add the user's answer to the main chat history
+                conversationHistory: [].concat(_toConsumableArray(currentState.conversationHistory), [{
+                  role: "user",
+                  content: userResponse
+                }])
               });
 
               // Resume the execution loop
@@ -120324,7 +120335,7 @@ var ReActController = /*#__PURE__*/function () {
                   content: userPrompt
                 });
               } else {
-                _systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by executing a pre-defined plan ONE STEP AT A TIME.\n\n## CRITICAL: RESPONSE FORMAT\nYou MUST respond with EXACTLY ONE Thought and ONE Action. Your entire response must follow this exact format:\n\nThought: [Your reasoning about the current step, what tool to use, and why]\nAction: { \"name\": \"tool_name\", \"parameters\": { \"param1\": \"value1\" } }\n\n## CRITICAL THINKING & ADAPTATION\n1.  **Analyze the last Observation:** Before deciding your next action, you MUST carefully analyze the most recent Observation in the scratchpad.\n2.  **Assess Success:** Did the last action succeed? Did it return the expected information? For example, if you searched for something, did the observation indicate that items were found?\n3.  **Adapt Your Plan:**\n    - If the observation is unexpected (e.g., \"Found 0 places\", an error message, or \"Tool not implemented\"), DO NOT blindly proceed with the original plan.\n    - Your 'Thought' must explain how you are adapting to the new information.\n    - Your next 'Action' should be a direct attempt to recover. For example:\n        - **If you get \"Found 0 places\":** Your thought must be to expand the search. Your action should be to call the *same tool* but with a *larger search radius*. Look at the previous action in the scratchpad to see what the last radius was and increase it significantly (e.g., double it).\n        - **If a tool is not implemented:** Your thought must be to try a different, more suitable tool from the available list to achieve the same goal.\n        - **If you are truly stuck:** Use the 'ask_user' tool for clarification.\n    - Only if the last observation was successful and expected should you proceed to the next step of the plan.\n\n## AVAILABLE ACTIONS\n- Use one of the provided tools.\n- Use the 'finish(answer=...)' tool when you have the final answer.\n- Use the 'escalate_tool_level' tool if the current tools are insufficient.\n- Use the 'ask_user' tool if you need clarification from the user.";
+                _systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by executing a pre-defined plan ONE STEP AT A TIME.\n\n## CRITICAL: RESPONSE FORMAT\nYou MUST respond with EXACTLY ONE Thought and ONE Action. Your entire response must follow this exact format:\n\nThought: [Your reasoning about the current step, what tool to use, and why]\nAction: { \"name\": \"tool_name\", \"parameters\": { \"param1\": \"value1\" } }\n\n## CRITICAL THINKING & ADAPTATION\n1.  **Analyze the last Observation:** Before deciding your next action, you MUST carefully analyze the most recent Observation in the scratchpad.\n2.  **Assess Success:** Did the last action succeed? Did it return the expected information? For example, if you searched for something, did the observation indicate that items were found?\n3.  **Adapt Your Plan:**\n    - If the observation is unexpected (e.g., \"Found 0 places\", an error message, or \"Tool not implemented\"), DO NOT blindly proceed with the original plan.\n    - Your 'Thought' must explain how you are adapting to the new information.\n    - Your next 'Action' should be a direct attempt to recover.\n        - **If you get \"Found 0 places\":** Your primary strategy is to expand the search. You should *repeatedly* call the same tool with a larger search radius. Look at the previous action in the scratchpad to see what the last radius was and increase it significantly (e.g., double it). Only after several failed attempts with an expanded radius should you consider a different strategy like using the 'ask_user' tool.\n        - **If a tool is not implemented:** Your thought must be to try a different, more suitable tool from the available list to achieve the same goal.\n        - **If you are truly stuck on a step for other reasons:** Use the 'ask_user' tool for clarification.\n    - Only if the last observation was successful and expected should you proceed to the next step of the plan.\n\n## AVAILABLE ACTIONS\n- Use one of the provided tools.\n- Use the 'finish(answer=...)' tool when you have the final answer.\n- Use the 'escalate_tool_level' tool if the current tools are insufficient.\n- Use the 'ask_user' tool if you need clarification from the user.";
                 _userPrompt = "You have access to the following tools to help you. Select ONE tool to achieve the current goal.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(availableTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is the current goal:\n").concat(currentGoal, "\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
                   return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
                 }).join("\n"), "\n\nThought:");
