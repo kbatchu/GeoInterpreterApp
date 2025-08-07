@@ -120586,17 +120586,22 @@ var ReActController = /*#__PURE__*/function () {
         }
       }
       var actionStr;
-      if (braceCount !== 0) {
-        console.warn("ReActController: Unbalanced braces in Action JSON, attempting to fix...");
-        // Try to extract what we have and add missing closing braces
+      if (braceCount !== 0 || inString) {
+        console.warn("ReActController: Unbalanced braces or unterminated string in Action JSON, attempting to fix...");
+        // Try to extract what we have and add missing closing characters
         actionStr = aiResponse.substring(startIndex);
+
+        // If a string is still open, close it before adding braces.
+        if (inString) {
+          actionStr += '"';
+        }
 
         // Add missing closing braces
         var missingBraces = braceCount;
         for (var _i2 = 0; _i2 < missingBraces; _i2++) {
           actionStr += "}";
         }
-        console.log("ReActController: Attempted fix by adding closing braces:", actionStr);
+        console.log("ReActController: Attempted fix by adding closing characters:", actionStr);
       } else {
         actionStr = aiResponse.substring(startIndex, endIndex + 1);
       }
