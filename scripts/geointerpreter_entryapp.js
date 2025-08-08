@@ -120909,7 +120909,7 @@ function geocodeAddress(_x) {
  */
 function _geocodeAddress() {
   _geocodeAddress = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(address) {
-    var encodedAddress, url, response, data, _t;
+    var sanitizedAddress, encodedAddress, url, response, data, _t;
     return _regenerator().w(function (_context) {
       while (1) switch (_context.n) {
         case 0:
@@ -120921,7 +120921,10 @@ function _geocodeAddress() {
             error: "Invalid address provided. Please provide a valid street address as a string."
           });
         case 1:
-          encodedAddress = encodeURIComponent(address); // Nominatim API Usage Policy requires a custom User-Agent.
+          // Sanitize the address string for better geocoding results with Nominatim.
+          // e.g., "GA-30024" becomes "GA 30024", which Nominatim handles correctly.
+          sanitizedAddress = address.replace(/-/g, ' ');
+          encodedAddress = encodeURIComponent(sanitizedAddress); // Nominatim API Usage Policy requires a custom User-Agent.
           // See: https://operations.osmfoundation.org/policies/nominatim/
           url = "https://nominatim.openstreetmap.org/search?q=".concat(encodedAddress, "&format=json&limit=1");
           _context.p = 2;
