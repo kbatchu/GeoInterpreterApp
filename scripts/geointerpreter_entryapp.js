@@ -120891,13 +120891,63 @@ function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { 
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
 // c:\Kiran\Work\GIS\DATAVIZ\GeoInterpreter\scripts\modules\tools\geocoding_tool.js
-
+/**
+ * Helper function to perform a search against the Nominatim API.
+ * @param {string} query The search query.
+ * @returns {Promise<object[]|null>} A promise that resolves to an array of results or null on error.
+ * @private
+ */
+function _nominatimSearch(_x) {
+  return _nominatimSearch2.apply(this, arguments);
+}
 /**
  * Geocodes a street address using the Nominatim API.
+ * It attempts to find the address, and if it fails, it retries with a less specific query (without the house number).
  * @param {string} address The street address to geocode.
- * @returns {Promise<object>} A promise that resolves to an object containing latitude and longitude.
+ * @returns {Promise<object>} A promise that resolves to an object containing latitude and longitude, or an error.
  */
-function geocodeAddress(_x) {
+function _nominatimSearch2() {
+  _nominatimSearch2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(query) {
+    var encodedQuery, url, response, _t;
+    return _regenerator().w(function (_context) {
+      while (1) switch (_context.n) {
+        case 0:
+          encodedQuery = encodeURIComponent(query);
+          url = "https://nominatim.openstreetmap.org/search?q=".concat(encodedQuery, "&format=json&limit=1");
+          console.log("Geocoding: Querying Nominatim with URL: ".concat(url));
+          _context.p = 1;
+          _context.n = 2;
+          return fetch(url, {
+            headers: {
+              // Nominatim API Usage Policy requires a custom User-Agent.
+              // See: https://operations.osmfoundation.org/policies/nominatim/
+              "User-Agent": "GeoInterpreter/1.0 (https://github.com/your-repo/your-app)" // It's good practice to link to a project page.
+            }
+          });
+        case 2:
+          response = _context.v;
+          if (response.ok) {
+            _context.n = 3;
+            break;
+          }
+          console.error("Nominatim API request failed for query \"".concat(query, "\" with status: ").concat(response.status));
+          return _context.a(2, null);
+        case 3:
+          _context.n = 4;
+          return response.json();
+        case 4:
+          return _context.a(2, _context.v);
+        case 5:
+          _context.p = 5;
+          _t = _context.v;
+          console.error("An error occurred during Nominatim search for query \"".concat(query, "\":"), _t);
+          return _context.a(2, null);
+      }
+    }, _callee, null, [[1, 5]]);
+  }));
+  return _nominatimSearch2.apply(this, arguments);
+}
+function geocodeAddress(_x2) {
   return _geocodeAddress.apply(this, arguments);
 }
 
@@ -120908,149 +120958,136 @@ function geocodeAddress(_x) {
  * @returns {Promise<object>} A promise that resolves to an object containing the address string.
  */
 function _geocodeAddress() {
-  _geocodeAddress = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(address) {
-    var sanitizedAddress, encodedAddress, url, response, data, _t;
-    return _regenerator().w(function (_context) {
-      while (1) switch (_context.n) {
-        case 0:
-          if (!(!address || typeof address !== "string")) {
-            _context.n = 1;
-            break;
-          }
-          return _context.a(2, {
-            error: "Invalid address provided. Please provide a valid street address as a string."
-          });
-        case 1:
-          // Sanitize the address string for better geocoding results with Nominatim.
-          // e.g., "GA-30024" becomes "GA 30024", which Nominatim handles correctly.
-          sanitizedAddress = address.replace(/-/g, ' ');
-          encodedAddress = encodeURIComponent(sanitizedAddress); // Nominatim API Usage Policy requires a custom User-Agent.
-          // See: https://operations.osmfoundation.org/policies/nominatim/
-          url = "https://nominatim.openstreetmap.org/search?q=".concat(encodedAddress, "&format=json&limit=1");
-          _context.p = 2;
-          _context.n = 3;
-          return fetch(url, {
-            headers: {
-              "User-Agent": "GeoInterpreter/1.0 (https://your-app-url.com)" // Replace with your app's info
-            }
-          });
-        case 3:
-          response = _context.v;
-          if (response.ok) {
-            _context.n = 4;
-            break;
-          }
-          return _context.a(2, {
-            error: "Nominatim API request failed with status: ".concat(response.status)
-          });
-        case 4:
-          _context.n = 5;
-          return response.json();
-        case 5:
-          data = _context.v;
-          if (!(data && data.length > 0)) {
-            _context.n = 6;
-            break;
-          }
-          return _context.a(2, {
-            latitude: parseFloat(data[0].lat),
-            longitude: parseFloat(data[0].lon)
-          });
-        case 6:
-          return _context.a(2, {
-            error: "No results found for address: \"".concat(address, "\"")
-          });
-        case 7:
-          _context.n = 9;
-          break;
-        case 8:
-          _context.p = 8;
-          _t = _context.v;
-          console.error("Geocoding error:", _t);
-          return _context.a(2, {
-            error: "An error occurred during geocoding: ".concat(_t.message)
-          });
-        case 9:
-          return _context.a(2);
-      }
-    }, _callee, null, [[2, 8]]);
-  }));
-  return _geocodeAddress.apply(this, arguments);
-}
-function reverseGeocode(_x2, _x3) {
-  return _reverseGeocode.apply(this, arguments);
-}
-function _reverseGeocode() {
-  _reverseGeocode = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(latitude, longitude) {
-    var url, response, data, _t2;
+  _geocodeAddress = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(address) {
+    var sanitizedAddress, data, addressWithoutNumber;
     return _regenerator().w(function (_context2) {
       while (1) switch (_context2.n) {
         case 0:
-          if (!(typeof latitude !== 'number' || typeof longitude !== 'number')) {
+          if (!(!address || typeof address !== "string")) {
             _context2.n = 1;
             break;
           }
           return _context2.a(2, {
+            error: "Invalid address provided. Please provide a valid street address as a string."
+          });
+        case 1:
+          sanitizedAddress = address.replace(/-/g, ' '); // --- Attempt 1: Use the full address ---
+          _context2.n = 2;
+          return _nominatimSearch(sanitizedAddress);
+        case 2:
+          data = _context2.v;
+          if (!(!data || data.length === 0)) {
+            _context2.n = 4;
+            break;
+          }
+          console.warn("Geocoding failed for full address: \"".concat(sanitizedAddress, "\". Retrying without house number."));
+          // This regex removes a sequence of digits at the start of the string, plus any following whitespace.
+          addressWithoutNumber = sanitizedAddress.replace(/^\d+\s+/, ''); // Only retry if the address actually changed (i.e., it had a house number)
+          if (!(addressWithoutNumber !== sanitizedAddress)) {
+            _context2.n = 4;
+            break;
+          }
+          _context2.n = 3;
+          return _nominatimSearch(addressWithoutNumber);
+        case 3:
+          data = _context2.v;
+        case 4:
+          if (!(data && data.length > 0)) {
+            _context2.n = 5;
+            break;
+          }
+          console.log("Geocoding successful for \"".concat(address, "\". Found: ").concat(data[0].display_name));
+          return _context2.a(2, {
+            latitude: parseFloat(data[0].lat),
+            longitude: parseFloat(data[0].lon)
+          });
+        case 5:
+          // If all attempts fail, return the error.
+          console.error("Geocoding failed for all attempts for address: \"".concat(address, "\""));
+          return _context2.a(2, {
+            error: "No results found for address: \"".concat(address, "\"")
+          });
+        case 6:
+          return _context2.a(2);
+      }
+    }, _callee2);
+  }));
+  return _geocodeAddress.apply(this, arguments);
+}
+function reverseGeocode(_x3, _x4) {
+  return _reverseGeocode.apply(this, arguments);
+}
+function _reverseGeocode() {
+  _reverseGeocode = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(latitude, longitude) {
+    var url, response, data, _t2;
+    return _regenerator().w(function (_context3) {
+      while (1) switch (_context3.n) {
+        case 0:
+          if (!(typeof latitude !== 'number' || typeof longitude !== 'number')) {
+            _context3.n = 1;
+            break;
+          }
+          return _context3.a(2, {
             error: "Invalid coordinates provided. Please provide valid latitude and longitude as numbers."
           });
         case 1:
           // Nominatim API Usage Policy requires a custom User-Agent.
           // See: https://operations.osmfoundation.org/policies/nominatim/
           url = "https://nominatim.openstreetmap.org/reverse?lat=".concat(latitude, "&lon=").concat(longitude, "&format=json");
-          _context2.p = 2;
-          _context2.n = 3;
+          _context3.p = 2;
+          _context3.n = 3;
           return fetch(url, {
             headers: {
-              "User-Agent": "GeoInterpreter/1.0 (https://your-app-url.com)" // Replace with your app's info
+              "User-Agent": "GeoInterpreter/1.0 (https://github.com/your-repo/your-app)" // Replace with your app's info
             }
           });
         case 3:
-          response = _context2.v;
+          response = _context3.v;
           if (response.ok) {
-            _context2.n = 4;
+            _context3.n = 4;
             break;
           }
-          return _context2.a(2, {
+          return _context3.a(2, {
             error: "Nominatim API request failed with status: ".concat(response.status)
           });
         case 4:
-          _context2.n = 5;
+          _context3.n = 5;
           return response.json();
         case 5:
-          data = _context2.v;
+          data = _context3.v;
           if (!(data && data.display_name)) {
-            _context2.n = 6;
+            _context3.n = 6;
             break;
           }
-          return _context2.a(2, {
+          return _context3.a(2, {
             address: data.display_name
           });
         case 6:
           if (!data.error) {
-            _context2.n = 7;
+            _context3.n = 7;
             break;
           }
-          return _context2.a(2, {
+          return _context3.a(2, {
             error: "Nominatim API error: ".concat(data.error)
           });
         case 7:
-          return _context2.a(2, {
+          return _context3.a(2, {
             error: "No address found for coordinates: lat=".concat(latitude, ", lon=").concat(longitude)
           });
         case 8:
-          _context2.n = 10;
+          _context3.n = 10;
           break;
         case 9:
-          _context2.p = 9;
-          _t2 = _context2.v;
+          _context3.p = 9;
+          _t2 = _context3.v;
           console.error("Reverse geocoding error:", _t2);
-          return _context2.a(2, {
+          return _context3.a(2, {
             error: "An error occurred during reverse geocoding: ".concat(_t2.message)
           });
         case 10:
-          return _context2.a(2);
+          return _context3.a(2);
       }
-    }, _callee2, null, [[2, 9]]);
+    }, _callee3, null, [[2, 9]]);
   }));
   return _reverseGeocode.apply(this, arguments);
 }
