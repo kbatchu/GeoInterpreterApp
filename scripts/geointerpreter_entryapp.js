@@ -125689,11 +125689,10 @@ function Geointerpreter() {
             }; // Initialize the Bootstrap Collapse instance once for efficiency.
             thinkingProcessCollapse = new (bootstrap_dist_js_bootstrap__WEBPACK_IMPORTED_MODULE_2___default().Collapse)(thinkingProcessWrapper, {
               toggle: false
-            }); // Manually wire up the toggle button since we are not using the data-api from a CDN script.
-            toggleThinkingButton.addEventListener("click", function () {
-              thinkingProcessCollapse.toggle();
-            });
-
+            }); // Remove the manual event listener and let Bootstrap handle the toggle
+            // toggleThinkingButton.addEventListener("click", () => {
+            //   thinkingProcessCollapse.toggle();
+            // });
             // Handle button text change on collapse toggle for the "Show Thinking" UI
             if (thinkingProcessWrapper && toggleThinkingButton) {
               thinkingProcessWrapper.addEventListener("show.bs.collapse", function () {
@@ -125757,7 +125756,8 @@ function Geointerpreter() {
             // const modelId = "Qwen2-7B-Instruct-q4f32_1-MLC";
             // const modelId = "Llama-3.2-1B-Instruct-q4f16_1-MLC"; // small-fast
             // 09Aug2025 const modelId = "Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC"; // supports OpenAI's API for function calling
-            modelId = "Qwen2.5-7B-Instruct-q4f32_1-MLC"; //? better reasoning capability  // 09Aug2025
+            // const modelId = "Qwen2.5-7B-Instruct-q4f32_1-MLC"; //? performance is slower than Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC  // 09Aug2025
+            modelId = "gemma-2-2b-jpn-it-q4f32_1-MLC";
             _context3.p = 3;
             outputElement.textContent = "Initializing AI systems...";
 
@@ -128499,7 +128499,13 @@ var ReActController = /*#__PURE__*/function () {
     key: "_dispatchScratchpadUpdate",
     value: function _dispatchScratchpadUpdate() {
       var thinkingProcess = this.scratchpad.map(function (entry) {
-        return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content, null, 2) : entry.content);
+        var formattedEntry = "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content, null, 2) : entry.content);
+        if (entry.type === "observation") {
+          // Add a visual separator after an observation to clearly delineate
+          // the result of an action from the next thought process.
+          return formattedEntry + "\n" + ".".repeat(80);
+        }
+        return formattedEntry;
       }).join("\n\n");
       this.communicationBus.dispatchEvent("aiThinkingStream", {
         content: thinkingProcess
