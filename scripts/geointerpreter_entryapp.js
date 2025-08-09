@@ -125652,7 +125652,7 @@ function Geointerpreter() {
               type: function type() {
                 var _this = this;
                 return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
-                  var _char, cardBody;
+                  var _char;
                   return _regenerator().w(function (_context2) {
                     while (1) switch (_context2.n) {
                       case 0:
@@ -125665,12 +125665,8 @@ function Geointerpreter() {
                         _char = _this.queue.shift();
                         thinkingProcessContent.textContent += _char;
 
-                        // Fix: Scroll the parent container of the content
-                        // The card-body div is the scrollable container
-                        cardBody = thinkingProcessContent.parentElement;
-                        if (cardBody) {
-                          cardBody.scrollTop = cardBody.scrollHeight;
-                        }
+                        // Fix: Scroll the thinking process content itself (it has the scrollbar)
+                        thinkingProcessContent.scrollTop = thinkingProcessContent.scrollHeight;
                         _context2.n = 2;
                         return new Promise(function (resolve) {
                           return setTimeout(resolve, _this.speed);
@@ -128145,7 +128141,7 @@ var ReActController = /*#__PURE__*/function () {
                 planningTools = availableTools.filter(function (t) {
                   return t.name === "create_plan";
                 });
-                systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your primary goal is to help the user by breaking down complex requests into a logical, step-by-step plan.\n\n## RESPONSE FORMAT\nYou MUST respond in the following format, with no other text before or after. Your entire response must start with \"Thought:\".\n\nThought: [Your reasoning for the plan you are about to create.]\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"...\", \"step_type\": \"...\" }, ... ] } }\n\n## PLAN REQUIREMENTS\n- Each step in the plan should be a discrete, self-contained analytical task.\n- For each step, you must provide a 'step_type' from this exact list: [geospatial, aggregation, filter, data_retrieval, calculation, visualization].\n\n## CRITICAL PLANNING INSTRUCTIONS\n- **Prioritize User-Provided Information:** If the user's query contains specific details like a street address, a location name, or a dataset, your plan MUST start by using that information.\n- **Example:** If a street address is given, the first step of your plan MUST be to geocode that specific address. Do NOT use a tool to find the user's current location (e.g., from their IP address) unless the user explicitly asks for it (e.g., \"near me\").";
+                systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your primary goal is to help the user by breaking down complex requests into a logical, step-by-step plan.\n\n## CRITICAL: YOU ARE IN PLANNING MODE\nYou MUST create a plan using the create_plan tool. Do NOT attempt to execute any other actions.\n\n## RESPONSE FORMAT\nYou MUST respond in the following format, with no other text before or after. Your entire response must start with \"Thought:\".\n\nThought: [Your reasoning for the plan you are about to create.]\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"...\", \"step_type\": \"...\" }, ... ] } }\n\n## PLAN REQUIREMENTS\n- Each step in the plan should be a discrete, self-contained analytical task.\n- For each step, you must provide a 'step_type' from this exact list: [geospatial, aggregation, filter, data_retrieval, calculation, visualization].\n\n## CRITICAL PLANNING INSTRUCTIONS\n- **Prioritize User-Provided Information:** If the user's query contains specific details like a street address, a location name, or a dataset, your plan MUST start by using that information.\n- **Example:** If a street address is given, the first step of your plan MUST be to geocode that specific address. Do NOT use a tool to find the user's current location (e.g., from their IP address) unless the user explicitly asks for it (e.g., \"near me\").\n\n## EXAMPLE RESPONSE\nThought: The user wants to find Indian restaurants near their location. I need to create a plan that first determines their location and then searches for nearby restaurants.\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"Get user's current location\", \"step_type\": \"geospatial\" }, { \"step\": 2, \"description\": \"Search for Indian restaurants near the location\", \"step_type\": \"data_retrieval\" } ] } }";
                 userPrompt = "You have access to a single tool to help you. Use this tool to output your plan as a JSON array of steps.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(planningTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is the user's request:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
                   return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
                 }).join("\n"), "\n\nThought:");
@@ -128336,40 +128332,25 @@ var ReActController = /*#__PURE__*/function () {
       return _getRelevantTools;
     }()
     /**
-     * Parses the AI's response to extract Thought and Action.
-     * Handles both JSON format and function-call format responses.
-     * @param {string} aiResponse - The raw response string from the AI.
-     * @returns {{thought: string, action: {name: string, params: object}}} Parsed thought and action.
+     * Parses the AI's response to extract thought and action.
+     * @param {string} aiResponse - The raw response from the AI.
+     * @returns {{thought: string, action: object}} The parsed thought and action.
      * @private
      */
     )
   }, {
     key: "_parseAIResponse",
     value: function _parseAIResponse(aiResponse) {
-      // Allow for optional whitespace between Thought/Action and their content, and be more robust.
-      var thoughtMatch = aiResponse.match(/Thought:\s*([^]*?)(?=\s*Action:|$)/);
+      console.log("ReActController: Parsing AI response:", aiResponse);
+
+      // Extract thought
+      var thoughtMatch = aiResponse.match(/Thought:\s*([^]*?)(?=\nAction:|$)/);
       var thought = thoughtMatch ? thoughtMatch[1].trim() : "No thought provided.";
 
-      // Find the start of the Action block
-      var actionStartMatch = aiResponse.match(/Action:\s*({)/);
-
-      // Fallback for thought if the "Thought:" prefix is missing.
-      if (!thoughtMatch) {
-        // If there's an action, assume the text before it is the thought.
-        if (actionStartMatch) {
-          var actionIndex = aiResponse.indexOf(actionStartMatch[0]);
-          var potentialThought = aiResponse.substring(0, actionIndex).trim();
-          if (potentialThought) {
-            thought = potentialThought;
-          }
-        }
-        // If there's no action, assume the entire response is the thought.
-        else if (aiResponse.trim()) {
-          thought = aiResponse.trim();
-        }
-      }
-      if (!actionStartMatch) {
-        console.warn("ReActController: Could not find a valid JSON Action block.", aiResponse);
+      // Extract action
+      var actionMatch = aiResponse.match(/Action:\s*(\{[^]*\})/);
+      if (!actionMatch) {
+        console.warn("ReActController: No valid action found in AI response");
         return {
           thought: thought,
           action: {
@@ -128378,73 +128359,12 @@ var ReActController = /*#__PURE__*/function () {
           }
         };
       }
-
-      // Extract JSON by counting braces to handle nested structures
-      var startIndex = actionStartMatch.index + actionStartMatch[0].length - 1; // Position of the opening brace
-      var braceCount = 0;
-      var endIndex = startIndex;
-      var inString = false;
-      var escapeNext = false;
-      for (var i = startIndex; i < aiResponse.length; i++) {
-        var _char = aiResponse[i];
-        if (escapeNext) {
-          escapeNext = false;
-          continue;
-        }
-        if (_char === "\\") {
-          escapeNext = true;
-          continue;
-        }
-        if (_char === '"') {
-          inString = !inString;
-          continue;
-        }
-        if (!inString) {
-          if (_char === "{") {
-            braceCount++;
-          } else if (_char === "}") {
-            braceCount--;
-            if (braceCount === 0) {
-              endIndex = i;
-              break;
-            }
-          }
-        }
-      }
-      var actionStr;
-      if (braceCount !== 0 || inString) {
-        console.warn("ReActController: Unbalanced braces or unterminated string in Action JSON, attempting to fix...");
-        // Try to extract what we have and add missing closing characters
-        actionStr = aiResponse.substring(startIndex);
-
-        // If a string is still open, close it before adding braces.
-        if (inString) {
-          actionStr += '"';
-        }
-
-        // Add missing closing braces
-        var missingBraces = braceCount;
-        for (var _i2 = 0; _i2 < missingBraces; _i2++) {
-          actionStr += "}";
-        }
-        console.log("ReActController: Attempted fix by adding closing characters:", actionStr);
-      } else {
-        actionStr = aiResponse.substring(startIndex, endIndex + 1);
-      }
-
-      // Clean up common JSON formatting issues, including trailing commas which LLMs often produce.
-      actionStr = actionStr.replace(/[\u0000-\u001F\u007F-\u009F]/g, "") // Remove control characters
-      .replace(/\s+/g, " ") // Collapse all whitespace to single spaces.
-      .replace(/,(\s*[}\]])/g, "$1") // Remove trailing commas before a closing brace or bracket.
-      .trim(); // remove leading/trailing whitespace
-
-      console.log("ReActController: Extracted and cleaned action string:", actionStr);
       try {
-        var actionObj = JSON.parse(actionStr);
+        var actionJson = JSON.parse(actionMatch[1]);
 
-        // Validate the action object structure
-        if (!actionObj.name) {
-          console.warn("ReActController: Action object missing 'name' property:", actionObj);
+        // Validate action structure
+        if (!actionJson.name && !actionJson.parameters) {
+          console.warn("ReActController: Invalid action structure");
           return {
             thought: thought,
             action: {
@@ -128454,28 +128374,50 @@ var ReActController = /*#__PURE__*/function () {
           };
         }
 
-        // Ensure params exists
-        var params = actionObj.parameters || actionObj.params || {};
+        // Normalize action structure (handle both 'params' and 'parameters')
+        var action = {
+          name: actionJson.name,
+          params: actionJson.parameters || actionJson.params || {}
+        };
+
+        // Special handling for planning mode
+        if (this.isPlanningMode) {
+          if (action.name !== "create_plan") {
+            console.warn("ReActController: Expected 'create_plan' action in planning mode, but got:", action.name);
+            // Force the AI to create a plan by returning a continue action
+            return {
+              thought: thought + " (Note: Must use create_plan action in planning mode)",
+              action: {
+                name: "continue",
+                params: {}
+              }
+            };
+          }
+
+          // Validate plan structure
+          if (!action.params.plan || !Array.isArray(action.params.plan)) {
+            console.warn("ReActController: Invalid plan structure in create_plan action");
+            return {
+              thought: thought + " (Note: create_plan action must include a 'plan' array)",
+              action: {
+                name: "continue",
+                params: {}
+              }
+            };
+          }
+        }
         return {
           thought: thought,
-          action: {
-            name: actionObj.name,
-            params: params
-          }
+          action: action
         };
       } catch (parseError) {
-        console.error("ReActController: JSON parsing error:", parseError);
-        console.error("ReActController: Failed to parse action string:", actionStr);
-        console.error("ReActController: Original AI response:", aiResponse);
-
-        // Return a parse error action that the system can handle
+        console.error("ReActController: Error parsing action JSON:", parseError);
         return {
           thought: thought,
           action: {
             name: "parse_error",
             params: {
-              error: parseError.message,
-              originalResponse: aiResponse.substring(0, 500) // Truncate for logging
+              error: parseError.message
             }
           }
         };
