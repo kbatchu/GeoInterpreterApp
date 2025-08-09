@@ -125612,7 +125612,7 @@ function Geointerpreter() {
   }
   function _initializeApplication() {
     _initializeApplication = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
-      var outputElement, userInputField, sendButton, cancelAnalysisButton, chatHistoryDiv, toggleThinkingButton, thinkingProcessContent, thinkingProcessWrapper, chatInputContainer, userPromptContainer, userPromptQuestion, userPromptInput, userPromptSubmit, userPromptOptions, scrollSentinel, typewriter, thinkingProcessCollapse, aiCore, _yield$InitializeDuck, db, dbConn, llmProgress, embeddingProgress, updateCombinedProgress, llmInitProgressCallback, embeddingInitProgressCallback, modelId, embeddingManagerInstance, _yield$Promise$all, _yield$Promise$all2, core, _, stateManager, communicationBus, toolExecutorInstance, reactController, lastThinkingProcess, submitUserResponse, _t2;
+      var outputElement, userInputField, sendButton, cancelAnalysisButton, newSessionButton, chatHistoryDiv, toggleThinkingButton, thinkingProcessContent, thinkingProcessWrapper, chatInputContainer, userPromptContainer, userPromptQuestion, userPromptInput, userPromptSubmit, userPromptOptions, scrollSentinel, typewriter, thinkingProcessCollapse, aiCore, _yield$InitializeDuck, db, dbConn, llmProgress, embeddingProgress, updateCombinedProgress, llmInitProgressCallback, embeddingInitProgressCallback, modelId, embeddingManagerInstance, _yield$Promise$all, _yield$Promise$all2, core, _, stateManager, communicationBus, toolExecutorInstance, reactController, lastThinkingProcess, submitUserResponse, _t2;
       return _regenerator().w(function (_context3) {
         while (1) switch (_context3.n) {
           case 0:
@@ -125620,6 +125620,7 @@ function Geointerpreter() {
             userInputField = document.getElementById("user-input");
             sendButton = document.getElementById("send-button");
             cancelAnalysisButton = document.getElementById("cancel-analysis-button");
+            newSessionButton = document.getElementById("new-session-button");
             chatHistoryDiv = document.getElementById("chat-history");
             toggleThinkingButton = document.getElementById("toggle-thinking-button");
             thinkingProcessContent = document.getElementById("thinking-process-content");
@@ -125798,6 +125799,14 @@ function Geointerpreter() {
             lastThinkingProcess = ""; // Listen for the AI's streaming thought process
             communicationBus.addEventListener("aiThinkingStream", function (event) {
               var newThinkingProcess = event.detail.content;
+
+              // If the new content is empty, it's a reset signal.
+              if (newThinkingProcess === "") {
+                typewriter.clear();
+                lastThinkingProcess = "";
+                return;
+              }
+
               // Find the difference between the last known content and the new content
               var diff = newThinkingProcess.substring(lastThinkingProcess.length);
               if (diff) {
@@ -125871,6 +125880,11 @@ function Geointerpreter() {
             if (cancelAnalysisButton) {
               cancelAnalysisButton.addEventListener("click", function () {
                 communicationBus.dispatchEvent("cancelProcessing");
+              });
+            }
+            if (newSessionButton) {
+              newSessionButton.addEventListener("click", function () {
+                communicationBus.dispatchEvent("newSessionRequested");
               });
             }
 
@@ -127434,6 +127448,7 @@ var ReActController = /*#__PURE__*/function () {
     this.communicationBus.addEventListener("userQuerySubmitted", this._handleUserQuery.bind(this));
     this.communicationBus.addEventListener("userInputProvided", this._handleUserInput.bind(this));
     this.communicationBus.addEventListener("cancelProcessing", this._handleCancel.bind(this));
+    this.communicationBus.addEventListener("newSessionRequested", this._handleNewSession.bind(this));
   }
 
   /**
@@ -128054,6 +128069,31 @@ var ReActController = /*#__PURE__*/function () {
       });
     }
 
+    /**
+     * Handles a new session request, resetting the agent and UI to its initial state.
+     * @private
+     */
+  }, {
+    key: "_handleNewSession",
+    value: function _handleNewSession() {
+      console.log("ReActController: New session requested. Resetting state.");
+      this.isCancelled = true; // Stop any ongoing process
+      this.scratchpad = [];
+      this._dispatchScratchpadUpdate(); // Dispatch empty scratchpad to clear UI
+
+      this.userQuery = "";
+      this.isPlanningMode = false;
+      this.currentPlanStepIndex = 0;
+      this.currentToolLevels = [1];
+      this._findPlacesRetryCount = 0;
+
+      // Reset the state manager completely
+      this.stateManager.updateState({
+        agentStatus: "idle",
+        conversationHistory: [],
+        activePlan: null
+      });
+    }
     /**
      * Assembles the context for the AI Core.
      * This includes the user query, conversation history, scratchpad, and relevant tools retrieved via vector search.
