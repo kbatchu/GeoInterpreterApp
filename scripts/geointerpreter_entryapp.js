@@ -119888,7 +119888,7 @@ var ReActController = /*#__PURE__*/function () {
     value: (function () {
       var _run = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
         var _this = this;
-        var finished, loopCount, MAX_LOOP_ITERATIONS, REPETITION_LIMIT, lastActionHistory, _loop, _ret, reason, finalMessage;
+        var finished, loopCount, MAX_LOOP_ITERATIONS, REPETITION_LIMIT, lastActionHistory, _loop, _ret, reason, finalMessage, currentState;
         return _regenerator().w(function (_context3) {
           while (1) switch (_context3.n) {
             case 0:
@@ -119898,7 +119898,7 @@ var ReActController = /*#__PURE__*/function () {
               REPETITION_LIMIT = 3; // Number of times the same action can be repeated before halting.
               lastActionHistory = []; // Tracks the last few actions to detect loops.
               _loop = /*#__PURE__*/_regenerator().m(function _loop() {
-                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, correctedPlan, _errorMsg, currentState, observation, questionText, _errorMsg2, standardizedAction, _currentState, _observation, chosenTool, currentStepType, _observation2, _observation3, finalObservation, MAX_RETRIES, _t, _t2;
+                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, correctedPlan, _errorMsg, _currentState2, observation, questionText, _errorMsg2, standardizedAction, _currentState3, _observation, chosenTool, currentStepType, _observation2, _observation3, finalObservation, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
                 return _regenerator().w(function (_context2) {
                   while (1) switch (_context2.n) {
                     case 0:
@@ -120019,11 +120019,14 @@ var ReActController = /*#__PURE__*/function () {
                       }
                       errorMsg = "Error: The agent appears to be stuck in a loop, repeating the action '".concat(action.name, "'. Halting execution to prevent further issues.");
                       console.error("ReActController: ".concat(errorMsg));
-                      _this.scratchpad.push({
-                        type: "observation",
-                        content: errorMsg
+                      _currentState = _this.stateManager.getState();
+                      _this.stateManager.updateState({
+                        agentStatus: "idle",
+                        conversationHistory: [].concat(_toConsumableArray(_currentState.conversationHistory), [{
+                          role: "assistant",
+                          content: errorMsg
+                        }])
                       });
-                      _this._dispatchScratchpadUpdate();
                       _this.communicationBus.dispatchEvent("finalAnswerReady", {
                         answer: errorMsg
                       });
@@ -120114,10 +120117,10 @@ var ReActController = /*#__PURE__*/function () {
                         content: action
                       });
                       _this._dispatchScratchpadUpdate();
-                      currentState = _this.stateManager.getState();
+                      _currentState2 = _this.stateManager.getState();
                       _this.stateManager.updateState({
                         agentStatus: "idle",
-                        conversationHistory: [].concat(_toConsumableArray(currentState.conversationHistory), [{
+                        conversationHistory: [].concat(_toConsumableArray(_currentState2.conversationHistory), [{
                           role: "assistant",
                           content: action.params.answer
                         }])
@@ -120185,10 +120188,10 @@ var ReActController = /*#__PURE__*/function () {
                         content: standardizedAction
                       });
                       _this._dispatchScratchpadUpdate();
-                      _currentState = _this.stateManager.getState();
+                      _currentState3 = _this.stateManager.getState();
                       _this.stateManager.updateState({
                         agentStatus: "waiting_for_user",
-                        conversationHistory: [].concat(_toConsumableArray(_currentState.conversationHistory), [
+                        conversationHistory: [].concat(_toConsumableArray(_currentState3.conversationHistory), [
                         // Add the AI's question to the main chat history
                         {
                           role: "assistant",
@@ -120324,8 +120327,17 @@ var ReActController = /*#__PURE__*/function () {
                       });
                       // Allow AI to recover from error in next iteration if not maxed out
                       if (loopCount >= MAX_LOOP_ITERATIONS) {
+                        finalErrorMessage = "An error occurred: ".concat(_t2.message, ". Max iterations reached.");
+                        _currentState4 = _this.stateManager.getState();
+                        _this.stateManager.updateState({
+                          agentStatus: "idle",
+                          conversationHistory: [].concat(_toConsumableArray(_currentState4.conversationHistory), [{
+                            role: "assistant",
+                            content: finalErrorMessage
+                          }])
+                        });
                         _this.communicationBus.dispatchEvent("finalAnswerReady", {
-                          answer: "An error occurred: ".concat(_t2.message, ". Max iterations reached.")
+                          answer: finalErrorMessage
                         });
                         finished = true;
                       }
@@ -120361,8 +120373,13 @@ var ReActController = /*#__PURE__*/function () {
                 reason = loopCount >= MAX_LOOP_ITERATIONS ? "the maximum number of steps" : "an unrecoverable state";
                 finalMessage = "I could not complete the task within ".concat(reason, ".");
                 console.warn("ReActController: Task ended without finishing. Reason: ".concat(reason, "."));
+                currentState = this.stateManager.getState();
                 this.stateManager.updateState({
-                  agentStatus: "idle"
+                  agentStatus: "idle",
+                  conversationHistory: [].concat(_toConsumableArray(currentState.conversationHistory), [{
+                    role: "assistant",
+                    content: finalMessage
+                  }])
                 });
                 this.communicationBus.dispatchEvent("finalAnswerReady", {
                   answer: finalMessage
