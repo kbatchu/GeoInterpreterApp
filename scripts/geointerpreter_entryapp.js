@@ -125612,7 +125612,7 @@ function Geointerpreter() {
   }
   function _initializeApplication() {
     _initializeApplication = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
-      var outputElement, userInputField, sendButton, cancelAnalysisButton, chatHistoryDiv, toggleThinkingButton, thinkingProcessContent, thinkingProcessWrapper, chatInputContainer, userPromptContainer, userPromptQuestion, userPromptInput, userPromptSubmit, userPromptOptions, typewriter, aiCore, _yield$InitializeDuck, db, dbConn, llmProgress, embeddingProgress, updateCombinedProgress, llmInitProgressCallback, embeddingInitProgressCallback, modelId, embeddingManagerInstance, _yield$Promise$all, _yield$Promise$all2, core, _, stateManager, communicationBus, toolExecutorInstance, reactController, lastThinkingProcess, submitUserResponse, _t2;
+      var outputElement, userInputField, sendButton, cancelAnalysisButton, chatHistoryDiv, toggleThinkingButton, thinkingProcessContent, thinkingProcessWrapper, chatInputContainer, userPromptContainer, userPromptQuestion, userPromptInput, userPromptSubmit, userPromptOptions, scrollSentinel, typewriter, thinkingProcessCollapse, aiCore, _yield$InitializeDuck, db, dbConn, llmProgress, embeddingProgress, updateCombinedProgress, llmInitProgressCallback, embeddingInitProgressCallback, modelId, embeddingManagerInstance, _yield$Promise$all, _yield$Promise$all2, core, _, stateManager, communicationBus, toolExecutorInstance, reactController, lastThinkingProcess, submitUserResponse, _t2;
       return _regenerator().w(function (_context3) {
         while (1) switch (_context3.n) {
           case 0:
@@ -125629,7 +125629,9 @@ function Geointerpreter() {
             userPromptQuestion = document.getElementById("user-prompt-question");
             userPromptInput = document.getElementById("user-prompt-input");
             userPromptSubmit = document.getElementById("user-prompt-submit");
-            userPromptOptions = document.getElementById("user-prompt-options");
+            userPromptOptions = document.getElementById("user-prompt-options"); // Create a sentinel element to append to the thinking process wrapper for robust scrolling.
+            scrollSentinel = document.createElement('div');
+            thinkingProcessWrapper.appendChild(scrollSentinel);
             typewriter = {
               queue: [],
               isTyping: false,
@@ -125640,11 +125642,7 @@ function Geointerpreter() {
                 // Add new text to the queue as individual characters
                 // If this is the first text being added for a new thought, expand the UI.
                 if (!this.isTyping && thinkingProcessWrapper && !thinkingProcessWrapper.classList.contains('show')) {
-                  // Use Bootstrap's Collapse API to programmatically open the panel.
-                  var collapse = new (bootstrap_dist_js_bootstrap__WEBPACK_IMPORTED_MODULE_2___default().Collapse)(thinkingProcessWrapper, {
-                    toggle: false
-                  });
-                  collapse.show();
+                  thinkingProcessCollapse.show();
                 }
                 (_this$queue = this.queue).push.apply(_this$queue, _toConsumableArray(text.split("")));
                 // If not already typing, start
@@ -125667,8 +125665,11 @@ function Geointerpreter() {
                         }
                         _char = _this.queue.shift();
                         thinkingProcessContent.textContent += _char;
-                        // Scroll to bottom of the thinking process wrapper
-                        thinkingProcessWrapper.scrollTop = thinkingProcessWrapper.scrollHeight;
+                        // Use scrollIntoView on the sentinel for robust auto-scrolling.
+                        scrollSentinel.scrollIntoView({
+                          behavior: "auto",
+                          block: "end"
+                        });
                         _context2.n = 2;
                         return new Promise(function (resolve) {
                           return setTimeout(resolve, _this.speed);
@@ -125688,7 +125689,10 @@ function Geointerpreter() {
                 this.queue = [];
                 thinkingProcessContent.textContent = "";
               }
-            }; // Handle button text change on collapse toggle for the "Show Thinking" UI
+            }; // Initialize the Bootstrap Collapse instance once for efficiency.
+            thinkingProcessCollapse = new (bootstrap_dist_js_bootstrap__WEBPACK_IMPORTED_MODULE_2___default().Collapse)(thinkingProcessWrapper, {
+              toggle: false
+            }); // Handle button text change on collapse toggle for the "Show Thinking" UI
             if (thinkingProcessWrapper && toggleThinkingButton) {
               thinkingProcessWrapper.addEventListener("show.bs.collapse", function () {
                 toggleThinkingButton.innerHTML = 'Hide Thinking <i class="bi bi-chevron-up toggle-icon"></i>';
