@@ -118089,13 +118089,14 @@ function Geointerpreter() {
   }
   function _initializeApplication() {
     _initializeApplication = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
-      var outputElement, userInputField, sendButton, chatHistoryDiv, toggleThinkingButton, thinkingProcessContent, thinkingProcessWrapper, chatInputContainer, userPromptContainer, userPromptQuestion, userPromptInput, userPromptSubmit, userPromptOptions, aiCore, _yield$InitializeDuck, db, dbConn, llmProgress, embeddingProgress, updateCombinedProgress, llmInitProgressCallback, embeddingInitProgressCallback, modelId, embeddingManagerInstance, _yield$Promise$all, _yield$Promise$all2, core, _, stateManager, communicationBus, toolExecutorInstance, reactController, submitUserResponse, _t2;
+      var outputElement, userInputField, sendButton, cancelAnalysisButton, chatHistoryDiv, toggleThinkingButton, thinkingProcessContent, thinkingProcessWrapper, chatInputContainer, userPromptContainer, userPromptQuestion, userPromptInput, userPromptSubmit, userPromptOptions, aiCore, _yield$InitializeDuck, db, dbConn, llmProgress, embeddingProgress, updateCombinedProgress, llmInitProgressCallback, embeddingInitProgressCallback, modelId, embeddingManagerInstance, _yield$Promise$all, _yield$Promise$all2, core, _, stateManager, communicationBus, toolExecutorInstance, reactController, submitUserResponse, _t2;
       return _regenerator().w(function (_context2) {
         while (1) switch (_context2.n) {
           case 0:
             outputElement = document.getElementById("analysis-output");
             userInputField = document.getElementById("user-input");
             sendButton = document.getElementById("send-button");
+            cancelAnalysisButton = document.getElementById("cancel-analysis-button");
             chatHistoryDiv = document.getElementById("chat-history");
             toggleThinkingButton = document.getElementById("toggle-thinking-button");
             thinkingProcessContent = document.getElementById("thinking-process-content");
@@ -118220,6 +118221,13 @@ function Geointerpreter() {
             stateManager.subscribe(function (state) {
               // Update UI based on state.agentStatus
               console.log("Agent Status:", state.agentStatus);
+              if (cancelAnalysisButton) {
+                if (state.agentStatus === "idle") {
+                  cancelAnalysisButton.style.display = "none";
+                } else {
+                  cancelAnalysisButton.style.display = "inline-block";
+                }
+              }
               if (state.agentStatus === "idle") {
                 outputElement.textContent = "Ready for your questions.";
                 userInputField.disabled = false;
@@ -118261,6 +118269,11 @@ function Geointerpreter() {
                 sendButton.click(); // Simulate a click on the send button
               }
             });
+            if (cancelAnalysisButton) {
+              cancelAnalysisButton.addEventListener("click", function () {
+                communicationBus.dispatchEvent("cancelProcessing");
+              });
+            }
 
             // Listen for the agent asking the user a question
             communicationBus.addEventListener("promptUserForInput", function (event) {
@@ -119813,6 +119826,7 @@ var ReActController = /*#__PURE__*/function () {
     this.isPlanningMode = false; // Flag for hybrid Plan-and-Execute mode
     this.currentPlanStepIndex = 0; // Tracks current step in active plan
     this.currentToolLevels = [1]; // Tool levels to use: [1] or [2, 3]
+    this.isCancelled = false; // Flag to stop the run loop
     this._findPlacesRetryCount = 0;
     // ?Level 1: High-level, self-contained tools that directly map to a likely step in an analysis plan (e.g., "get user location," "find coordinates for an address," "find hotspots").
     // ? Level 3: Granular, primitive functions that act as building blocks when higher-level tools are not specific enough (e.g., your SQL functions like st_area, less_than, count).
@@ -119820,6 +119834,7 @@ var ReActController = /*#__PURE__*/function () {
     // Bind event listeners
     this.communicationBus.addEventListener("userQuerySubmitted", this._handleUserQuery.bind(this));
     this.communicationBus.addEventListener("userInputProvided", this._handleUserInput.bind(this));
+    this.communicationBus.addEventListener("cancelProcessing", this._handleCancel.bind(this));
   }
 
   /**
@@ -119834,6 +119849,7 @@ var ReActController = /*#__PURE__*/function () {
           while (1) switch (_context.n) {
             case 0:
               this.userQuery = event.detail.query;
+              this.isCancelled = false; // Reset cancellation flag for a new query
               this.scratchpad = []; // Clear scratchpad for new query
               this.isPlanningMode = true; // Start in planning mode
               this.currentPlanStepIndex = 0; // Reset plan step index
@@ -119880,10 +119896,20 @@ var ReActController = /*#__PURE__*/function () {
               REPETITION_LIMIT = 3; // Number of times the same action can be repeated before halting.
               lastActionHistory = []; // Tracks the last few actions to detect loops.
               _loop = /*#__PURE__*/_regenerator().m(function _loop() {
-                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, correctedPlan, currentState, observation, _currentState, _observation, chosenTool, currentStepType, _observation2, _observation3, finalObservation, MAX_RETRIES, _t, _t2;
+                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, correctedPlan, currentState, observation, questionText, _errorMsg, standardizedAction, _currentState, _observation, chosenTool, currentStepType, _observation2, _observation3, finalObservation, MAX_RETRIES, _t, _t2;
                 return _regenerator().w(function (_context2) {
                   while (1) switch (_context2.n) {
                     case 0:
+                      if (!_this.isCancelled) {
+                        _context2.n = 1;
+                        break;
+                      }
+                      console.log("ReActController: Run loop terminated due to cancellation.");
+                      _this.isCancelled = false; // Reset for the next run
+                      return _context2.a(2, {
+                        v: void 0
+                      });
+                    case 1:
                       loopCount++;
                       _this.communicationBus.dispatchEvent("agentLoopUpdate", {
                         loopCount: loopCount,
@@ -119893,7 +119919,7 @@ var ReActController = /*#__PURE__*/function () {
                         agentStatus: "thinking"
                       });
                       console.log("ReActController: Loop iteration ".concat(loopCount));
-                      _context2.p = 1;
+                      _context2.p = 2;
                       currentGoal = _this.userQuery;
                       currentStep = null; // Will hold the full step object {description, step_type}
                       if (!_this.isPlanningMode && _this.stateManager.getState().activePlan) {
@@ -119919,46 +119945,46 @@ var ReActController = /*#__PURE__*/function () {
                       }
 
                       // 1. Context Assembly
-                      _context2.n = 2;
+                      _context2.n = 3;
                       return _this._assembleContext(currentGoal, currentStep);
-                    case 2:
+                    case 3:
                       _yield$_this$_assembl = _context2.v;
                       messages = _yield$_this$_assembl.messages;
                       availableTools = _yield$_this$_assembl.availableTools;
                       console.log("ReActController: Assembled context for AI invocation:", messages);
 
                       // 2. AI Invocation
-                      _context2.p = 3;
+                      _context2.p = 4;
                       console.log("ReActController: Invoking AI core with messages...");
-                      _context2.n = 4;
+                      _context2.n = 5;
                       return _this.aiCore.chat.completions.create({
                         messages: messages,
                         temperature: 0.1,
                         // A low temperature for more predictable tool usage.
                         max_gen_len: 512 // A reasonable limit for a thought/action response.
                       });
-                    case 4:
+                    case 5:
                       reply = _context2.v;
                       console.log("ReActController: AI core responded. Full reply object:", reply);
                       if (!(reply && reply.choices && reply.choices.length > 0 && reply.choices[0].message)) {
-                        _context2.n = 5;
+                        _context2.n = 6;
                         break;
                       }
                       aiResponse = reply.choices[0].message.content;
                       console.log("ReActController: Extracted AI response content:", aiResponse);
-                      _context2.n = 6;
+                      _context2.n = 7;
                       break;
-                    case 5:
-                      throw new Error("AI response structure is unexpected or empty.");
                     case 6:
-                      _context2.n = 8;
-                      break;
+                      throw new Error("AI response structure is unexpected or empty.");
                     case 7:
-                      _context2.p = 7;
+                      _context2.n = 9;
+                      break;
+                    case 8:
+                      _context2.p = 8;
                       _t = _context2.v;
                       console.error("ReActController: Error during AI invocation:", _t);
                       throw new Error("AI invocation failed: ".concat(_t.message));
-                    case 8:
+                    case 9:
                       // 3. Response Parsing
                       _this$_parseAIRespons = _this._parseAIResponse(aiResponse), thought = _this$_parseAIRespons.thought, action = _this$_parseAIRespons.action;
                       _this.scratchpad.push({
@@ -119972,7 +119998,7 @@ var ReActController = /*#__PURE__*/function () {
                       // *** Repetition Detection Logic ***
                       // Check if the agent is stuck repeating the same action.
                       if (!(action.name !== "continue" && action.name !== "parse_error")) {
-                        _context2.n = 10;
+                        _context2.n = 11;
                         break;
                       }
                       actionSignature = JSON.stringify({
@@ -119986,7 +120012,7 @@ var ReActController = /*#__PURE__*/function () {
 
                       // Check if the last `REPETITION_LIMIT` actions are all identical
                       if (!(lastActionHistory.length === REPETITION_LIMIT && new Set(lastActionHistory).size === 1)) {
-                        _context2.n = 9;
+                        _context2.n = 10;
                         break;
                       }
                       errorMsg = "Error: The agent appears to be stuck in a loop, repeating the action '".concat(action.name, "'. Halting execution to prevent further issues.");
@@ -120001,15 +120027,15 @@ var ReActController = /*#__PURE__*/function () {
                       });
                       finished = true;
                       return _context2.a(2, 0);
-                    case 9:
-                      _context2.n = 11;
-                      break;
                     case 10:
+                      _context2.n = 12;
+                      break;
+                    case 11:
                       // Reset history on non-tool or error actions to not penalize recovery attempts
                       lastActionHistory = [];
-                    case 11:
+                    case 12:
                       if (!(action.name === "continue")) {
-                        _context2.n = 12;
+                        _context2.n = 13;
                         break;
                       }
                       _this.scratchpad.push({
@@ -120018,18 +120044,18 @@ var ReActController = /*#__PURE__*/function () {
                       });
                       // This will cause the loop to run again with the new thought and observation in the scratchpad
                       return _context2.a(2, 0);
-                    case 12:
+                    case 13:
                       if (!_this.isPlanningMode) {
-                        _context2.n = 16;
+                        _context2.n = 17;
                         break;
                       }
                       if (!(action.name === "create_plan" && action.params.plan)) {
-                        _context2.n = 14;
+                        _context2.n = 15;
                         break;
                       }
-                      _context2.n = 13;
+                      _context2.n = 14;
                       return _this._correctPlanStepTypes(action.params.plan);
-                    case 13:
+                    case 14:
                       correctedPlan = _context2.v;
                       // Correct the plan
                       _this.stateManager.updateState({
@@ -120051,16 +120077,16 @@ var ReActController = /*#__PURE__*/function () {
                       console.log("ReActController: Plan created and stored.");
                       console.log("ReActController: Generated Plan:", correctedPlan); // Log corrected plan
                       // Continue to next loop iteration to execute first step
-                      _context2.n = 15;
+                      _context2.n = 16;
                       break;
-                    case 14:
-                      throw new Error("AI did not return a valid plan in planning mode.");
                     case 15:
-                      _context2.n = 23;
-                      break;
+                      throw new Error("AI did not return a valid plan in planning mode.");
                     case 16:
+                      _context2.n = 25;
+                      break;
+                    case 17:
                       if (!(action.name === "finish")) {
-                        _context2.n = 17;
+                        _context2.n = 18;
                         break;
                       }
                       finished = true;
@@ -120081,11 +120107,11 @@ var ReActController = /*#__PURE__*/function () {
                         answer: action.params.answer
                       });
                       console.log("ReActController: AI finished with answer:", action.params.answer);
-                      _context2.n = 23;
+                      _context2.n = 25;
                       break;
-                    case 17:
+                    case 18:
                       if (!(action.name === "escalate_tool_level")) {
-                        _context2.n = 18;
+                        _context2.n = 19;
                         break;
                       }
                       // Handle the AI's request to escalate to more granular tools
@@ -120103,14 +120129,41 @@ var ReActController = /*#__PURE__*/function () {
                       console.log("ReActController: Escalating to lower-level tools.");
                       // Do NOT increment plan step index, we are retrying the same step with new tools.
                       return _context2.a(2, 0);
-                    case 18:
+                    case 19:
                       if (!(action.name === "ask_user")) {
-                        _context2.n = 19;
+                        _context2.n = 21;
                         break;
                       }
+                      // Standardize the question parameter, accepting 'prompt' as an alias for 'question'
+                      questionText = action.params.question || action.params.prompt; // Defensive check to ensure the AI provides a question.
+                      if (!(!questionText || typeof questionText !== "string" || questionText.trim() === "")) {
+                        _context2.n = 20;
+                        break;
+                      }
+                      _errorMsg = "Invalid action: 'ask_user' tool was called without a valid 'question' or 'prompt' parameter. You must provide a question for the user.";
+                      console.error("ReActController: ".concat(_errorMsg));
                       _this.scratchpad.push({
                         type: "action",
                         content: action
+                      }); // Log the faulty action
+                      _this.scratchpad.push({
+                        type: "observation",
+                        content: _errorMsg
+                      });
+                      _this._dispatchScratchpadUpdate();
+                      return _context2.a(2, 0);
+                    case 20:
+                      // Standardize the action for logging and downstream use
+                      standardizedAction = {
+                        name: "ask_user",
+                        params: {
+                          question: questionText,
+                          options: action.params.options || []
+                        }
+                      };
+                      _this.scratchpad.push({
+                        type: "action",
+                        content: standardizedAction
                       });
                       _this._dispatchScratchpadUpdate();
                       _currentState = _this.stateManager.getState();
@@ -120120,21 +120173,21 @@ var ReActController = /*#__PURE__*/function () {
                         // Add the AI's question to the main chat history
                         {
                           role: "assistant",
-                          content: action.params.question
+                          content: questionText
                         }])
                       });
                       _this.communicationBus.dispatchEvent("promptUserForInput", {
-                        question: action.params.question,
-                        options: action.params.options || []
+                        question: questionText,
+                        options: standardizedAction.params.options
                       });
                       // The run loop will be paused here. It will be resumed by a new event
                       // handler that listens for the user's response.
                       return _context2.a(2, {
                         v: void 0
                       });
-                    case 19:
+                    case 21:
                       if (!(action.name === "parse_error")) {
-                        _context2.n = 20;
+                        _context2.n = 22;
                         break;
                       }
                       _observation = "Parse error occurred. The AI response format was incorrect. Please respond with exactly one Thought and one Action in the specified format. Error: ".concat(action.params.error);
@@ -120150,14 +120203,14 @@ var ReActController = /*#__PURE__*/function () {
                       console.log("ReActController: Parse error, prompting AI to correct format.");
                       // Do NOT increment plan step index, we are retrying the same step.
                       return _context2.a(2, 0);
-                    case 20:
+                    case 22:
                       // *** NEW: Mismatch Detection Logic ***
                       chosenTool = availableTools.find(function (t) {
                         return t.name === action.name;
                       });
                       currentStepType = currentStep ? currentStep.step_type : null;
                       if (!(currentStepType === "geospatial" && chosenTool && !["geospatial", "data_retrieval"].includes(chosenTool.category.toLowerCase()))) {
-                        _context2.n = 21;
+                        _context2.n = 23;
                         break;
                       }
                       console.warn("ReActController: Mismatch detected! Step type is 'geospatial' but chosen tool '".concat(action.name, "' is category '").concat(chosenTool.category, "'."));
@@ -120177,7 +120230,7 @@ var ReActController = /*#__PURE__*/function () {
                       _this._dispatchScratchpadUpdate();
                       // Do NOT increment plan step index, we are retrying the same step.
                       return _context2.a(2, 0);
-                    case 21:
+                    case 23:
                       // *** END: Mismatch Detection Logic ***
 
                       _this.scratchpad.push({
@@ -120194,10 +120247,10 @@ var ReActController = /*#__PURE__*/function () {
                       });
 
                       // 5. Observation Handling
-                      _context2.n = 22;
+                      _context2.n = 24;
                       return _this.toolExecutor.execute(action.name, action.params, _this.stateManager.getState() // Pass current state to the executor
                       );
-                    case 22:
+                    case 24:
                       _observation3 = _context2.v;
                       finalObservation = _observation3; // Add programmatic guidance for find_places_nearby failures
                       if (action.name === "find_places_nearby" && typeof _observation3 === "string" && _observation3.startsWith("Found 0 places")) {
@@ -120235,11 +120288,11 @@ var ReActController = /*#__PURE__*/function () {
                         _this.currentPlanStepIndex++;
                       }
                       _this._dispatchScratchpadUpdate();
-                    case 23:
-                      _context2.n = 25;
+                    case 25:
+                      _context2.n = 27;
                       break;
-                    case 24:
-                      _context2.p = 24;
+                    case 26:
+                      _context2.p = 26;
                       _t2 = _context2.v;
                       console.error("ReActController: Error during ReAct cycle:", _t2);
                       _this.scratchpad.push({
@@ -120257,10 +120310,10 @@ var ReActController = /*#__PURE__*/function () {
                         });
                         finished = true;
                       }
-                    case 25:
+                    case 27:
                       return _context2.a(2);
                   }
-                }, _loop, null, [[3, 7], [1, 24]]);
+                }, _loop, null, [[4, 8], [2, 26]]);
               });
             case 1:
               if (!(!finished && loopCount < MAX_LOOP_ITERATIONS)) {
@@ -120353,6 +120406,22 @@ var ReActController = /*#__PURE__*/function () {
       return _handleUserInput;
     }()
     /**
+     * Handles the cancellation request from the UI.
+     * @private
+     */
+    )
+  }, {
+    key: "_handleCancel",
+    value: function _handleCancel() {
+      console.log("ReActController: Cancellation requested by user.");
+      this.isCancelled = true;
+      // Set the agent status to idle immediately to make the UI responsive.
+      this.stateManager.updateState({
+        agentStatus: "idle"
+      });
+    }
+
+    /**
      * Assembles the context for the AI Core.
      * This includes the user query, conversation history, scratchpad, and relevant tools retrieved via vector search.
      * @param {string} currentGoal - The current goal for the AI (user query or plan step).
@@ -120360,7 +120429,6 @@ var ReActController = /*#__PURE__*/function () {
      * @returns {Promise<{messages: Array, availableTools: Array}>} A promise that resolves to an object containing messages for the AI and the list of tools made available.
      * @private
      */
-    )
   }, {
     key: "_assembleContext",
     value: (function () {
@@ -120538,6 +120606,26 @@ var ReActController = /*#__PURE__*/function () {
                     }
                   },
                   required: ["reason"]
+                }
+              }, {
+                name: "ask_user",
+                description: "Asks the user for clarification or additional information when you are stuck or need more input to proceed. The user's response will be provided in the next Observation.",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    question: {
+                      type: "string",
+                      description: "The clear, specific question to ask the user."
+                    },
+                    options: {
+                      type: "array",
+                      description: "Optional. A list of suggested response options for the user to choose from.",
+                      items: {
+                        type: "string"
+                      }
+                    }
+                  },
+                  required: ["question"]
                 }
               });
 
