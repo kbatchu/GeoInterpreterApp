@@ -522,32 +522,23 @@
             Show Thinking <i class="bi bi-chevron-down toggle-icon"></i>
           </button>
         </div>
-         <div id="thinking-process-wrapper" class="collapse">
+        <div id="thinking-process-wrapper" class="collapse">
           <div class="card">
             <div class="card-body">
               <h5>AI Thought Process:</h5>
               <pre id="thinking-process-content"></pre>
             </div>
-          </div>
+          </div><!-- Add this button next to your "toggle-thinking-button" -->
+          <button id="cancel-analysis-button" class="btn btn-danger btn-sm m-2<!-- Add this button, for example, next to your "Cancel Analysis" button -->
+          <button
+            id="new-session-button"
+            class="btn btn-secondary"
+            title="Start a new session"
+          >
+            <i class="bi bi-plus-lg"></i> New Session
+          </button>
+          " style="display: none;">Cancel Analysis</button>
           
-          <!-- Fixed button container with proper structure -->
-          <div class="d-flex justify-content-between align-items-center p-2">
-            <button 
-              id="cancel-analysis-button" 
-              class="btn btn-danger btn-sm" 
-              style="display: none;"
-            >
-              Cancel Analysis
-            </button>
-            
-            <button
-              id="new-session-button"
-              class="btn btn-secondary btn-sm"
-              title="Start a new session"
-            >
-              <i class="bi bi-plus-lg"></i> New Session
-            </button>
-          </div>
         </div>
 
         <!-- Container for the agent to ask the user for input -->
