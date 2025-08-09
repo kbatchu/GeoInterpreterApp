@@ -127546,7 +127546,7 @@ var ReActController = /*#__PURE__*/function () {
                         } else {
                           // All plan steps completed
                           // All plan steps have been executed. The AI now needs to be prompted to
-                          // synthesize the results from the scratchpad and provide a final answer.
+                          // synthesize the results from the scratchpad and provide a final answer to the user's original query: "${this.userQuery}". Use the 'finish' tool to provide the answer.
                           currentGoal = "All plan steps have been executed. Review the scratchpad and provide a final, comprehensive answer to the user's original query: \"".concat(_this.userQuery, "\". Use the 'finish' tool to provide the answer.");
                           currentStep = null; // No longer tied to a specific step
                           console.log("ReActController: All planned steps completed. Now generating final answer.");
@@ -128141,7 +128141,7 @@ var ReActController = /*#__PURE__*/function () {
                 planningTools = availableTools.filter(function (t) {
                   return t.name === "create_plan";
                 });
-                systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your primary goal is to help the user by breaking down complex requests into a logical, step-by-step plan.\n\n## CRITICAL: YOU ARE IN PLANNING MODE\nYou MUST create a plan using the create_plan tool. Do NOT attempt to execute any other actions.\n\n## RESPONSE FORMAT\nYou MUST respond in the following format, with no other text before or after. Your entire response must start with \"Thought:\".\n\nThought: [Your reasoning for the plan you are about to create.]\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"...\", \"step_type\": \"...\" }, ... ] } }\n\n## PLAN REQUIREMENTS\n- Each step in the plan should be a discrete, self-contained analytical task.\n- For each step, you must provide a 'step_type' from this exact list: [geospatial, aggregation, filter, data_retrieval, calculation, visualization].\n\n## CRITICAL PLANNING INSTRUCTIONS\n- **Prioritize User-Provided Information:** If the user's query contains specific details like a street address, a location name, or a dataset, your plan MUST start by using that information.\n- **Example:** If a street address is given, the first step of your plan MUST be to geocode that specific address. Do NOT use a tool to find the user's current location (e.g., from their IP address) unless the user explicitly asks for it (e.g., \"near me\").\n\n## EXAMPLE RESPONSE\nThought: The user wants to find Indian restaurants near a specific address, \"1600 Pennsylvania Avenue NW, Washington, DC\". The first step must be to convert this address into geographic coordinates. After getting the coordinates, I can search for the restaurants.\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"Geocode the address '1600 Pennsylvania Avenue NW, Washington, DC'\", \"step_type\": \"geospatial\" }, { \"step\": 2, \"description\": \"Search for Indian restaurants near the geocoded location\", \"step_type\": \"data_retrieval\" } ] } }";
+                systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your primary goal is to help the user by breaking down complex requests into a logical, step-by-step plan.\n\n## CRITICAL: YOU ARE IN PLANNING MODE\nYou MUST create a plan using the create_plan tool. Do NOT attempt to execute any other actions.\n\n## RESPONSE FORMAT\nYou MUST respond in the following format, with no other text before or after. Your entire response must start with \"Thought:\".\n\nThought: [Your reasoning for the plan you are about to create.]\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"...\", \"step_type\": \"...\" }, ... ] } }\n\n## PLAN REQUIREMENTS\n- Each step in the plan should be a discrete, self-contained analytical task.\n- For each step, you must provide a 'step_type' from this exact list: [geospatial, aggregation, filter, data_retrieval, calculation, visualization].\n\n## CRITICAL PLANNING INSTRUCTIONS\n- **Prioritize User-Provided Information:** If the user's query contains specific details like a street address, a location name, or a dataset, your plan MUST start by using that information.\n- **Example:** If a street address is given, the first step of your plan MUST be to convert this address into geographic coordinates. After getting the coordinates, I can search for the restaurants.\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"Geocode the address '1600 Pennsylvania Avenue NW, Washington, DC'\", \"step_type\": \"geospatial\" }, { \"step\": 2, \"description\": \"Search for Indian restaurants near the geocoded location\", \"step_type\": \"data_retrieval\" } ] } }";
                 userPrompt = "You have access to a single tool to help you. Use this tool to output your plan as a JSON array of steps.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(planningTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is the user's request:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
                   return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
                 }).join("\n"), "\n\nThought:");
@@ -128343,13 +128343,75 @@ var ReActController = /*#__PURE__*/function () {
     value: function _parseAIResponse(aiResponse) {
       console.log("ReActController: Parsing AI response:", aiResponse);
 
-      // Extract thought
-      var thoughtMatch = aiResponse.match(/Thought:\s*([^]*?)(?=\nAction:|$)/);
-      var thought = thoughtMatch ? thoughtMatch[1].trim() : "No thought provided.";
+      // Clean up the response - remove extra whitespace and normalize line endings
+      var cleanResponse = aiResponse.trim().replace(/\r\n/g, '\n');
 
-      // Extract action
-      var actionMatch = aiResponse.match(/Action:\s*(\{[^]*\})/);
-      if (!actionMatch) {
+      // Extract thought - more flexible regex that handles various formats
+      var thought = "No thought provided.";
+      var thoughtPatterns = [/Thought:\s*([^]*?)(?=\n\s*Action:|$)/,
+      // Original pattern
+      /Thought:\s*([^]*?)(?=Action:|$)/,
+      // Without newline before Action
+      /Thought:\s*([^]*)/ // Everything after Thought:
+      ];
+      for (var _i2 = 0, _thoughtPatterns = thoughtPatterns; _i2 < _thoughtPatterns.length; _i2++) {
+        var pattern = _thoughtPatterns[_i2];
+        var thoughtMatch = cleanResponse.match(pattern);
+        if (thoughtMatch && thoughtMatch[1].trim()) {
+          thought = thoughtMatch[1].trim();
+          break;
+        }
+      }
+
+      // Extract action - more flexible patterns
+      var actionJson = null;
+      var actionPatterns = [/Action:\s*(\{[^]*?\})\s*$/,
+      // Action at end
+      /Action:\s*(\{[^]*?\})/,
+      // Action anywhere
+      /\{[^}]*"name"[^}]*\}/ // Any JSON with "name" property
+      ];
+      for (var _i3 = 0, _actionPatterns = actionPatterns; _i3 < _actionPatterns.length; _i3++) {
+        var _pattern = _actionPatterns[_i3];
+        var actionMatch = cleanResponse.match(_pattern);
+        if (actionMatch) {
+          try {
+            actionJson = JSON.parse(actionMatch[1]);
+            break;
+          } catch (e) {
+            console.warn("ReActController: Failed to parse action JSON:", actionMatch[1]);
+            continue;
+          }
+        }
+      }
+
+      // If no valid action found, try to extract any JSON object
+      if (!actionJson) {
+        var jsonMatches = cleanResponse.match(/\{[^{}]*\}/g);
+        if (jsonMatches) {
+          var _iterator2 = _createForOfIteratorHelper(jsonMatches),
+            _step2;
+          try {
+            for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+              var jsonMatch = _step2.value;
+              try {
+                var parsed = JSON.parse(jsonMatch);
+                if (parsed.name) {
+                  actionJson = parsed;
+                  break;
+                }
+              } catch (e) {
+                continue;
+              }
+            }
+          } catch (err) {
+            _iterator2.e(err);
+          } finally {
+            _iterator2.f();
+          }
+        }
+      }
+      if (!actionJson) {
         console.warn("ReActController: No valid action found in AI response");
         return {
           thought: thought,
@@ -128359,14 +128421,32 @@ var ReActController = /*#__PURE__*/function () {
           }
         };
       }
-      try {
-        var actionJson = JSON.parse(actionMatch[1]);
 
-        // Validate action structure
-        if (!actionJson.name && !actionJson.parameters) {
-          console.warn("ReActController: Invalid action structure");
+      // Validate action structure
+      if (!actionJson.name) {
+        console.warn("ReActController: Invalid action structure - missing name");
+        return {
+          thought: thought,
+          action: {
+            name: "continue",
+            params: {}
+          }
+        };
+      }
+
+      // Normalize action structure (handle both 'params' and 'parameters')
+      var action = {
+        name: actionJson.name,
+        params: actionJson.parameters || actionJson.params || {}
+      };
+
+      // Special handling for planning mode
+      if (this.isPlanningMode) {
+        if (action.name !== "create_plan") {
+          console.warn("ReActController: Expected 'create_plan' action in planning mode, but got:", action.name);
+          // Force the AI to create a plan by returning a continue action
           return {
-            thought: thought,
+            thought: thought + " (Note: Must use create_plan action in planning mode)",
             action: {
               name: "continue",
               params: {}
@@ -128374,54 +128454,24 @@ var ReActController = /*#__PURE__*/function () {
           };
         }
 
-        // Normalize action structure (handle both 'params' and 'parameters')
-        var action = {
-          name: actionJson.name,
-          params: actionJson.parameters || actionJson.params || {}
-        };
-
-        // Special handling for planning mode
-        if (this.isPlanningMode) {
-          if (action.name !== "create_plan") {
-            console.warn("ReActController: Expected 'create_plan' action in planning mode, but got:", action.name);
-            // Force the AI to create a plan by returning a continue action
-            return {
-              thought: thought + " (Note: Must use create_plan action in planning mode)",
-              action: {
-                name: "continue",
-                params: {}
-              }
-            };
-          }
-
-          // Validate plan structure
-          if (!action.params.plan || !Array.isArray(action.params.plan)) {
-            console.warn("ReActController: Invalid plan structure in create_plan action");
-            return {
-              thought: thought + " (Note: create_plan action must include a 'plan' array)",
-              action: {
-                name: "continue",
-                params: {}
-              }
-            };
-          }
-        }
-        return {
-          thought: thought,
-          action: action
-        };
-      } catch (parseError) {
-        console.error("ReActController: Error parsing action JSON:", parseError);
-        return {
-          thought: thought,
-          action: {
-            name: "parse_error",
-            params: {
-              error: parseError.message
+        // Validate plan structure
+        if (!action.params.plan || !Array.isArray(action.params.plan)) {
+          console.warn("ReActController: Invalid plan structure in create_plan action");
+          return {
+            thought: thought + " (Note: create_plan action must include a 'plan' array)",
+            action: {
+              name: "continue",
+              params: {}
             }
-          }
-        };
+          };
+        }
       }
+      console.log("ReActController: Successfully parsed - Thought:", thought);
+      console.log("ReActController: Successfully parsed - Action:", action);
+      return {
+        thought: thought,
+        action: action
+      };
     }
   }, {
     key: "_correctPlanStepTypes",
