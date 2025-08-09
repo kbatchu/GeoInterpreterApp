@@ -125640,7 +125640,7 @@ function Geointerpreter() {
                 var _this$queue;
                 // Add new text to the queue as individual characters
                 // If this is the first text being added for a new thought, expand the UI.
-                if (!this.isTyping && thinkingProcessWrapper && !thinkingProcessWrapper.classList.contains('show')) {
+                if (!this.isTyping && thinkingProcessWrapper && !thinkingProcessWrapper.classList.contains("show")) {
                   thinkingProcessCollapse.show();
                 }
                 (_this$queue = this.queue).push.apply(_this$queue, _toConsumableArray(text.split("")));
@@ -125690,7 +125690,7 @@ function Geointerpreter() {
             thinkingProcessCollapse = new (bootstrap_dist_js_bootstrap__WEBPACK_IMPORTED_MODULE_2___default().Collapse)(thinkingProcessWrapper, {
               toggle: false
             }); // Manually wire up the toggle button since we are not using the data-api from a CDN script.
-            toggleThinkingButton.addEventListener('click', function () {
+            toggleThinkingButton.addEventListener("click", function () {
               thinkingProcessCollapse.toggle();
             });
 
@@ -125756,7 +125756,8 @@ function Geointerpreter() {
             // const modelId = "Qwen2-1.5B-Instruct-q4f32_1-MLC";
             // const modelId = "Qwen2-7B-Instruct-q4f32_1-MLC";
             // const modelId = "Llama-3.2-1B-Instruct-q4f16_1-MLC"; // small-fast
-            modelId = "Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC"; // supports OpenAI's API for function calling
+            // 09Aug2025 const modelId = "Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC"; // supports OpenAI's API for function calling
+            modelId = "Qwen2.5-7B-Instruct-q4f32_1-MLC"; //? better reasoning capability  // 09Aug2025
             _context3.p = 3;
             outputElement.textContent = "Initializing AI systems...";
 
