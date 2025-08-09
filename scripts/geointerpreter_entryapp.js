@@ -125755,9 +125755,7 @@ function Geointerpreter() {
             // const modelId = "Qwen2-1.5B-Instruct-q4f32_1-MLC";
             // const modelId = "Qwen2-7B-Instruct-q4f32_1-MLC";
             // const modelId = "Llama-3.2-1B-Instruct-q4f16_1-MLC"; // small-fast
-            // 09Aug2025 const modelId = "Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC"; // supports OpenAI's API for function calling
-            // const modelId = "Qwen2.5-7B-Instruct-q4f32_1-MLC"; //? performance is slower than Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC  // 09Aug2025
-            modelId = "gemma-2-2b-jpn-it-q4f32_1-MLC";
+            modelId = "Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC"; // supports OpenAI's API for function calling
             _context3.p = 3;
             outputElement.textContent = "Initializing AI systems...";
 
