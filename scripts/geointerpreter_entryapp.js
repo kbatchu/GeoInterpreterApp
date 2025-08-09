@@ -128341,129 +128341,65 @@ var ReActController = /*#__PURE__*/function () {
   }, {
     key: "_parseAIResponse",
     value: function _parseAIResponse(aiResponse) {
-      console.log("ReActController: Parsing AI response:", aiResponse);
-
-      // Clean up the response - remove extra whitespace and normalize line endings
-      var cleanResponse = aiResponse.trim().replace(/\r\n/g, '\n');
-
-      // Extract thought - more flexible regex that handles various formats
+      console.log("ReActController: Parsing AI response:", "\"".concat(aiResponse, "\""));
+      var cleanResponse = aiResponse.trim();
       var thought = "No thought provided.";
-      var thoughtPatterns = [/Thought:\s*([^]*?)(?=\n\s*Action:|$)/,
-      // Original pattern
-      /Thought:\s*([^]*?)(?=Action:|$)/,
-      // Without newline before Action
-      /Thought:\s*([^]*)/ // Everything after Thought:
-      ];
-      for (var _i2 = 0, _thoughtPatterns = thoughtPatterns; _i2 < _thoughtPatterns.length; _i2++) {
-        var pattern = _thoughtPatterns[_i2];
-        var thoughtMatch = cleanResponse.match(pattern);
-        if (thoughtMatch && thoughtMatch[1].trim()) {
-          thought = thoughtMatch[1].trim();
-          break;
-        }
-      }
-
-      // Extract action - more flexible patterns
-      var actionJson = null;
-      var actionPatterns = [/Action:\s*(\{[^]*?\})\s*$/,
-      // Action at end
-      /Action:\s*(\{[^]*?\})/,
-      // Action anywhere
-      /\{[^}]*"name"[^}]*\}/ // Any JSON with "name" property
-      ];
-      for (var _i3 = 0, _actionPatterns = actionPatterns; _i3 < _actionPatterns.length; _i3++) {
-        var _pattern = _actionPatterns[_i3];
-        var actionMatch = cleanResponse.match(_pattern);
-        if (actionMatch) {
-          try {
-            actionJson = JSON.parse(actionMatch[1]);
-            break;
-          } catch (e) {
-            console.warn("ReActController: Failed to parse action JSON:", actionMatch[1]);
-            continue;
-          }
-        }
-      }
-
-      // If no valid action found, try to extract any JSON object
-      if (!actionJson) {
-        var jsonMatches = cleanResponse.match(/\{[^{}]*\}/g);
-        if (jsonMatches) {
-          var _iterator2 = _createForOfIteratorHelper(jsonMatches),
-            _step2;
-          try {
-            for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-              var jsonMatch = _step2.value;
-              try {
-                var parsed = JSON.parse(jsonMatch);
-                if (parsed.name) {
-                  actionJson = parsed;
-                  break;
-                }
-              } catch (e) {
-                continue;
-              }
-            }
-          } catch (err) {
-            _iterator2.e(err);
-          } finally {
-            _iterator2.f();
-          }
-        }
-      }
-      if (!actionJson) {
-        console.warn("ReActController: No valid action found in AI response");
-        return {
-          thought: thought,
-          action: {
-            name: "continue",
-            params: {}
-          }
-        };
-      }
-
-      // Validate action structure
-      if (!actionJson.name) {
-        console.warn("ReActController: Invalid action structure - missing name");
-        return {
-          thought: thought,
-          action: {
-            name: "continue",
-            params: {}
-          }
-        };
-      }
-
-      // Normalize action structure (handle both 'params' and 'parameters')
       var action = {
-        name: actionJson.name,
-        params: actionJson.parameters || actionJson.params || {}
-      };
+        name: "continue",
+        params: {}
+      }; // Default action
 
-      // Special handling for planning mode
-      if (this.isPlanningMode) {
-        if (action.name !== "create_plan") {
-          console.warn("ReActController: Expected 'create_plan' action in planning mode, but got:", action.name);
-          // Force the AI to create a plan by returning a continue action
-          return {
-            thought: thought + " (Note: Must use create_plan action in planning mode)",
-            action: {
-              name: "continue",
-              params: {}
+      // Find the last occurrence of "Action:" to reliably separate thought from action.
+      var actionPrefix = "Action:";
+      var actionIndex = cleanResponse.lastIndexOf(actionPrefix);
+      if (actionIndex !== -1) {
+        // If "Action:" is present, parse both thought and action
+        var rawThought = cleanResponse.substring(0, actionIndex).trim();
+        var thoughtPrefix = "Thought:";
+        if (rawThought.startsWith(thoughtPrefix)) {
+          rawThought = rawThought.substring(thoughtPrefix.length).trim();
+        }
+        if (rawThought) {
+          thought = rawThought;
+        }
+        var actionString = cleanResponse.substring(actionIndex + actionPrefix.length).trim();
+        try {
+          // Find the first '{' and last '}' to extract the JSON object
+          var jsonStart = actionString.indexOf('{');
+          var jsonEnd = actionString.lastIndexOf('}');
+          if (jsonStart === -1 || jsonEnd === -1 || jsonEnd < jsonStart) {
+            throw new Error("No valid JSON object found in the action part.");
+          }
+          var jsonString = actionString.substring(jsonStart, jsonEnd + 1);
+          var parsedAction = JSON.parse(jsonString);
+          if (parsedAction && typeof parsedAction.name === 'string') {
+            // Assign to the existing 'action' variable, don't redeclare
+            action = {
+              name: parsedAction.name,
+              params: parsedAction.parameters || parsedAction.params || {}
+            };
+          } else {
+            throw new Error("Parsed JSON is not a valid action object (missing 'name').");
+          }
+        } catch (e) {
+          console.error("ReActController: Failed to parse action JSON. Error: ".concat(e.message, ". Raw action string: \"").concat(actionString, "\""));
+          // If parsing fails, we create a special action to inform the agent.
+          action = {
+            name: "parse_error",
+            params: {
+              error: e.message,
+              response: actionString
             }
           };
         }
-
-        // Validate plan structure
-        if (!action.params.plan || !Array.isArray(action.params.plan)) {
-          console.warn("ReActController: Invalid plan structure in create_plan action");
-          return {
-            thought: thought + " (Note: create_plan action must include a 'plan' array)",
-            action: {
-              name: "continue",
-              params: {}
-            }
-          };
+      } else {
+        // If "Action:" is not present, the entire response is the thought.
+        // This handles cases where the AI is just thinking or recovering.
+        var _thoughtPrefix = "Thought:";
+        if (cleanResponse.startsWith(_thoughtPrefix)) {
+          thought = cleanResponse.substring(_thoughtPrefix.length).trim();
+        } else {
+          thought = cleanResponse;
         }
       }
       console.log("ReActController: Successfully parsed - Thought:", thought);
