@@ -117991,14 +117991,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modules_orchestration_embedding_manager_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./modules/orchestration/embedding_manager.js */ "./scripts/modules/orchestration/embedding_manager.js");
 /* harmony import */ var _modules_tools_tool_executor_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./modules/tools/tool_executor.js */ "./scripts/modules/tools/tool_executor.js");
 /* harmony import */ var _modules_duckdb_init_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./modules/duckdb_init.js */ "./scripts/modules/duckdb_init.js");
-function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
-function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
 
@@ -118030,15 +118030,68 @@ function Geointerpreter() {
     return mMediator;
   };
 
-  // Main function to run our analysis
+  /**
+   * Requests persistent storage for the application's data (including cached models).
+   * This prevents the browser from automatically clearing the cache when storage is low.
+   */
+  function requestPersistentStorage() {
+    return _requestPersistentStorage.apply(this, arguments);
+  } // Main function to run our analysis
+  function _requestPersistentStorage() {
+    _requestPersistentStorage = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+      var isPersisted, wasPersisted, _t;
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.n) {
+          case 0:
+            if (!(navigator.storage && navigator.storage.persist)) {
+              _context.n = 6;
+              break;
+            }
+            _context.n = 1;
+            return navigator.storage.persisted();
+          case 1:
+            isPersisted = _context.v;
+            console.log("Storage is currently persisted: ".concat(isPersisted));
+            if (isPersisted) {
+              _context.n = 5;
+              break;
+            }
+            _context.p = 2;
+            _context.n = 3;
+            return navigator.storage.persist();
+          case 3:
+            wasPersisted = _context.v;
+            if (wasPersisted) {
+              console.log("Successfully enabled persistent storage for the origin.");
+            } else {
+              console.warn("Failed to enable persistent storage. The browser may clear data under storage pressure.");
+            }
+            _context.n = 5;
+            break;
+          case 4:
+            _context.p = 4;
+            _t = _context.v;
+            console.error("Error requesting persistent storage:", _t);
+          case 5:
+            _context.n = 7;
+            break;
+          case 6:
+            console.warn("Persistent Storage API is not supported in this browser.");
+          case 7:
+            return _context.a(2);
+        }
+      }, _callee, null, [[2, 4]]);
+    }));
+    return _requestPersistentStorage.apply(this, arguments);
+  }
   function initializeApplication() {
     return _initializeApplication.apply(this, arguments);
   }
   function _initializeApplication() {
-    _initializeApplication = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
-      var outputElement, userInputField, sendButton, chatHistoryDiv, toggleThinkingButton, thinkingProcessContent, thinkingProcessWrapper, chatInputContainer, userPromptContainer, userPromptQuestion, userPromptInput, userPromptSubmit, userPromptOptions, aiCore, _yield$InitializeDuck, db, dbConn, llmProgress, embeddingProgress, updateCombinedProgress, llmInitProgressCallback, embeddingInitProgressCallback, modelId, embeddingManagerInstance, _yield$Promise$all, _yield$Promise$all2, core, _, stateManager, communicationBus, toolExecutorInstance, reactController, submitUserResponse, _t;
-      return _regenerator().w(function (_context) {
-        while (1) switch (_context.n) {
+    _initializeApplication = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
+      var outputElement, userInputField, sendButton, chatHistoryDiv, toggleThinkingButton, thinkingProcessContent, thinkingProcessWrapper, chatInputContainer, userPromptContainer, userPromptQuestion, userPromptInput, userPromptSubmit, userPromptOptions, aiCore, _yield$InitializeDuck, db, dbConn, llmProgress, embeddingProgress, updateCombinedProgress, llmInitProgressCallback, embeddingInitProgressCallback, modelId, embeddingManagerInstance, _yield$Promise$all, _yield$Promise$all2, core, _, stateManager, communicationBus, toolExecutorInstance, reactController, submitUserResponse, _t2;
+      return _regenerator().w(function (_context2) {
+        while (1) switch (_context2.n) {
           case 0:
             outputElement = document.getElementById("analysis-output");
             userInputField = document.getElementById("user-input");
@@ -118061,10 +118114,15 @@ function Geointerpreter() {
                 toggleThinkingButton.innerHTML = 'Show Thinking <i class="bi bi-chevron-down toggle-icon"></i>';
               });
             }
-            _context.n = 1;
-            return (0,_modules_duckdb_init_js__WEBPACK_IMPORTED_MODULE_10__["default"])();
+
+            // Request persistent storage early in the lifecycle
+            _context2.n = 1;
+            return requestPersistentStorage();
           case 1:
-            _yield$InitializeDuck = _context.v;
+            _context2.n = 2;
+            return (0,_modules_duckdb_init_js__WEBPACK_IMPORTED_MODULE_10__["default"])();
+          case 2:
+            _yield$InitializeDuck = _context2.v;
             db = _yield$InitializeDuck.db;
             dbConn = _yield$InitializeDuck.dbConn;
             mDB = db;
@@ -118110,7 +118168,7 @@ function Geointerpreter() {
             // const modelId = "Qwen2-7B-Instruct-q4f32_1-MLC";
             // const modelId = "Llama-3.2-1B-Instruct-q4f16_1-MLC"; // small-fast
             modelId = "Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC"; // supports OpenAI's API for function calling
-            _context.p = 2;
+            _context2.p = 3;
             outputElement.textContent = "Initializing AI systems...";
 
             // Start updating progress immediately
@@ -118118,15 +118176,15 @@ function Geointerpreter() {
 
             // Parallel loading of models as per design document
             embeddingManagerInstance = new _modules_orchestration_embedding_manager_js__WEBPACK_IMPORTED_MODULE_8__["default"](embeddingInitProgressCallback); // Instantiate with callback
-            _context.n = 3;
+            _context2.n = 4;
             return Promise.all([
             // Await both promises concurrently
             (0,_mlc_ai_web_llm__WEBPACK_IMPORTED_MODULE_4__.CreateMLCEngine)(modelId, {
               initProgressCallback: llmInitProgressCallback
             }), embeddingManagerInstance.readyPromise // Await the promise from the instance
             ]);
-          case 3:
-            _yield$Promise$all = _context.v;
+          case 4:
+            _yield$Promise$all = _context2.v;
             _yield$Promise$all2 = _slicedToArray(_yield$Promise$all, 2);
             core = _yield$Promise$all2[0];
             _ = _yield$Promise$all2[1];
@@ -118267,24 +118325,24 @@ function Geointerpreter() {
             stateManager.updateState({
               agentStatus: "idle"
             });
-            _context.n = 5;
+            _context2.n = 6;
             break;
-          case 4:
-            _context.p = 4;
-            _t = _context.v;
+          case 5:
+            _context2.p = 5;
+            _t2 = _context2.v;
             // Error handling remains the same
-            console.error("Initialization error:", _t);
-            outputElement.textContent = "Error during initialization: ".concat(_t.message || "An unknown error occurred.");
-            if (_t.message && _t.message.includes("Model variant not found")) {
+            console.error("Initialization error:", _t2);
+            outputElement.textContent = "Error during initialization: ".concat(_t2.message || "An unknown error occurred.");
+            if (_t2.message && _t2.message.includes("Model variant not found")) {
               outputElement.textContent += "\n\nPlease ensure the model ID '".concat(modelId, "' is correct and available in WebLLM's model list.");
             }
-          case 5:
-            _context.p = 5;
-            return _context.f(5);
           case 6:
-            return _context.a(2);
+            _context2.p = 6;
+            return _context2.f(6);
+          case 7:
+            return _context2.a(2);
         }
-      }, _callee, null, [[2, 4, 5, 6]]);
+      }, _callee2, null, [[3, 5, 6, 7]]);
     }));
     return _initializeApplication.apply(this, arguments);
   }
