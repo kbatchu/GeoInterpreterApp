@@ -120959,7 +120959,7 @@ function geocodeAddress(_x2) {
  */
 function _geocodeAddress() {
   _geocodeAddress = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(address) {
-    var sanitizedAddress, data, addressWithoutNumber;
+    var coordRegex, sanitizedAddress, data, addressWithoutNumber;
     return _regenerator().w(function (_context2) {
       while (1) switch (_context2.n) {
         case 0:
@@ -120971,29 +120971,40 @@ function _geocodeAddress() {
             error: "Invalid address provided. Please provide a valid street address as a string."
           });
         case 1:
-          sanitizedAddress = address.replace(/-/g, ' '); // --- Attempt 1: Use the full address ---
-          _context2.n = 2;
-          return _nominatimSearch(sanitizedAddress);
+          // This regex looks for two numbers (integer or float, possibly negative) separated by a comma.
+          // It's a simple check to prevent misuse of the tool with coordinates.
+          coordRegex = /^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/;
+          if (!coordRegex.test(address.trim())) {
+            _context2.n = 2;
+            break;
+          }
+          return _context2.a(2, {
+            error: "Invalid input: \"".concat(address, "\" looks like coordinates. To convert coordinates to a text address, you MUST use the 'reverse_geocode' tool.")
+          });
         case 2:
+          sanitizedAddress = address.replace(/-/g, ' '); // --- Attempt 1: Use the full address ---
+          _context2.n = 3;
+          return _nominatimSearch(sanitizedAddress);
+        case 3:
           data = _context2.v;
           if (!(!data || data.length === 0)) {
-            _context2.n = 4;
+            _context2.n = 5;
             break;
           }
           console.warn("Geocoding failed for full address: \"".concat(sanitizedAddress, "\". Retrying without house number."));
           // This regex removes a sequence of digits at the start of the string, plus any following whitespace.
           addressWithoutNumber = sanitizedAddress.replace(/^\d+\s+/, ''); // Only retry if the address actually changed (i.e., it had a house number)
           if (!(addressWithoutNumber !== sanitizedAddress)) {
-            _context2.n = 4;
+            _context2.n = 5;
             break;
           }
-          _context2.n = 3;
+          _context2.n = 4;
           return _nominatimSearch(addressWithoutNumber);
-        case 3:
-          data = _context2.v;
         case 4:
+          data = _context2.v;
+        case 5:
           if (!(data && data.length > 0)) {
-            _context2.n = 5;
+            _context2.n = 6;
             break;
           }
           console.log("Geocoding successful for \"".concat(address, "\". Found: ").concat(data[0].display_name));
@@ -121001,13 +121012,13 @@ function _geocodeAddress() {
             latitude: parseFloat(data[0].lat),
             longitude: parseFloat(data[0].lon)
           });
-        case 5:
+        case 6:
           // If all attempts fail, return the error.
           console.error("Geocoding failed for all attempts for address: \"".concat(address, "\""));
           return _context2.a(2, {
             error: "No results found for address: \"".concat(address, "\"")
           });
-        case 6:
+        case 7:
           return _context2.a(2);
       }
     }, _callee2);
@@ -121119,14 +121130,14 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
  * @param {string} params.amenity - The type of place to search for (e.g., 'restaurant', 'hospital').
  * @param {string} [params.cuisine] - Optional cuisine type for restaurants.
  * @param {number} [params.radius_meters=1000] - The search radius in meters.
- * @returns {Promise<string>} A promise that resolves to a string summarizing the found places.
+ * @returns {Promise<string>} A promise that resolves to a JSON string of found places with their name and coordinates.
  */
 function findPlacesNearby(_x) {
   return _findPlacesNearby.apply(this, arguments);
 }
 function _findPlacesNearby() {
   _findPlacesNearby = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(params) {
-    var latitude, longitude, amenity, cuisine, _params$radius_meters, radius_meters, filters, query, response, data, placeNames, _t;
+    var latitude, longitude, amenity, cuisine, _params$radius_meters, radius_meters, filters, query, response, data, places, _t;
     return _regenerator().w(function (_context) {
       while (1) switch (_context.n) {
         case 0:
@@ -121142,7 +121153,7 @@ function _findPlacesNearby() {
           if (cuisine) {
             filters += "[\"cuisine\"=\"".concat(cuisine, "\"]");
           }
-          query = "\n    [out:json][timeout:25];\n    (\n      node".concat(filters, "(around:").concat(radius_meters, ",").concat(latitude, ",").concat(longitude, ");\n      way").concat(filters, "(around:").concat(radius_meters, ",").concat(latitude, ",").concat(longitude, ");\n      relation").concat(filters, "(around:").concat(radius_meters, ",").concat(latitude, ",").concat(longitude, ");\n    );\n    out body;\n    >;\n    out skel qt;\n  ");
+          query = "\n    [out:json][timeout:25];\n    (\n      node".concat(filters, "(around:").concat(radius_meters, ",").concat(latitude, ",").concat(longitude, ");\n      way").concat(filters, "(around:").concat(radius_meters, ",").concat(latitude, ",").concat(longitude, ");\n      relation").concat(filters, "(around:").concat(radius_meters, ",").concat(latitude, ",").concat(longitude, ");\n    );\n    out center;\n  ");
           _context.p = 2;
           _context.n = 3;
           return fetch("https://overpass-api.de/api/interpreter", {
@@ -121161,17 +121172,38 @@ function _findPlacesNearby() {
           return response.json();
         case 5:
           data = _context.v;
-          placeNames = data.elements.map(function (el) {
-            return el.tags && el.tags.name;
-          }).filter(Boolean); // Filter out elements without a name
-          return _context.a(2, "Found ".concat(placeNames.length, " places: [").concat(placeNames.join(", "), "]"));
+          places = data.elements.map(function (el) {
+            if (el.tags && el.tags.name) {
+              // For ways and relations, Overpass returns a 'center' object with lat/lon.
+              // For nodes, it's directly lat/lon properties.
+              var center = el.center || {
+                lat: el.lat,
+                lon: el.lon
+              };
+              if (center && typeof center.lat === 'number' && typeof center.lon === 'number') {
+                return {
+                  name: el.tags.name,
+                  latitude: center.lat,
+                  longitude: center.lon
+                };
+              }
+            }
+            return null;
+          }).filter(Boolean); // Filter out elements without a name or coordinates
+          if (!(places.length === 0)) {
+            _context.n = 6;
+            break;
+          }
+          return _context.a(2, "Found 0 places matching the criteria within a ".concat(radius_meters, " meter radius."));
         case 6:
-          _context.p = 6;
+          return _context.a(2, JSON.stringify(places, null, 2));
+        case 7:
+          _context.p = 7;
           _t = _context.v;
           console.error("Overpass API error:", _t);
           return _context.a(2, "Error executing Overpass query: ".concat(_t.message));
       }
-    }, _callee, null, [[2, 6]]);
+    }, _callee, null, [[2, 7]]);
   }));
   return _findPlacesNearby.apply(this, arguments);
 }
