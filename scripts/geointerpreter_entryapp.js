@@ -125689,7 +125689,12 @@ function Geointerpreter() {
             }; // Initialize the Bootstrap Collapse instance once for efficiency.
             thinkingProcessCollapse = new (bootstrap_dist_js_bootstrap__WEBPACK_IMPORTED_MODULE_2___default().Collapse)(thinkingProcessWrapper, {
               toggle: false
-            }); // Handle button text change on collapse toggle for the "Show Thinking" UI
+            }); // Manually wire up the toggle button since we are not using the data-api from a CDN script.
+            toggleThinkingButton.addEventListener('click', function () {
+              thinkingProcessCollapse.toggle();
+            });
+
+            // Handle button text change on collapse toggle for the "Show Thinking" UI
             if (thinkingProcessWrapper && toggleThinkingButton) {
               thinkingProcessWrapper.addEventListener("show.bs.collapse", function () {
                 toggleThinkingButton.innerHTML = 'Hide Thinking <i class="bi bi-chevron-up toggle-icon"></i>';
@@ -125933,14 +125938,6 @@ function Geointerpreter() {
             userPromptSubmit.addEventListener("click", submitUserResponse);
             userPromptInput.addEventListener("keypress", function (event) {
               if (event.key === "Enter") submitUserResponse();
-            });
-
-            // Handle button text change on collapse toggle for the "Show Thinking" UI
-            thinkingProcessWrapper.addEventListener("show.bs.collapse", function () {
-              toggleThinkingButton.textContent = "Hide Thinking";
-            });
-            thinkingProcessWrapper.addEventListener("hide.bs.collapse", function () {
-              toggleThinkingButton.textContent = "Show Thinking";
             });
 
             // Set initial state
