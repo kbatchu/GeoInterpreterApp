@@ -49,6 +49,23 @@
       font-size: 1em;
       cursor: pointer;
     }
+
+    /* Add this CSS for proper scrolling in the thinking process */
+    #thinking-process-wrapper .card-body {
+      max-height: 300px;
+      /* Set a maximum height */
+      overflow-y: auto;
+      /* Enable vertical scrolling */
+    }
+
+    #thinking-process-content {
+      white-space: pre-wrap;
+      /* Preserve formatting */
+      word-wrap: break-word;
+      /* Break long words */
+      margin: 0;
+      /* Remove default margin */
+    }
   </style>
 
   <style>

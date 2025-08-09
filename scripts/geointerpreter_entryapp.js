@@ -125612,7 +125612,7 @@ function Geointerpreter() {
   }
   function _initializeApplication() {
     _initializeApplication = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
-      var outputElement, userInputField, sendButton, cancelAnalysisButton, newSessionButton, chatHistoryDiv, toggleThinkingButton, thinkingProcessContent, thinkingProcessWrapper, chatInputContainer, userPromptContainer, userPromptQuestion, userPromptInput, userPromptSubmit, userPromptOptions, scrollSentinel, typewriter, thinkingProcessCollapse, aiCore, _yield$InitializeDuck, db, dbConn, llmProgress, embeddingProgress, updateCombinedProgress, llmInitProgressCallback, embeddingInitProgressCallback, modelId, embeddingManagerInstance, _yield$Promise$all, _yield$Promise$all2, core, _, stateManager, communicationBus, toolExecutorInstance, reactController, lastThinkingProcess, submitUserResponse, _t2;
+      var outputElement, userInputField, sendButton, cancelAnalysisButton, newSessionButton, chatHistoryDiv, toggleThinkingButton, thinkingProcessContent, thinkingProcessWrapper, chatInputContainer, userPromptContainer, userPromptQuestion, userPromptInput, userPromptSubmit, userPromptOptions, typewriter, thinkingProcessCollapse, aiCore, _yield$InitializeDuck, db, dbConn, llmProgress, embeddingProgress, updateCombinedProgress, llmInitProgressCallback, embeddingInitProgressCallback, modelId, embeddingManagerInstance, _yield$Promise$all, _yield$Promise$all2, core, _, stateManager, communicationBus, toolExecutorInstance, reactController, lastThinkingProcess, submitUserResponse, _t2;
       return _regenerator().w(function (_context3) {
         while (1) switch (_context3.n) {
           case 0:
@@ -125630,9 +125630,7 @@ function Geointerpreter() {
             userPromptQuestion = document.getElementById("user-prompt-question");
             userPromptInput = document.getElementById("user-prompt-input");
             userPromptSubmit = document.getElementById("user-prompt-submit");
-            userPromptOptions = document.getElementById("user-prompt-options"); // Create a sentinel element to append to the thinking process wrapper for robust scrolling.
-            scrollSentinel = document.createElement('div');
-            thinkingProcessWrapper.appendChild(scrollSentinel);
+            userPromptOptions = document.getElementById("user-prompt-options");
             typewriter = {
               queue: [],
               isTyping: false,
@@ -125654,7 +125652,7 @@ function Geointerpreter() {
               type: function type() {
                 var _this = this;
                 return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
-                  var _char;
+                  var _char, cardBody;
                   return _regenerator().w(function (_context2) {
                     while (1) switch (_context2.n) {
                       case 0:
@@ -125666,11 +125664,13 @@ function Geointerpreter() {
                         }
                         _char = _this.queue.shift();
                         thinkingProcessContent.textContent += _char;
-                        // Use scrollIntoView on the sentinel for robust auto-scrolling.
-                        scrollSentinel.scrollIntoView({
-                          behavior: "auto",
-                          block: "end"
-                        });
+
+                        // Fix: Scroll the parent container of the content
+                        // The card-body div is the scrollable container
+                        cardBody = thinkingProcessContent.parentElement;
+                        if (cardBody) {
+                          cardBody.scrollTop = cardBody.scrollHeight;
+                        }
                         _context2.n = 2;
                         return new Promise(function (resolve) {
                           return setTimeout(resolve, _this.speed);
@@ -128112,6 +128112,7 @@ var ReActController = /*#__PURE__*/function () {
           availableTools,
           toolNames,
           messages,
+          planningTools,
           systemPrompt,
           userPrompt,
           _systemPrompt,
@@ -128138,8 +128139,14 @@ var ReActController = /*#__PURE__*/function () {
               console.log("ReActController: Retrieved available tools: [".concat(toolNames.join(", "), "]"));
               messages = [];
               if (this.isPlanningMode) {
+                // In planning mode, we ONLY want the AI to use the 'create_plan' tool.
+                // We filter the available tools to ensure no other tools are presented,
+                // which could confuse the model into trying to execute a step instead of planning.
+                planningTools = availableTools.filter(function (t) {
+                  return t.name === "create_plan";
+                });
                 systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your primary goal is to help the user by breaking down complex requests into a logical, step-by-step plan.\n\n## RESPONSE FORMAT\nYou MUST respond in the following format, with no other text before or after. Your entire response must start with \"Thought:\".\n\nThought: [Your reasoning for the plan you are about to create.]\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"...\", \"step_type\": \"...\" }, ... ] } }\n\n## PLAN REQUIREMENTS\n- Each step in the plan should be a discrete, self-contained analytical task.\n- For each step, you must provide a 'step_type' from this exact list: [geospatial, aggregation, filter, data_retrieval, calculation, visualization].\n\n## CRITICAL PLANNING INSTRUCTIONS\n- **Prioritize User-Provided Information:** If the user's query contains specific details like a street address, a location name, or a dataset, your plan MUST start by using that information.\n- **Example:** If a street address is given, the first step of your plan MUST be to geocode that specific address. Do NOT use a tool to find the user's current location (e.g., from their IP address) unless the user explicitly asks for it (e.g., \"near me\").";
-                userPrompt = "You have access to a special tool called `create_plan`. Use this tool to output your plan as a JSON array of steps inside the 'plan' parameter.\n\nHere is the user's request:\n<USER_QUERY>\n".concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
+                userPrompt = "You have access to a single tool to help you. Use this tool to output your plan as a JSON array of steps.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(planningTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is the user's request:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
                   return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
                 }).join("\n"), "\n\nThought:");
                 messages.push({
