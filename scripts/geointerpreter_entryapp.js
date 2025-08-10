@@ -127418,7 +127418,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 
 // Keep the last 10 pairs of Thought/Action/Observation to prevent excessive token usage.
 // This now controls how much of the *immediate* scratchpad is shown to the AI.
-var MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT = 18; // Give the agent a larger short-term memory buffer (last 6 cycles) for more stability.
+var MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT = 25; // Give the agent a larger short-term memory buffer (last 6 cycles) for more stability.
 var ReActController = /*#__PURE__*/function () {
   function ReActController(stateManager, communicationBus, aiCore, toolExecutor,
   // Placeholder for ToolExecutor
