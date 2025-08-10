@@ -127410,7 +127410,11 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 
 
 // Keep the last 10 pairs of Thought/Action/Observation to prevent excessive token usage.
-var MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT = 30; // 19Jul2025
+var MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT = 12; // A smaller number to prevent exceeding context window. A value of 12 allows for ~4 full Thought/Action/Observation cycles.
+
+// Constants for the summarization strategy
+var SCRATCHPAD_SUMMARY_THRESHOLD = 20; // Trigger summary when scratchpad has this many entries.
+var SCRATCHPAD_ENTRIES_TO_SUMMARIZE = 15; // Summarize this many of the oldest entries.
 var ReActController = /*#__PURE__*/function () {
   function ReActController(stateManager, communicationBus, aiCore, toolExecutor,
   // Placeholder for ToolExecutor
@@ -127516,6 +127520,9 @@ var ReActController = /*#__PURE__*/function () {
                         v: void 0
                       });
                     case 1:
+                      _context2.n = 2;
+                      return _this._summarizeScratchpad();
+                    case 2:
                       loopCount++;
                       _this.communicationBus.dispatchEvent("agentLoopUpdate", {
                         loopCount: loopCount,
@@ -127525,7 +127532,7 @@ var ReActController = /*#__PURE__*/function () {
                         agentStatus: "thinking"
                       });
                       console.log("ReActController: Loop iteration ".concat(loopCount));
-                      _context2.p = 2;
+                      _context2.p = 3;
                       currentGoal = _this.userQuery;
                       currentStep = null; // Will hold the full step object {description, step_type}
                       if (!_this.isPlanningMode && _this.stateManager.getState().activePlan) {
@@ -127551,46 +127558,46 @@ var ReActController = /*#__PURE__*/function () {
                       }
 
                       // 1. Context Assembly
-                      _context2.n = 3;
+                      _context2.n = 4;
                       return _this._assembleContext(currentGoal, currentStep);
-                    case 3:
+                    case 4:
                       _yield$_this$_assembl = _context2.v;
                       messages = _yield$_this$_assembl.messages;
                       availableTools = _yield$_this$_assembl.availableTools;
                       console.log("ReActController: Assembled context for AI invocation:", messages);
 
                       // 2. AI Invocation
-                      _context2.p = 4;
+                      _context2.p = 5;
                       console.log("ReActController: Invoking AI core with messages...");
-                      _context2.n = 5;
+                      _context2.n = 6;
                       return _this.aiCore.chat.completions.create({
                         messages: messages,
                         temperature: 0.1,
                         // A low temperature for more predictable tool usage.
                         max_gen_len: 512 // A reasonable limit for a thought/action response.
                       });
-                    case 5:
+                    case 6:
                       reply = _context2.v;
                       console.log("ReActController: AI core responded. Full reply object:", reply);
                       if (!(reply && reply.choices && reply.choices.length > 0 && reply.choices[0].message)) {
-                        _context2.n = 6;
+                        _context2.n = 7;
                         break;
                       }
                       aiResponse = reply.choices[0].message.content;
                       console.log("ReActController: Extracted AI response content:", aiResponse);
-                      _context2.n = 7;
+                      _context2.n = 8;
                       break;
-                    case 6:
-                      throw new Error("AI response structure is unexpected or empty.");
                     case 7:
-                      _context2.n = 9;
-                      break;
+                      throw new Error("AI response structure is unexpected or empty.");
                     case 8:
-                      _context2.p = 8;
+                      _context2.n = 10;
+                      break;
+                    case 9:
+                      _context2.p = 9;
                       _t = _context2.v;
                       console.error("ReActController: Error during AI invocation:", _t);
                       throw new Error("AI invocation failed: ".concat(_t.message));
-                    case 9:
+                    case 10:
                       // 3. Response Parsing
                       _this$_parseAIRespons = _this._parseAIResponse(aiResponse), thought = _this$_parseAIRespons.thought, action = _this$_parseAIRespons.action;
                       _this.scratchpad.push({
@@ -127604,7 +127611,7 @@ var ReActController = /*#__PURE__*/function () {
                       // *** Repetition Detection Logic ***
                       // Check if the agent is stuck repeating the same action.
                       if (!(action.name !== "continue" && action.name !== "parse_error")) {
-                        _context2.n = 11;
+                        _context2.n = 12;
                         break;
                       }
                       actionSignature = JSON.stringify({
@@ -127618,7 +127625,7 @@ var ReActController = /*#__PURE__*/function () {
 
                       // Check if the last `REPETITION_LIMIT` actions are all identical
                       if (!(lastActionHistory.length === REPETITION_LIMIT && new Set(lastActionHistory).size === 1)) {
-                        _context2.n = 10;
+                        _context2.n = 11;
                         break;
                       }
                       errorMsg = "Error: The agent appears to be stuck in a loop, repeating the action '".concat(action.name, "'. Halting execution to prevent further issues.");
@@ -127636,15 +127643,15 @@ var ReActController = /*#__PURE__*/function () {
                       });
                       finished = true;
                       return _context2.a(2, 0);
-                    case 10:
-                      _context2.n = 12;
-                      break;
                     case 11:
+                      _context2.n = 13;
+                      break;
+                    case 12:
                       // Reset history on non-tool or error actions to not penalize recovery attempts
                       lastActionHistory = [];
-                    case 12:
+                    case 13:
                       if (!(action.name === "continue")) {
-                        _context2.n = 13;
+                        _context2.n = 14;
                         break;
                       }
                       _this.scratchpad.push({
@@ -127653,18 +127660,18 @@ var ReActController = /*#__PURE__*/function () {
                       });
                       // This will cause the loop to run again with the new thought and observation in the scratchpad
                       return _context2.a(2, 0);
-                    case 13:
+                    case 14:
                       if (!_this.isPlanningMode) {
-                        _context2.n = 17;
+                        _context2.n = 18;
                         break;
                       }
                       if (!(action.name === "create_plan" && action.params.plan)) {
-                        _context2.n = 15;
+                        _context2.n = 16;
                         break;
                       }
-                      _context2.n = 14;
+                      _context2.n = 15;
                       return _this._correctPlanStepTypes(action.params.plan);
-                    case 14:
+                    case 15:
                       correctedPlan = _context2.v;
                       // Correct the plan
                       _this.stateManager.updateState({
@@ -127686,20 +127693,20 @@ var ReActController = /*#__PURE__*/function () {
                       console.log("ReActController: Plan created and stored.");
                       console.log("ReActController: Generated Plan:", correctedPlan); // Log corrected plan
                       // Continue to next loop iteration to execute first step
-                      _context2.n = 16;
+                      _context2.n = 17;
                       break;
-                    case 15:
-                      throw new Error("AI did not return a valid plan in planning mode.");
                     case 16:
-                      _context2.n = 26;
-                      break;
+                      throw new Error("AI did not return a valid plan in planning mode.");
                     case 17:
+                      _context2.n = 27;
+                      break;
+                    case 18:
                       if (!(action.name === "finish")) {
-                        _context2.n = 19;
+                        _context2.n = 20;
                         break;
                       }
                       if (!(!action.params.answer || typeof action.params.answer !== "string" || action.params.answer.trim() === "")) {
-                        _context2.n = 18;
+                        _context2.n = 19;
                         break;
                       }
                       _errorMsg = "Invalid action: 'finish' tool was called without a valid 'answer' parameter. You MUST provide a complete answer to the user's query based on the information in the scratchpad.";
@@ -127714,7 +127721,7 @@ var ReActController = /*#__PURE__*/function () {
                       });
                       _this._dispatchScratchpadUpdate();
                       return _context2.a(2, 0);
-                    case 18:
+                    case 19:
                       finished = true;
                       _this.scratchpad.push({
                         type: "action",
@@ -127733,11 +127740,11 @@ var ReActController = /*#__PURE__*/function () {
                         answer: action.params.answer
                       });
                       console.log("ReActController: AI finished with answer:", action.params.answer);
-                      _context2.n = 26;
+                      _context2.n = 27;
                       break;
-                    case 19:
+                    case 20:
                       if (!(action.name === "escalate_tool_level")) {
-                        _context2.n = 20;
+                        _context2.n = 21;
                         break;
                       }
                       // Handle the AI's request to escalate to more granular tools
@@ -127755,15 +127762,15 @@ var ReActController = /*#__PURE__*/function () {
                       console.log("ReActController: Escalating to lower-level tools.");
                       // Do NOT increment plan step index, we are retrying the same step with new tools.
                       return _context2.a(2, 0);
-                    case 20:
+                    case 21:
                       if (!(action.name === "ask_user")) {
-                        _context2.n = 22;
+                        _context2.n = 23;
                         break;
                       }
                       // Standardize the question parameter, accepting 'prompt' as an alias for 'question'
                       questionText = action.params.question || action.params.prompt; // Defensive check to ensure the AI provides a question.
                       if (!(!questionText || typeof questionText !== "string" || questionText.trim() === "")) {
-                        _context2.n = 21;
+                        _context2.n = 22;
                         break;
                       }
                       _errorMsg2 = "Invalid action: 'ask_user' tool was called without a valid 'question' or 'prompt' parameter. You must provide a question for the user.";
@@ -127778,7 +127785,7 @@ var ReActController = /*#__PURE__*/function () {
                       });
                       _this._dispatchScratchpadUpdate();
                       return _context2.a(2, 0);
-                    case 21:
+                    case 22:
                       // Standardize the action for logging and downstream use
                       standardizedAction = {
                         name: "ask_user",
@@ -127811,9 +127818,9 @@ var ReActController = /*#__PURE__*/function () {
                       return _context2.a(2, {
                         v: void 0
                       });
-                    case 22:
+                    case 23:
                       if (!(action.name === "parse_error")) {
-                        _context2.n = 23;
+                        _context2.n = 24;
                         break;
                       }
                       _observation = "Parse error occurred. The AI response format was incorrect. Please respond with exactly one Thought and one Action in the specified format. Error: ".concat(action.params.error);
@@ -127829,14 +127836,14 @@ var ReActController = /*#__PURE__*/function () {
                       console.log("ReActController: Parse error, prompting AI to correct format.");
                       // Do NOT increment plan step index, we are retrying the same step.
                       return _context2.a(2, 0);
-                    case 23:
+                    case 24:
                       // *** NEW: Mismatch Detection Logic ***
                       chosenTool = availableTools.find(function (t) {
                         return t.name === action.name;
                       });
                       currentStepType = currentStep ? currentStep.step_type : null;
                       if (!(currentStepType === "geospatial" && chosenTool && !["geospatial", "data_retrieval"].includes(chosenTool.category.toLowerCase()))) {
-                        _context2.n = 24;
+                        _context2.n = 25;
                         break;
                       }
                       console.warn("ReActController: Mismatch detected! Step type is 'geospatial' but chosen tool '".concat(action.name, "' is category '").concat(chosenTool.category, "'."));
@@ -127856,7 +127863,7 @@ var ReActController = /*#__PURE__*/function () {
                       _this._dispatchScratchpadUpdate();
                       // Do NOT increment plan step index, we are retrying the same step.
                       return _context2.a(2, 0);
-                    case 24:
+                    case 25:
                       // *** END: Mismatch Detection Logic ***
 
                       _this.scratchpad.push({
@@ -127873,10 +127880,10 @@ var ReActController = /*#__PURE__*/function () {
                       });
 
                       // 5. Observation Handling
-                      _context2.n = 25;
+                      _context2.n = 26;
                       return _this.toolExecutor.execute(action.name, action.params, _this.stateManager.getState() // Pass current state to the executor
                       );
-                    case 25:
+                    case 26:
                       _observation3 = _context2.v;
                       finalObservation = _observation3; // Add programmatic guidance for find_places_nearby failures
                       if (action.name === "find_places_nearby" && typeof _observation3 === "string" && _observation3.startsWith("Found 0 places")) {
@@ -127914,11 +127921,11 @@ var ReActController = /*#__PURE__*/function () {
                         _this.currentPlanStepIndex++;
                       }
                       _this._dispatchScratchpadUpdate();
-                    case 26:
-                      _context2.n = 28;
-                      break;
                     case 27:
-                      _context2.p = 27;
+                      _context2.n = 29;
+                      break;
+                    case 28:
+                      _context2.p = 28;
                       _t2 = _context2.v;
                       console.error("ReActController: Error during ReAct cycle:", _t2);
                       _this.scratchpad.push({
@@ -127945,10 +127952,10 @@ var ReActController = /*#__PURE__*/function () {
                         });
                         finished = true;
                       }
-                    case 28:
+                    case 29:
                       return _context2.a(2);
                   }
-                }, _loop, null, [[4, 8], [2, 27]]);
+                }, _loop, null, [[5, 9], [3, 28]]);
               });
             case 1:
               if (!(!finished && loopCount < MAX_LOOP_ITERATIONS)) {
@@ -128517,6 +128524,75 @@ var ReActController = /*#__PURE__*/function () {
         content: thinkingProcess
       });
     }
+
+    /**
+     * Checks if the scratchpad is too long and summarizes the oldest entries if needed.
+     * This is a key strategy for managing context window size.
+     * @private
+     */
+  }, {
+    key: "_summarizeScratchpad",
+    value: (function () {
+      var _summarizeScratchpad2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8() {
+        var entriesToSummarize, remainingEntries, textToSummarize, summarizationPrompt, _reply$choices$, reply, summaryText, summaryEntry, _t4;
+        return _regenerator().w(function (_context9) {
+          while (1) switch (_context9.n) {
+            case 0:
+              if (!(this.scratchpad.length < SCRATCHPAD_SUMMARY_THRESHOLD)) {
+                _context9.n = 1;
+                break;
+              }
+              return _context9.a(2);
+            case 1:
+              console.log("ReActController: Scratchpad length (".concat(this.scratchpad.length, ") exceeds threshold (").concat(SCRATCHPAD_SUMMARY_THRESHOLD, "). Summarizing..."));
+              entriesToSummarize = this.scratchpad.slice(0, SCRATCHPAD_ENTRIES_TO_SUMMARIZE);
+              remainingEntries = this.scratchpad.slice(SCRATCHPAD_ENTRIES_TO_SUMMARIZE);
+              textToSummarize = entriesToSummarize.map(function (entry) {
+                return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
+              }).join("\n\n");
+              summarizationPrompt = "You are a summarization expert. Condense the following agent work history into a concise paragraph. Focus on key outcomes, data found, critical errors, and the agent's last successful action. This summary will be used as memory for the agent's next steps.\n\n<WORK_HISTORY_TO_SUMMARIZE>\n".concat(textToSummarize, "\n</WORK_HISTORY_TO_SUMMARIZE>\n\nConcise Summary:");
+              _context9.p = 2;
+              _context9.n = 3;
+              return this.aiCore.chat.completions.create({
+                messages: [{
+                  role: "user",
+                  content: summarizationPrompt
+                }],
+                temperature: 0.0,
+                // Be factual for summarization
+                max_gen_len: 256 // A reasonable limit for a summary
+              });
+            case 3:
+              reply = _context9.v;
+              summaryText = (_reply$choices$ = reply.choices[0]) === null || _reply$choices$ === void 0 || (_reply$choices$ = _reply$choices$.message) === null || _reply$choices$ === void 0 || (_reply$choices$ = _reply$choices$.content) === null || _reply$choices$ === void 0 ? void 0 : _reply$choices$.trim();
+              if (summaryText) {
+                summaryEntry = {
+                  type: "observation",
+                  content: "Summary of previous work: ".concat(summaryText)
+                }; // Replace the old entries with the new summary
+                this.scratchpad = [summaryEntry].concat(_toConsumableArray(remainingEntries));
+                console.log("ReActController: Scratchpad summarized successfully.");
+                this._dispatchScratchpadUpdate(); // Update the UI with the new summarized scratchpad
+              } else {
+                console.warn("ReActController: Summarization call returned no content. Scratchpad not modified.");
+              }
+              _context9.n = 5;
+              break;
+            case 4:
+              _context9.p = 4;
+              _t4 = _context9.v;
+              console.error("ReActController: Error during scratchpad summarization:", _t4);
+              // If summarization fails, we log the error and continue with the long scratchpad for this cycle.
+            case 5:
+              return _context9.a(2);
+          }
+        }, _callee8, this, [[2, 4]]);
+      }));
+      function _summarizeScratchpad() {
+        return _summarizeScratchpad2.apply(this, arguments);
+      }
+      return _summarizeScratchpad;
+    }())
   }]);
 }();
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ReActController);
