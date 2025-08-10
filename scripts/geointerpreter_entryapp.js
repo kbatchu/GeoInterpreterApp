@@ -128224,6 +128224,7 @@ var ReActController = /*#__PURE__*/function () {
           state,
           historyQueryParts,
           recentHistory,
+          recentScratchpad,
           richHistoryQuery,
           relevantHistoryWithOrder,
           immediateScratchpadStartIndex,
@@ -128253,6 +128254,14 @@ var ReActController = /*#__PURE__*/function () {
                 historyQueryParts.push("Recent conversation: " + recentHistory.map(function (m) {
                   return "".concat(m.role, ": ").concat(m.content);
                 }).join(' '));
+              }
+              // Add the last 2 scratchpad entries to anchor the search to the most recent facts.
+              // This is CRITICAL for handling follow-up questions correctly.
+              recentScratchpad = this.scratchpad.slice(-2);
+              if (recentScratchpad.length > 0) {
+                historyQueryParts.push("Most recent work: " + recentScratchpad.map(function (entry) {
+                  return "".concat(entry.type, ": ").concat(_typeof(entry.content) === 'object' ? JSON.stringify(entry.content) : entry.content);
+                }).join('; '));
               }
               richHistoryQuery = historyQueryParts.join('\n'); // 2. Get long-term memory from the vector database using the rich query.
               _context6.n = 1;
