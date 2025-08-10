@@ -127418,8 +127418,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 
 // Keep the last 10 pairs of Thought/Action/Observation to prevent excessive token usage.
 // This now controls how much of the *immediate* scratchpad is shown to the AI.
-// The rest of the context comes from vector search. A value of 6 shows the last 2 T-A-O cycles.
-var MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT = 6;
+var MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT = 12; // Increased to give the agent a more stable short-term memory buffer (last 4 cycles).
 var ReActController = /*#__PURE__*/function () {
   function ReActController(stateManager, communicationBus, aiCore, toolExecutor,
   // Placeholder for ToolExecutor
@@ -128223,7 +128222,9 @@ var ReActController = /*#__PURE__*/function () {
       var _assembleContext2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(currentGoal) {
         var currentStep,
           state,
-          relevantHistory,
+          relevantHistoryWithOrder,
+          immediateScratchpadStartIndex,
+          filteredHistory,
           formattedRelevantHistory,
           toolQuery,
           availableTools,
@@ -128242,12 +128243,19 @@ var ReActController = /*#__PURE__*/function () {
               currentStep = _args6.length > 1 && _args6[1] !== undefined ? _args6[1] : null;
               state = this.stateManager.getState(); // 1. Get long-term memory from the vector database.
               _context6.n = 1;
-              return this._getRelevantHistory(currentGoal, 5);
+              return this._getRelevantHistory(currentGoal, 10 // Retrieve more candidates to allow for de-duplication
+              );
             case 1:
-              relevantHistory = _context6.v;
-              formattedRelevantHistory = relevantHistory.map(function (entry) {
+              relevantHistoryWithOrder = _context6.v;
+              // 2. De-duplicate: Filter out history that will appear in the immediate scratchpad window.
+              // This prevents redundant context and confusion for the AI.
+              immediateScratchpadStartIndex = Math.max(0, this.scratchpad.length - MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT);
+              filteredHistory = relevantHistoryWithOrder.filter(function (entry) {
+                return entry.entry_order <= immediateScratchpadStartIndex;
+              }).slice(0, 5); // Take the top 5 non-overlapping entries.
+              formattedRelevantHistory = filteredHistory.map(function (entry) {
                 return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(entry.content);
-              }).join('\n\n'); // 2. Get short-term memory (the immediate scratchpad).
+              }).join('\n\n'); // 3. Get short-term memory (the immediate scratchpad).
               toolQuery = currentGoal;
               if (currentStep && currentStep.step_type) {
                 // Augment the query with the step type for more relevant tool retrieval
@@ -128352,7 +128360,7 @@ var ReActController = /*#__PURE__*/function () {
             case 2:
               queryEmbedding = _context7.v;
               queryEmbeddingString = JSON.stringify(Array.from(queryEmbedding));
-              querySql = "\n      SELECT\n        type,\n        content,\n        array_cosine_distance(embedding, CAST(? AS DOUBLE[384])) AS distance\n      FROM\n        agent_history\n      WHERE\n        session_id = ?\n      ORDER BY\n        distance ASC\n      LIMIT ?;\n    ";
+              querySql = "\n      SELECT\n        type,\n        content,\n        entry_order,\n        array_cosine_distance(embedding, CAST(? AS DOUBLE[384])) AS distance\n      FROM\n        agent_history\n      WHERE\n        session_id = ?\n      ORDER BY\n        distance ASC\n      LIMIT ?;\n    ";
               _context7.p = 3;
               _context7.n = 4;
               return this.duckdbConnection.prepare(querySql);
