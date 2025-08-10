@@ -128300,7 +128300,7 @@ var ReActController = /*#__PURE__*/function () {
                   content: userPrompt
                 });
               } else {
-                _systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by executing a pre-defined plan ONE STEP AT A TIME.\n\n## CRITICAL: RESPONSE FORMAT\nYou MUST respond with EXACTLY ONE Thought and ONE Action. Your entire response must follow this exact format:\n\nThought: [Your reasoning about the current step, what tool to use, and why. Be concise.]\nAction: { \"name\": \"tool_name\", \"parameters\": { \"param1\": \"value1\" } }\n\n## CRITICAL THINKING & ADAPTATION\n1.  **Analyze the last Observation:** Before deciding your next action, you MUST carefully analyze the most recent Observation in the scratchpad.\n2.  **Entity-Attribute Integrity:** When you identify an entity (e.g., a restaurant name) from an 'Observation', you MUST use other attributes (like its address) from that *same* 'Observation'. Do NOT combine an entity from an 'Observation' with an address from the user's original query in '<CONVERSATION_HISTORY>'. If an attribute like an address is missing for a found entity, your action should be to use a tool to find it.\n3.  **Assess Success:** Did the last action succeed? Did it return the expected information? For example, if you searched for something, did the observation indicate that items were found?\n4.  **Adapt Your Plan:**\n    - If the observation is unexpected (e.g., \"Found 0 places\", an error message, or \"Tool not implemented\"), DO NOT blindly proceed with the original plan.\n    - Your 'Thought' must explain how you are adapting to the new information.\n    - Your next 'Action' should be a direct attempt to recover.\n        - **If you get \"Found 0 places\":** Your primary strategy is to expand the search. The system will track your attempts. If the observation says you MUST try again, then you must call the *same tool* but with a *larger search radius*. Look at the previous action in the scratchpad to see what the last radius was and increase it significantly (e.g., double it). Only if the observation indicates that multiple attempts have failed should you consider a different strategy like using the 'ask_user' tool.\n        - **If a tool is not implemented:** Your thought must be to try a different, more suitable tool from the available list to achieve the same goal.\n        - **If you are truly stuck on a step for other reasons:** Use the 'ask_user' tool for clarification.\n    - Only if the last observation was successful and expected should you proceed to the next step of the plan.\n\n## FINISHING THE TASK\nWhen all steps are complete and you have gathered all necessary information, you MUST use the 'finish' tool.\n- **Thought:** Your thought should summarize the key findings from the scratchpad.\n- **Action:** The 'answer' parameter in the 'finish' tool MUST contain the complete, final answer for the user, synthesized from the observations.\n- **Example:**\n  Thought: The scratchpad shows that the geocoding was successful and the subsequent search found three restaurants. I will now format these results into a final answer for the user.\n  Action: { \"name\": \"finish\", \"parameters\": { \"answer\": \"I found 3 Indian restaurants near your location: [List of restaurants and their details].\" } }\n\n## AVAILABLE ACTIONS\n- Use one of the provided tools.\n- Use the 'finish(answer=...)' tool when you have the final answer.\n- Use the 'escalate_tool_level' tool if the current tools are insufficient.\n- Use the 'ask_user' tool if you need clarification from the user.";
+                _systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by executing a pre-defined plan ONE STEP AT A TIME.\n\n## CRITICAL: RESPONSE FORMAT\nYou MUST respond with EXACTLY ONE Thought and ONE Action. Your entire response must follow this exact format:\n\nThought: [Your reasoning about the current step, what tool to use, and why. Be concise.]\nAction: { \"name\": \"tool_name\", \"parameters\": { \"param1\": \"value1\" } }\n\n## CRITICAL THINKING & ADAPTATION\n1.  **Analyze the last Observation:** Before deciding your next action, you MUST carefully analyze the most recent Observation in the scratchpad.\n2.  **Entity-Attribute Integrity:** When you identify an entity (e.g., a restaurant name) from an 'Observation', you MUST use other attributes (like its address) from that *same* 'Observation'. Do NOT combine an entity from an 'Observation' with an address from the user's original query in '<CONVERSATION_HISTORY>'. If an attribute like an address is missing for a found entity, your action should be to use a tool to find it.\n3.  **Correct Tool Usage:** You MUST use tools correctly. For example, the 'geocode_address' tool takes a street address, not coordinates. Do not pass a string containing coordinates like \"Some Place, 34.5, -87.6\" to 'geocode_address'. If you have coordinates, use them directly in tools that accept them.\n4.  **Assess Success:** Did the last action succeed? Did it return the expected information? For example, if you searched for something, did the observation indicate that items were found?\n5.  **Adapt Your Plan:**\n    - If the observation is unexpected (e.g., \"Found 0 places\", an error message, or \"Tool not implemented\"), DO NOT blindly proceed with the original plan.\n    - Your 'Thought' must explain how you are adapting to the new information.\n    - Your next 'Action' should be a direct attempt to recover.\n        - **If you get \"Found 0 places\":** Your primary strategy is to expand the search. The system will track your attempts. If the observation says you MUST try again, then you must call the *same tool* but with a *larger search radius*. Look at the previous action in the scratchpad to see what the last radius was and increase it significantly (e.g., double it). Only if the observation indicates that multiple attempts have failed should you consider a different strategy like using the 'ask_user' tool.\n        - **If a tool is not implemented:** Your thought must be to try a different, more suitable tool from the available list to achieve the same goal.\n        - **If you are truly stuck on a step for other reasons:** Use the 'ask_user' tool for clarification.\n    - Only if the last observation was successful and expected should you proceed to the next step of the plan.\n\n## FINISHING THE TASK\nWhen all steps are complete and you have gathered all necessary information, you MUST use the 'finish' tool.\n- **Thought:** Your thought should summarize the key findings from the scratchpad.\n- **Action:** The 'answer' parameter in the 'finish' tool MUST contain the complete, final answer for the user, synthesized from the observations.\n- **Example:**\n  Thought: The scratchpad shows that the geocoding was successful and the subsequent search found three restaurants. I will now format these results into a final answer for the user.\n  Action: { \"name\": \"finish\", \"parameters\": { \"answer\": \"I found 3 Indian restaurants near your location: [List of restaurants and their details].\" } }\n\n## AVAILABLE ACTIONS\n- Use one of the provided tools.\n- Use the 'finish(answer=...)' tool when you have the final answer.\n- Use the 'escalate_tool_level' tool if the current tools are insufficient.\n- Use the 'ask_user' tool if you need clarification from the user.";
                 _userPrompt = "You have access to the following tools to help you. Select ONE tool to achieve the current goal.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(availableTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is the full conversation history for context:\n<CONVERSATION_HISTORY>\n").concat(formattedHistory || "No previous conversation history.", "\n</CONVERSATION_HISTORY>\n\nHere is some relevant information from your long-term memory that might help with the current goal:\n<RELEVANT_HISTORY>\n").concat(formattedRelevantHistory || "No relevant history found.", "\n</RELEVANT_HISTORY>\n\nHere is the user's original request for context:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the current goal for this step:\n<CURRENT_GOAL>\n").concat(currentGoal, "\n</CURRENT_GOAL>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
                   return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
                 }).join("\n"), "\n\nThought:");
@@ -128929,7 +128929,7 @@ function geocodeAddress(_x2) {
  */
 function _geocodeAddress() {
   _geocodeAddress = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(address) {
-    var coordRegex, sanitizedAddress, data, addressWithoutNumber;
+    var coordRegex, containsCoordsRegex, sanitizedAddress, data, addressWithoutNumber;
     return _regenerator().w(function (_context2) {
       while (1) switch (_context2.n) {
         case 0:
@@ -128952,29 +128952,41 @@ function _geocodeAddress() {
             error: "Invalid input: \"".concat(address, "\" looks like coordinates. To convert coordinates to a text address, you MUST use the 'reverse_geocode' tool.")
           });
         case 2:
-          sanitizedAddress = address.replace(/-/g, ' '); // --- Attempt 1: Use the full address ---
-          _context2.n = 3;
-          return _nominatimSearch(sanitizedAddress);
+          // NEW: Add a check for strings that CONTAIN coordinates, not just ARE coordinates.
+          // This catches cases where the AI might mistakenly combine a name and coordinates.
+          // It looks for two floating point numbers separated by a comma.
+          containsCoordsRegex = /-?\d+\.\d+,\s*-?\d+\.\d+/;
+          if (!containsCoordsRegex.test(address)) {
+            _context2.n = 3;
+            break;
+          }
+          return _context2.a(2, {
+            error: "Invalid input for 'geocode_address'. The value \"".concat(address, "\" appears to contain coordinates. This tool converts street addresses to coordinates. If you already have coordinates, use them directly in other tools. To find an address from coordinates, use the 'reverse_geocode' tool.")
+          });
         case 3:
+          sanitizedAddress = address.replace(/-/g, ' '); // --- Attempt 1: Use the full address ---
+          _context2.n = 4;
+          return _nominatimSearch(sanitizedAddress);
+        case 4:
           data = _context2.v;
           if (!(!data || data.length === 0)) {
-            _context2.n = 5;
+            _context2.n = 6;
             break;
           }
           console.warn("Geocoding failed for full address: \"".concat(sanitizedAddress, "\". Retrying without house number."));
           // This regex removes a sequence of digits at the start of the string, plus any following whitespace.
           addressWithoutNumber = sanitizedAddress.replace(/^\d+\s+/, ''); // Only retry if the address actually changed (i.e., it had a house number)
           if (!(addressWithoutNumber !== sanitizedAddress)) {
-            _context2.n = 5;
+            _context2.n = 6;
             break;
           }
-          _context2.n = 4;
+          _context2.n = 5;
           return _nominatimSearch(addressWithoutNumber);
-        case 4:
-          data = _context2.v;
         case 5:
+          data = _context2.v;
+        case 6:
           if (!(data && data.length > 0)) {
-            _context2.n = 6;
+            _context2.n = 7;
             break;
           }
           console.log("Geocoding successful for \"".concat(address, "\". Found: ").concat(data[0].display_name));
@@ -128982,13 +128994,13 @@ function _geocodeAddress() {
             latitude: parseFloat(data[0].lat),
             longitude: parseFloat(data[0].lon)
           });
-        case 6:
+        case 7:
           // If all attempts fail, return the error.
           console.error("Geocoding failed for all attempts for address: \"".concat(address, "\""));
           return _context2.a(2, {
             error: "No results found for address: \"".concat(address, "\"")
           });
-        case 7:
+        case 8:
           return _context2.a(2);
       }
     }, _callee2);
