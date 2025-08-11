@@ -127393,8 +127393,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _tools_tool_retriever_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tools/tool_retriever.js */ "./scripts/modules/tools/tool_retriever.js");
 function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
-function _regeneratorValues(e) { if (null != e) { var t = e["function" == typeof Symbol && Symbol.iterator || "@@iterator"], r = 0; if (t) return t.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) return { next: function next() { return e && r >= e.length && (e = void 0), { value: e && e[r++], done: !e }; } }; } throw new TypeError(_typeof(e) + " is not iterable"); }
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _regeneratorValues(e) { if (null != e) { var t = e["function" == typeof Symbol && Symbol.iterator || "@@iterator"], r = 0; if (t) return t.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) return { next: function next() { return e && r >= e.length && (e = void 0), { value: e && e[r++], done: !e }; } }; } throw new TypeError(_typeof(e) + " is not iterable"); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
@@ -127435,7 +127435,6 @@ var ReActController = /*#__PURE__*/function () {
     this.embeddingManager = embeddingManager;
     this.toolRetriever = new _tools_tool_retriever_js__WEBPACK_IMPORTED_MODULE_0__["default"](embeddingManager, duckdbConnection);
     this.scratchpad = []; // Stores Thought, Action, Observation triplets
-    this.workingContext = {}; // NEW: Structured memory for the agent
     this.sessionId = null; // Will hold the unique ID for the current session
     this.userQuery = "";
     this.isPlanningMode = false; // Flag for hybrid Plan-and-Execute mode
@@ -127461,36 +127460,35 @@ var ReActController = /*#__PURE__*/function () {
     key: "_handleUserQuery",
     value: (function () {
       var _handleUserQuery2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(event) {
+        var currentQuery;
         return _regenerator().w(function (_context) {
           while (1) switch (_context.n) {
             case 0:
-              this.userQuery = event.detail.query;
-
-              // FIX: Only create a new session ID if one doesn't exist for the current conversation.
-              // This is the critical fix to prevent the agent from having amnesia on follow-up questions.
+              currentQuery = event.detail.query; // This is the critical fix to prevent the agent from having amnesia on follow-up questions.
               if (!this.sessionId) {
                 this.sessionId = crypto.randomUUID();
                 console.log("ReActController: New Session [".concat(this.sessionId, "] started."));
+                // This is the first query of the session.
+                this.userQuery = currentQuery;
+                this.scratchpad = []; // Clear scratchpad only for a new session's first query.
+                this.currentToolLevels = [1]; // Reset to high-level tools for new query
+                this._findPlacesRetryCount = 0; // Reset retry counter for new query
               }
               this.stateManager.updateState({
                 isCancelled: false
               }); // Reset cancellation flag for a new query
-              this.workingContext = {}; // Clear structured context for new query
-              this.scratchpad = []; // Clear scratchpad for new query
               this.isPlanningMode = true; // Start in planning mode
               this.currentPlanStepIndex = 0; // Reset plan step index
-              this.currentToolLevels = [1]; // Reset to high-level tools for new query
-              this._findPlacesRetryCount = 0; // Reset retry counter for new query
 
               this.stateManager.updateState({
                 agentStatus: "planning",
                 conversationHistory: [].concat(_toConsumableArray(this.stateManager.getState().conversationHistory), [{
                   role: "user",
-                  content: this.userQuery
+                  content: currentQuery
                 }]),
                 activePlan: null // Clear any previous active plan
               });
-              console.log("ReActController: Continuing Session [".concat(this.sessionId, "] for query:"), "ReActController: Starting ReAct cycle for query:", this.userQuery);
+              console.log("ReActController: Continuing Session [".concat(this.sessionId, "] for query:"), "ReActController: Starting ReAct cycle for query:", currentQuery);
               _context.n = 1;
               return this.run();
             case 1:
@@ -127522,7 +127520,7 @@ var ReActController = /*#__PURE__*/function () {
               REPETITION_LIMIT = 3; // Number of times the same action can be repeated before halting.
               lastActionHistory = []; // Tracks the last few actions to detect loops.
               _loop = /*#__PURE__*/_regenerator().m(function _loop() {
-                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, _action$params, entity_name, attributes, observation, correctedPlan, _errorMsg, _currentState2, _observation, questionText, _errorMsg2, standardizedAction, _currentState3, _observation2, chosenTool, currentStepType, _observation3, _observation4, finalObservation, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
+                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, correctedPlan, _errorMsg, _currentState2, observation, questionText, _errorMsg2, standardizedAction, _currentState3, _observation, chosenTool, currentStepType, _observation2, _observation3, finalObservation, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
                 return _regenerator().w(function (_context2) {
                   while (1) switch (_context2.n) {
                     case 0:
@@ -127677,48 +127675,17 @@ var ReActController = /*#__PURE__*/function () {
                     case 14:
                       return _context2.a(2, 0);
                     case 15:
-                      if (!(action.name === 'update_context')) {
-                        _context2.n = 18;
-                        break;
-                      }
-                      _action$params = action.params, entity_name = _action$params.entity_name, attributes = _action$params.attributes;
-                      if (entity_name && attributes && _typeof(attributes) === 'object') {
-                        // Merge new attributes with existing ones for the same entity
-                        _this.workingContext[entity_name] = _objectSpread(_objectSpread({}, _this.workingContext[entity_name] || {}), attributes);
-                        observation = "Working context updated successfully for entity '".concat(entity_name, "'.");
-                        console.log("ReActController: Updated working context:", _this.workingContext);
-                      } else {
-                        observation = "Error: 'update_context' requires a valid 'entity_name' and an 'attributes' object.";
-                        console.error("ReActController: Invalid call to update_context", action.params);
-                      }
-                      _context2.n = 16;
-                      return _this._persistToHistoryDB({
-                        type: "action",
-                        content: action
-                      });
-                    case 16:
-                      _context2.n = 17;
-                      return _this._persistToHistoryDB({
-                        type: "observation",
-                        content: observation
-                      });
-                    case 17:
-                      _this._dispatchScratchpadUpdate();
-                      // Context update is a meta-action, so we don't increment the plan step.
-                      // The agent should now use the updated context to proceed with the same goal.
-                      return _context2.a(2, 0);
-                    case 18:
                       if (!_this.isPlanningMode) {
-                        _context2.n = 23;
+                        _context2.n = 20;
                         break;
                       }
                       if (!(action.name === "create_plan" && action.params.plan)) {
-                        _context2.n = 21;
+                        _context2.n = 18;
                         break;
                       }
-                      _context2.n = 19;
+                      _context2.n = 16;
                       return _this._correctPlanStepTypes(action.params.plan);
-                    case 19:
+                    case 16:
                       correctedPlan = _context2.v;
                       // Correct the plan
                       _this.stateManager.updateState({
@@ -127729,7 +127696,7 @@ var ReActController = /*#__PURE__*/function () {
                         }
                       });
                       _this.isPlanningMode = false; // Switch to execution mode
-                      _context2.n = 20;
+                      _context2.n = 17;
                       return _this._persistToHistoryDB({
                         type: "action",
                         content: {
@@ -127737,51 +127704,51 @@ var ReActController = /*#__PURE__*/function () {
                           plan: correctedPlan
                         }
                       });
-                    case 20:
+                    case 17:
                       _this._dispatchScratchpadUpdate();
                       console.log("ReActController: Plan created and stored.");
                       console.log("ReActController: Generated Plan:", correctedPlan); // Log corrected plan
                       // Continue to next loop iteration to execute first step
-                      _context2.n = 22;
+                      _context2.n = 19;
                       break;
-                    case 21:
+                    case 18:
                       throw new Error("AI did not return a valid plan in planning mode.");
-                    case 22:
-                      _context2.n = 50;
+                    case 19:
+                      _context2.n = 47;
                       break;
-                    case 23:
+                    case 20:
                       if (!(action.name === "finish")) {
-                        _context2.n = 28;
+                        _context2.n = 25;
                         break;
                       }
                       if (!(!action.params.answer || typeof action.params.answer !== "string" || action.params.answer.trim() === "")) {
-                        _context2.n = 26;
+                        _context2.n = 23;
                         break;
                       }
                       _errorMsg = "Invalid action: 'finish' tool was called without a valid 'answer' parameter. You MUST provide a complete answer to the user's query based on the information in the scratchpad.";
                       console.error("ReActController: ".concat(_errorMsg));
+                      _context2.n = 21;
+                      return _this._persistToHistoryDB({
+                        type: "action",
+                        content: action
+                      });
+                    case 21:
+                      _context2.n = 22;
+                      return _this._persistToHistoryDB({
+                        type: "observation",
+                        content: _errorMsg
+                      });
+                    case 22:
+                      _this._dispatchScratchpadUpdate();
+                      return _context2.a(2, 0);
+                    case 23:
+                      finished = true;
                       _context2.n = 24;
                       return _this._persistToHistoryDB({
                         type: "action",
                         content: action
                       });
                     case 24:
-                      _context2.n = 25;
-                      return _this._persistToHistoryDB({
-                        type: "observation",
-                        content: _errorMsg
-                      });
-                    case 25:
-                      _this._dispatchScratchpadUpdate();
-                      return _context2.a(2, 0);
-                    case 26:
-                      finished = true;
-                      _context2.n = 27;
-                      return _this._persistToHistoryDB({
-                        type: "action",
-                        content: action
-                      });
-                    case 27:
                       _this._dispatchScratchpadUpdate();
                       _currentState2 = _this.stateManager.getState();
                       _this.stateManager.updateState({
@@ -127795,16 +127762,45 @@ var ReActController = /*#__PURE__*/function () {
                         answer: action.params.answer
                       });
                       console.log("ReActController: AI finished with answer:", action.params.answer);
-                      _context2.n = 50;
+                      _context2.n = 47;
                       break;
-                    case 28:
+                    case 25:
                       if (!(action.name === "escalate_tool_level")) {
-                        _context2.n = 31;
+                        _context2.n = 28;
                         break;
                       }
                       // Handle the AI's request to escalate to more granular tools
                       _this.currentToolLevels = [2, 3];
-                      _observation = "High-level tools were not sufficient. Providing a more granular set of tools for the same task. Please try to solve the goal again.";
+                      observation = "High-level tools were not sufficient. Providing a more granular set of tools for the same task. Please try to solve the goal again.";
+                      _context2.n = 26;
+                      return _this._persistToHistoryDB({
+                        type: "action",
+                        content: action
+                      });
+                    case 26:
+                      _context2.n = 27;
+                      return _this._persistToHistoryDB({
+                        type: "observation",
+                        content: observation
+                      });
+                    case 27:
+                      _this._dispatchScratchpadUpdate();
+                      console.log("ReActController: Escalating to lower-level tools.");
+                      // Do NOT increment plan step index, we are retrying the same step with new tools.
+                      return _context2.a(2, 0);
+                    case 28:
+                      if (!(action.name === "ask_user")) {
+                        _context2.n = 33;
+                        break;
+                      }
+                      // Standardize the question parameter, accepting 'prompt' as an alias for 'question'
+                      questionText = action.params.question || action.params.prompt; // Defensive check to ensure the AI provides a question.
+                      if (!(!questionText || typeof questionText !== "string" || questionText.trim() === "")) {
+                        _context2.n = 31;
+                        break;
+                      }
+                      _errorMsg2 = "Invalid action: 'ask_user' tool was called without a valid 'question' or 'prompt' parameter. You must provide a question for the user.";
+                      console.error("ReActController: ".concat(_errorMsg2));
                       _context2.n = 29;
                       return _this._persistToHistoryDB({
                         type: "action",
@@ -127814,41 +127810,12 @@ var ReActController = /*#__PURE__*/function () {
                       _context2.n = 30;
                       return _this._persistToHistoryDB({
                         type: "observation",
-                        content: _observation
+                        content: _errorMsg2
                       });
                     case 30:
                       _this._dispatchScratchpadUpdate();
-                      console.log("ReActController: Escalating to lower-level tools.");
-                      // Do NOT increment plan step index, we are retrying the same step with new tools.
                       return _context2.a(2, 0);
                     case 31:
-                      if (!(action.name === "ask_user")) {
-                        _context2.n = 36;
-                        break;
-                      }
-                      // Standardize the question parameter, accepting 'prompt' as an alias for 'question'
-                      questionText = action.params.question || action.params.prompt; // Defensive check to ensure the AI provides a question.
-                      if (!(!questionText || typeof questionText !== "string" || questionText.trim() === "")) {
-                        _context2.n = 34;
-                        break;
-                      }
-                      _errorMsg2 = "Invalid action: 'ask_user' tool was called without a valid 'question' or 'prompt' parameter. You must provide a question for the user.";
-                      console.error("ReActController: ".concat(_errorMsg2));
-                      _context2.n = 32;
-                      return _this._persistToHistoryDB({
-                        type: "action",
-                        content: action
-                      });
-                    case 32:
-                      _context2.n = 33;
-                      return _this._persistToHistoryDB({
-                        type: "observation",
-                        content: _errorMsg2
-                      });
-                    case 33:
-                      _this._dispatchScratchpadUpdate();
-                      return _context2.a(2, 0);
-                    case 34:
                       // Standardize the action for logging and downstream use
                       standardizedAction = {
                         name: "ask_user",
@@ -127857,12 +127824,12 @@ var ReActController = /*#__PURE__*/function () {
                           options: action.params.options || []
                         }
                       };
-                      _context2.n = 35;
+                      _context2.n = 32;
                       return _this._persistToHistoryDB({
                         type: "action",
                         content: standardizedAction
                       });
-                    case 35:
+                    case 32:
                       _this._dispatchScratchpadUpdate();
                       _currentState3 = _this.stateManager.getState();
                       _this.stateManager.updateState({
@@ -127883,45 +127850,61 @@ var ReActController = /*#__PURE__*/function () {
                       return _context2.a(2, {
                         v: void 0
                       });
-                    case 36:
+                    case 33:
                       if (!(action.name === "parse_error")) {
-                        _context2.n = 39;
+                        _context2.n = 36;
                         break;
                       }
-                      _observation2 = "Parse error occurred. The AI response format was incorrect. Please respond with exactly one Thought and one Action in the specified format. Error: ".concat(action.params.error);
-                      _context2.n = 37;
+                      _observation = "Parse error occurred. The AI response format was incorrect. Please respond with exactly one Thought and one Action in the specified format. Error: ".concat(action.params.error);
+                      _context2.n = 34;
                       return _this._persistToHistoryDB({
                         type: "action",
                         content: action
                       });
-                    case 37:
-                      _context2.n = 38;
+                    case 34:
+                      _context2.n = 35;
                       return _this._persistToHistoryDB({
                         type: "observation",
-                        content: _observation2
+                        content: _observation
                       });
-                    case 38:
+                    case 35:
                       _this._dispatchScratchpadUpdate();
                       console.log("ReActController: Parse error, prompting AI to correct format.");
                       // Do NOT increment plan step index, we are retrying the same step.
                       return _context2.a(2, 0);
-                    case 39:
+                    case 36:
                       // *** NEW: Mismatch Detection Logic ***
                       chosenTool = availableTools.find(function (t) {
                         return t.name === action.name;
                       });
                       currentStepType = currentStep ? currentStep.step_type : null;
                       if (!(currentStepType === "geospatial" && chosenTool && !["geospatial", "data_retrieval"].includes(chosenTool.category.toLowerCase()))) {
-                        _context2.n = 43;
+                        _context2.n = 40;
                         break;
                       }
                       console.warn("ReActController: Mismatch detected! Step type is 'geospatial' but chosen tool '".concat(action.name, "' is category '").concat(chosenTool.category, "'."));
-                      _observation3 = "Correction: The current step was labeled 'geospatial', but you chose the tool '".concat(action.name, "' which is a '").concat(chosenTool.category, "' tool. Please reconsider and choose a tool from the 'geospatial' or 'data_retrieval' category to achieve the goal: \"").concat(currentGoal, "\"");
-                      _context2.n = 40;
+                      _observation2 = "Correction: The current step was labeled 'geospatial', but you chose the tool '".concat(action.name, "' which is a '").concat(chosenTool.category, "' tool. Please reconsider and choose a tool from the 'geospatial' or 'data_retrieval' category to achieve the goal: \"").concat(currentGoal, "\"");
+                      _context2.n = 37;
                       return _this._persistToHistoryDB({
                         type: "thought",
                         content: thought
                       });
+                    case 37:
+                      _context2.n = 38;
+                      return _this._persistToHistoryDB({
+                        type: "action",
+                        content: action
+                      });
+                    case 38:
+                      _context2.n = 39;
+                      return _this._persistToHistoryDB({
+                        type: "observation",
+                        content: _observation2
+                      });
+                    case 39:
+                      _this._dispatchScratchpadUpdate();
+                      // Do NOT increment plan step index, we are retrying the same step.
+                      return _context2.a(2, 0);
                     case 40:
                       _context2.n = 41;
                       return _this._persistToHistoryDB({
@@ -127929,22 +127912,6 @@ var ReActController = /*#__PURE__*/function () {
                         content: action
                       });
                     case 41:
-                      _context2.n = 42;
-                      return _this._persistToHistoryDB({
-                        type: "observation",
-                        content: _observation3
-                      });
-                    case 42:
-                      _this._dispatchScratchpadUpdate();
-                      // Do NOT increment plan step index, we are retrying the same step.
-                      return _context2.a(2, 0);
-                    case 43:
-                      _context2.n = 44;
-                      return _this._persistToHistoryDB({
-                        type: "action",
-                        content: action
-                      });
-                    case 44:
                       _this._dispatchScratchpadUpdate();
                       _this.stateManager.updateState({
                         agentStatus: "executing_tool"
@@ -127955,19 +127922,19 @@ var ReActController = /*#__PURE__*/function () {
                       });
 
                       // 5. Observation Handling
-                      _context2.n = 45;
+                      _context2.n = 42;
                       return _this.toolExecutor.execute(action.name, action.params, _this.stateManager.getState() // Pass current state to the executor
                       );
-                    case 45:
-                      _observation4 = _context2.v;
-                      finalObservation = _observation4; // Add programmatic guidance for find_places_nearby failures
-                      if (action.name === "find_places_nearby" && typeof _observation4 === "string" && _observation4.startsWith("Found 0 places")) {
+                    case 42:
+                      _observation3 = _context2.v;
+                      finalObservation = _observation3; // Add programmatic guidance for find_places_nearby failures
+                      if (action.name === "find_places_nearby" && typeof _observation3 === "string" && _observation3.startsWith("Found 0 places")) {
                         _this._findPlacesRetryCount++;
                         MAX_RETRIES = 3; // Total of 4 attempts (1 initial + 3 retries)
                         if (_this._findPlacesRetryCount <= MAX_RETRIES) {
-                          finalObservation = "".concat(_observation4, ". Search attempt ").concat(_this._findPlacesRetryCount, " of ").concat(MAX_RETRIES, ". You MUST try again with a larger radius before trying another tool.");
+                          finalObservation = "".concat(_observation3, ". Search attempt ").concat(_this._findPlacesRetryCount, " of ").concat(MAX_RETRIES, ". You MUST try again with a larger radius before trying another tool.");
                         } else {
-                          finalObservation = "".concat(_observation4, ". Multiple search attempts with expanded radius have failed. You should now consider a different strategy.");
+                          finalObservation = "".concat(_observation3, ". Multiple search attempts with expanded radius have failed. You should now consider a different strategy.");
                           _this._findPlacesRetryCount = 0; // Reset for the next time the tool might be used in the plan
                         }
                       } else if (action.name === "find_places_nearby") {
@@ -127978,46 +127945,46 @@ var ReActController = /*#__PURE__*/function () {
                       // If the tool was not found, do not advance the plan.
                       // The loop will re-run with the failure observation in the scratchpad,
                       // forcing the AI to reconsider its action for the current step.
-                      if (!(typeof _observation4 === "string" && _observation4.startsWith("Tool '") && _observation4.endsWith("' not implemented in ToolExecutor."))) {
-                        _context2.n = 47;
+                      if (!(typeof _observation3 === "string" && _observation3.startsWith("Tool '") && _observation3.endsWith("' not implemented in ToolExecutor."))) {
+                        _context2.n = 44;
                         break;
                       }
                       console.log("ReActController: Tool not found, re-evaluating current step. The system prompt will guide recovery.");
-                      _context2.n = 46;
+                      _context2.n = 43;
                       return _this._persistToHistoryDB({
                         type: "observation",
-                        content: _observation4
+                        content: _observation3
                       });
-                    case 46:
-                      console.log("ReActController: Tool Observation:", _observation4);
+                    case 43:
+                      console.log("ReActController: Tool Observation:", _observation3);
                       // Do NOT increment plan step index.
-                      _context2.n = 49;
+                      _context2.n = 46;
                       break;
-                    case 47:
-                      _context2.n = 48;
+                    case 44:
+                      _context2.n = 45;
                       return _this._persistToHistoryDB({
                         type: "observation",
                         content: finalObservation
                       });
-                    case 48:
+                    case 45:
                       console.log("ReActController: Tool Observation:", finalObservation);
                       // Only increment the plan step if the tool was successfully executed (or at least found).
                       _this.currentPlanStepIndex++;
-                    case 49:
+                    case 46:
                       _this._dispatchScratchpadUpdate();
-                    case 50:
-                      _context2.n = 53;
+                    case 47:
+                      _context2.n = 50;
                       break;
-                    case 51:
-                      _context2.p = 51;
+                    case 48:
+                      _context2.p = 48;
                       _t2 = _context2.v;
                       console.error("ReActController: Error during ReAct cycle:", _t2);
-                      _context2.n = 52;
+                      _context2.n = 49;
                       return _this._persistToHistoryDB({
                         type: "observation",
                         content: "Error: ".concat(_t2.message)
                       });
-                    case 52:
+                    case 49:
                       _this._dispatchScratchpadUpdate();
                       _this.stateManager.updateState({
                         agentStatus: "error"
@@ -128038,10 +128005,10 @@ var ReActController = /*#__PURE__*/function () {
                         });
                         finished = true;
                       }
-                    case 53:
+                    case 50:
                       return _context2.a(2);
                   }
-                }, _loop, null, [[4, 8], [2, 51]]);
+                }, _loop, null, [[4, 8], [2, 48]]);
               });
             case 1:
               if (!(!finished && loopCount < MAX_LOOP_ITERATIONS)) {
@@ -128163,9 +128130,9 @@ var ReActController = /*#__PURE__*/function () {
   }, {
     key: "_handleNewSession",
     value: function _handleNewSession() {
-      this.isCancelled = true; // Stop any ongoing process
-      this.sessionId = crypto.randomUUID(); // Generate a new unique ID for the new session
-      console.log("ReActController: New session [".concat(this.sessionId, "] requested. Resetting state."));
+      this.isCancelled = true; // Stop any ongoing process.
+      this.sessionId = null; // Set sessionId to null to signal a new session.
+      console.log("ReActController: New session requested. State will be reset on next query.");
       this.scratchpad = [];
       this._dispatchScratchpadUpdate(); // Dispatch empty scratchpad to clear UI
       this.userQuery = "";
@@ -128270,7 +128237,6 @@ var ReActController = /*#__PURE__*/function () {
           filteredHistory,
           immediateScratchpad,
           combinedMemory,
-          formattedWorkingContext,
           formattedWorkingMemory,
           toolQuery,
           availableTools,
@@ -128322,8 +128288,7 @@ var ReActController = /*#__PURE__*/function () {
               // This gives the AI a clearer, more linear view of its own work.
               combinedMemory = [].concat(_toConsumableArray(filteredHistory.sort(function (a, b) {
                 return a.entry_order - b.entry_order;
-              })), _toConsumableArray(immediateScratchpad)); // NEW: Format the structured working context for the prompt
-              formattedWorkingContext = JSON.stringify(this.workingContext, null, 2);
+              })), _toConsumableArray(immediateScratchpad));
               formattedWorkingMemory = combinedMemory.map(function (entry) {
                 var formattedEntry = "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content, null, 2) : entry.content);
                 // Add a visual separator after observations to help the AI delineate steps.
@@ -128363,8 +128328,8 @@ var ReActController = /*#__PURE__*/function () {
                 planningTools = availableTools.filter(function (t) {
                   return t.name === "create_plan";
                 });
-                systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your primary goal is to help the user by breaking down complex requests into a logical, step-by-step plan.\n\n## CRITICAL: YOU ARE IN PLANNING MODE\nYou MUST create a plan using the create_plan tool. Do NOT attempt to execute any other actions.\n\n## RESPONSE FORMAT\nYou MUST respond in the following format, with no other text before or after. Your entire response must start with \"Thought:\".\n\nThought: [Your reasoning for the plan you are about to create.]\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"...\", \"step_type\": \"...\" }, ... ] } }\n\n## PLAN REQUIREMENTS\n- Each step should be a discrete, self-contained analytical task.\n- For each step, you MUST provide a 'step_type' from this list: [geospatial, aggregation, filter, data_retrieval, calculation, visualization].\n\n## CRITICAL PLANNING INSTRUCTIONS\n- **Prioritize User-Provided Information:** If the user's query contains specific details like a street address, a location name, or a dataset, your plan MUST start by using that information.\n- **Entity Integrity:** Do not invent information. If you need the address of a place you found, your plan must include a step to find that address. Do not assume it's the same as another address mentioned in the conversation.\n- **Example:** If a street address is given, the first step of your plan MUST be to convert this address into geographic coordinates. After getting the coordinates, you can search for restaurants.";
-                userPrompt = "You have access to a single tool to help you. Use this tool to output your plan as a JSON array of steps.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(planningTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is the full conversation history for context:\n<CONVERSATION_HISTORY>\n").concat(formattedHistory || "No previous conversation history.", "\n</CONVERSATION_HISTORY>\n\nHere is your structured working context. It will be empty during planning but is here for consistency.\n<CURRENT_CONTEXT>\n").concat(formattedWorkingContext, "\n</CURRENT_CONTEXT>\n\nHere is the user's request:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.length > 0 ? "<WORKING_MEMORY>\n".concat(formattedWorkingMemory, "\n</WORKING_MEMORY>") : "You have not started working on this request yet.", "\n\nThought:");
+                systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your primary goal is to help the user by breaking down complex requests into a logical, step-by-step plan.\n\n## CRITICAL: YOU ARE IN PLANNING MODE\nYou MUST create a plan using the create_plan tool. Do NOT attempt to execute any other actions.\n\n## RESPONSE FORMAT\nYou MUST respond in the following format, with no other text before or after. Your entire response must start with \"Thought:\".\n\nThought: [Your reasoning for the plan you are about to create.]\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"...\", \"step_type\": \"...\" }, ... ] } }\n\n## PLAN REQUIREMENTS\n- Each step should be a discrete, self-contained analytical task.\n- For each step, you MUST provide a 'step_type' from this list: [geospatial, aggregation, filter, data_retrieval, calculation, visualization].\n\n## CRITICAL PLANNING INSTRUCTIONS\n- **Check Your Memory First:** Before creating a new plan, review the " < WORKING_MEMORY > ". If the memory already contains information relevant to the user's request (like coordinates for a location), your plan should start by using that information instead of re-discovering it.\n- **Prioritize User-Provided Information:** If the user's query contains specific details like a street address, a location name, or a dataset, your plan MUST start by using that information.\n- **Entity Integrity:** Do not invent information. If you need the address of a place you found, your plan must include a step to find that address. Do not assume it's the same as another address mentioned in the conversation.\n- **Example:** If a street address is given, the first step of your plan MUST be to convert this address into geographic coordinates. After getting the coordinates, you can search for restaurants.";
+                userPrompt = "You have access to a single tool to help you. Use this tool to output your plan as a JSON array of steps.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(planningTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is the full conversation history for context:\n<CONVERSATION_HISTORY>\n").concat(formattedHistory || "No previous conversation history.", "\n</CONVERSATION_HISTORY>\n\nHere is the user's request:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.length > 0 ? "<WORKING_MEMORY>\n".concat(formattedWorkingMemory, "\n</WORKING_MEMORY>") : "You have not started working on this request yet.", "\n\nThought:");
                 messages.push({
                   role: "system",
                   content: systemPrompt
@@ -128374,8 +128339,8 @@ var ReActController = /*#__PURE__*/function () {
                   content: userPrompt
                 });
               } else {
-                _systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by executing a pre-defined plan ONE STEP AT A TIME.\n\n## CRITICAL: RESPONSE FORMAT\nYou MUST respond with EXACTLY ONE Thought and ONE Action. Your entire response must follow this exact format:\n\nThought: [Your reasoning about the current step, what tool to use, and why. Be concise.]\nAction: { \"name\": \"tool_name\", \"parameters\": { \"param1\": \"value1\" } }\n\n## CRITICAL REASONING RULES\n1.  **Use Your Structured Memory:** You have a structured memory block called <CURRENT_CONTEXT>. When you discover a key piece of information (like coordinates, a name, or a calculated value), you MUST save it using the 'update_context' tool.\n2.  **Prioritize Your Memory:** When you need information for a tool (like coordinates for a route calculation), you MUST use the values from your <CURRENT_CONTEXT> first. If the information is not there, check your <WORKING_MEMORY>. Only use information from the <CONVERSATION_HISTORY> if it's not available anywhere else. This prevents you from using stale data.\n3.  **Entity Integrity is Paramount:** When you find an entity (e.g., \"Restaurant X\"), save its attributes (e.g., coordinates) to the context. For all future actions involving \"Restaurant X\", you MUST use the attributes you saved for it. Do not confuse it with other entities (like the user's original starting address).\n4.  **Handle Follow-up Questions Correctly:** If the user asks a follow-up question (e.g., \"what is its address?\"), the answer is almost certainly in your <CURRENT_CONTEXT> or <WORKING_MEMORY>. Your first action should be to find it there, not to restart the original search.\n5.  **Correct Tool Usage:** You MUST use tools correctly. For example, the 'geocode_address' tool takes a street address, not coordinates.\n6.  **Assess Success:** Did the last action succeed? Did it return the expected information?\n7.  **Adapt Your Plan:**\n    - If the observation is unexpected (e.g., \"Found 0 places\", an error message, or \"Tool not implemented\"), DO NOT blindly proceed with the original plan.\n    - Your 'Thought' must explain how you are adapting to the new information.\n    - Your next 'Action' should be a direct attempt to recover.\n        - **If you get \"Found 0 places\":** Your primary strategy is to expand the search. The system will track your attempts. If the observation says you MUST try again, then you must call the *same tool* but with a *larger search radius*. Look at the previous action in the scratchpad to see what the last radius was and increase it significantly (e.g., double it). Only if the observation indicates that multiple attempts have failed should you consider a different strategy like using the 'ask_user' tool.\n        - **If a tool is not implemented:** Your thought must be to try a different, more suitable tool from the available list to achieve the same goal.\n        - **If you are truly stuck on a step for other reasons:** Use the 'ask_user' tool for clarification.\n    - Only if the last observation was successful and expected should you proceed to the next step of the plan.\n\n## FINISHING THE TASK\nWhen all steps are complete and you have gathered all necessary information to answer the user's request, you MUST use the 'finish' tool to provide a final answer.\n- **Synthesize a Helpful Answer:** Your final answer must be a helpful summary for the user. Do not just state raw data from your observations.\n- **CRITICAL: Avoid Trivial Facts:** Do not state obvious or unhelpful facts. For example, if a location is at the address requested, do not report the distance as \"0 miles\". Instead, confirm its location, like \"The restaurant is located at the address you provided.\"\n- **Thought:** Your thought should briefly summarize the key findings from the scratchpad that justify your final answer.\n- **Action:** The 'answer' parameter in the 'finish' tool MUST contain the complete, final answer for the user.\n- **Example:**\n  Thought: The scratchpad shows that the geocoding was successful and the subsequent search found three restaurants. I will now format these results into a final answer for the user.\n  Action: { \"name\": \"finish\", \"parameters\": { \"answer\": \"I found 3 Indian restaurants near your location: [List of restaurants and their details].\" } }\n\n## AVAILABLE ACTIONS\n- Use one of the provided tools.\n- Use the 'finish(answer=...)' tool when you have the final answer.\n- Use the 'escalate_tool_level' tool if the current tools are insufficient.\n- Use the 'ask_user' tool if you need clarification from the user.";
-                _userPrompt = "You have access to the following tools to help you. Select ONE tool to achieve the current goal.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(availableTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is the full conversation history for context:\n<CONVERSATION_HISTORY>\n").concat(formattedHistory || "No previous conversation history.", "\n</CONVERSATION_HISTORY>\n\nHere is your structured working context. Use this as your primary source of truth.\n<CURRENT_CONTEXT>\n").concat(formattedWorkingContext, "\n</CURRENT_CONTEXT>\n\nHere is the current goal you must achieve for this step:\n<CURRENT_GOAL>\n").concat(currentGoal, "\n</CURRENT_GOAL>\n\nHere is your working memory for this request so far (a mix of retrieved long-term memory and your most recent work):\n").concat(this.scratchpad.length > 0 ? "<WORKING_MEMORY>\n".concat(formattedWorkingMemory, "\n</WORKING_MEMORY>") : "You have not started working on this request yet.", "\n\nThought:");
+                _systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by executing a pre-defined plan ONE STEP AT A TIME.\n\n## CRITICAL: RESPONSE FORMAT\nYou MUST respond with EXACTLY ONE Thought and ONE Action. Your entire response must follow this exact format:\n\nThought: [Your reasoning about the current step, what tool to use, and why. Be concise.]\nAction: { \"name\": \"tool_name\", \"parameters\": { \"param1\": \"value1\" } }\n\n## CRITICAL REASONING RULES\n1.  **Focus on the <WORKING_MEMORY>:** Your primary source of truth is your <WORKING_MEMORY>. The information in it, especially the most recent 'Observation', represents the current state of the world.\n2.  **Entity Integrity is Paramount:** When you need information about something (e.g., the coordinates of a restaurant you found), you MUST use the data from the 'Observation' where you found it. DO NOT use similar-looking data from the older <CONVERSATION_HISTORY> or the original user query. For example, if you found \"Restaurant X\" at specific coordinates, use *those* coordinates, not the coordinates of the user's initial search area.\n3.  **Handle Follow-up Questions Correctly:** If the user asks a follow-up question (e.g., \"what is its address?\"), the answer is almost certainly in your <WORKING_MEMORY>. Your first action should be to find it there, not to restart the original search.\n4.  **Correct Tool Usage:** You MUST use tools correctly. For example, the 'geocode_address' tool takes a street address, not coordinates. If you already have coordinates, use them directly in other tools.\n5.  **Assess Success:** Did the last action succeed? Did it return the expected information?\n6.  **Adapt Your Plan:**\n    - If the observation is unexpected (e.g., \"Found 0 places\", an error message, or \"Tool not implemented\"), DO NOT blindly proceed with the original plan.\n    - Your 'Thought' must explain how you are adapting to the new information.\n    - Your next 'Action' should be a direct attempt to recover.\n        - **If you get \"Found 0 places\":** Your primary strategy is to expand the search. The system will track your attempts. If the observation says you MUST try again, then you must call the *same tool* but with a *larger search radius*. Look at the previous action in the scratchpad to see what the last radius was and increase it significantly (e.g., double it). Only if the observation indicates that multiple attempts have failed should you consider a different strategy like using the 'ask_user' tool.\n        - **If a tool is not implemented:** Your thought must be to try a different, more suitable tool from the available list to achieve the same goal.\n        - **If you are truly stuck on a step for other reasons:** Use the 'ask_user' tool for clarification.\n    - Only if the last observation was successful and expected should you proceed to the next step of the plan.\n\n## FINISHING THE TASK\nWhen all steps are complete and you have gathered all necessary information to answer the user's request, you MUST use the 'finish' tool to provide a final answer.\n- **Synthesize a Helpful Answer:** Your final answer must be a helpful summary for the user. Do not just state raw data from your observations.\n- **CRITICAL: Avoid Trivial Facts:** Do not state obvious or unhelpful facts\n- **Example:**\n  Thought: The scratchpad shows that the geocoding was successful and the subsequent search found three restaurants. I will now format these results into a final answer for the user.\n  Action: { \"name\": \"finish\", \"parameters\": { \"answer\": \"I found 3 Indian restaurants near your location: [List of restaurants and their details].\" } }\n\n## AVAILABLE ACTIONS\n- Use one of the provided tools.\n- Use the 'finish(answer=...)' tool when you have the final answer.\n- Use the 'escalate_tool_level' tool if the current tools are insufficient.\n- Use the 'ask_user' tool if you need clarification from the user.";
+                _userPrompt = "You have access to the following tools to help you. Select ONE tool to achieve the current goal.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(availableTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is the full conversation history for context:\n<CONVERSATION_HISTORY>\n").concat(formattedHistory || "No previous conversation history.", "\n</CONVERSATION_HISTORY>\n\nHere is the current goal you must achieve for this step:\n<CURRENT_GOAL>\n").concat(currentGoal, "\n</CURRENT_GOAL>\n\nHere is your working memory for this request so far (a mix of retrieved long-term memory and your most recent work):\n").concat(this.scratchpad.length > 0 ? "<WORKING_MEMORY>\n".concat(formattedWorkingMemory, "\n</WORKING_MEMORY>") : "You have not started working on this request yet.", "\n\nThought:");
                 messages.push({
                   role: "system",
                   content: _systemPrompt
@@ -128497,26 +128462,6 @@ var ReActController = /*#__PURE__*/function () {
               return this.toolRetriever.getRelevantTools(query, topN, levels);
             case 1:
               dbTools = _context8.v;
-              // Conditionally add internal tools based on the agent's mode.
-              internalTools = [];
-              internalTools.push({
-                name: "update_context",
-                description: "Updates or adds an entity to the structured working context (<CURRENT_CONTEXT>). Use this to save key information you discover, like coordinates, names, or calculated values. This helps you remember facts correctly for subsequent steps.",
-                parameters: {
-                  type: "object",
-                  properties: {
-                    entity_name: {
-                      type: "string",
-                      description: "A unique name for the entity being tracked (e.g., 'origin_location', 'found_restaurant_1')."
-                    },
-                    attributes: {
-                      type: "object",
-                      description: "An object containing the key-value pairs of information to save for the entity (e.g., {\"latitude\": 40.7128, \"longitude\": -74.0060})."
-                    }
-                  },
-                  required: ["entity_name", "attributes"]
-                }
-              });
               if (dbTools.length > 0) {
                 console.log("ReActController: Tools retrieved from DB: [".concat(dbTools.map(function (t) {
                   return t.name;
@@ -128525,7 +128470,8 @@ var ReActController = /*#__PURE__*/function () {
                 console.log("ReActController: No tools retrieved from DB for query: \"".concat(query, "\""));
               }
 
-              // The 'create_plan' tool is always available for initial planning or for course-correction via re-planning.
+              // Conditionally add internal tools based on the agent's mode.
+              internalTools = []; // The 'create_plan' tool is always available for initial planning or for course-correction via re-planning.
               internalTools.push({
                 name: "create_plan",
                 description: "Breaks down a complex user request into a logical, step-by-step plan. Use this for initial planning or to create a new plan if the current one is flawed.",
