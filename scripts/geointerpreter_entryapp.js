@@ -128368,11 +128368,26 @@ var ReActController = /*#__PURE__*/function () {
         }
         var actionString = cleanResponse.substring(actionIndex + actionPrefix.length).trim();
         try {
-          // Find the first '{' and last '}' to extract the JSON object
+          // Robustly find the JSON object by balancing curly braces.
           var jsonStart = actionString.indexOf('{');
-          var jsonEnd = actionString.lastIndexOf('}');
-          if (jsonStart === -1 || jsonEnd === -1 || jsonEnd < jsonStart) {
+          if (jsonStart === -1) {
             throw new Error("No valid JSON object found in the action part.");
+          }
+          var openBraces = 0;
+          var jsonEnd = -1;
+          for (var i = jsonStart; i < actionString.length; i++) {
+            if (actionString[i] === '{') {
+              openBraces++;
+            } else if (actionString[i] === '}') {
+              openBraces--;
+            }
+            if (openBraces === 0) {
+              jsonEnd = i;
+              break;
+            }
+          }
+          if (jsonEnd === -1) {
+            throw new Error("Malformed JSON object in action part; braces do not match.");
           }
           var jsonString = actionString.substring(jsonStart, jsonEnd + 1);
           var parsedAction = JSON.parse(jsonString);
