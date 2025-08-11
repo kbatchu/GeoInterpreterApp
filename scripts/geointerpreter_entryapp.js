@@ -125506,7 +125506,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modules_orchestration_state_manager_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./modules/orchestration/state_manager.js */ "./scripts/modules/orchestration/state_manager.js");
 /* harmony import */ var _modules_orchestration_communication_bus_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./modules/orchestration/communication_bus.js */ "./scripts/modules/orchestration/communication_bus.js");
 /* harmony import */ var _modules_orchestration_react_controller_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./modules/orchestration/react_controller.js */ "./scripts/modules/orchestration/react_controller.js");
-/* harmony import */ var _modules_orchestration_react_controller_js__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(_modules_orchestration_react_controller_js__WEBPACK_IMPORTED_MODULE_8__);
 /* harmony import */ var _modules_orchestration_embedding_manager_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./modules/orchestration/embedding_manager.js */ "./scripts/modules/orchestration/embedding_manager.js");
 /* harmony import */ var _modules_tools_tool_executor_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./modules/tools/tool_executor.js */ "./scripts/modules/tools/tool_executor.js");
 /* harmony import */ var _modules_duckdb_init_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./modules/duckdb_init.js */ "./scripts/modules/duckdb_init.js");
@@ -125787,7 +125786,7 @@ function Geointerpreter() {
             stateManager = new _modules_orchestration_state_manager_js__WEBPACK_IMPORTED_MODULE_6__["default"]();
             communicationBus = new _modules_orchestration_communication_bus_js__WEBPACK_IMPORTED_MODULE_7__["default"](); // Instantiate the ToolExecutor with the DB connection
             toolExecutorInstance = new _modules_tools_tool_executor_js__WEBPACK_IMPORTED_MODULE_10__["default"](mDBConnection); // Instantiate ReActController
-            reactController = new (_modules_orchestration_react_controller_js__WEBPACK_IMPORTED_MODULE_8___default())(stateManager, communicationBus, aiCore,
+            reactController = new _modules_orchestration_react_controller_js__WEBPACK_IMPORTED_MODULE_8__["default"](stateManager, communicationBus, aiCore,
             // Pass the execute method, bound to the instance to preserve its `this` context
             {
               execute: toolExecutorInstance.execute.bind(toolExecutorInstance)
@@ -127378,9 +127377,1149 @@ var EmbeddingManager = /*#__PURE__*/function () {
 /*!***********************************************************!*\
   !*** ./scripts/modules/orchestration/react_controller.js ***!
   \***********************************************************/
-/***/ (() => {
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-throw new Error("Module build failed (from ./node_modules/babel-loader/lib/index.js):\nSyntaxError: C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\scripts\\modules\\orchestration\\react_controller.js: Missing semicolon. (701:748)\n\n\u001b[0m \u001b[90m 699 |\u001b[39m \u001b[32m    - **Use Full Context:** You MUST use both the `\u001b[39m\u001b[33m<\u001b[39m\u001b[33mCONVERSATION_HISTORY\u001b[39m\u001b[33m>\u001b[39m\u001b[32m` and the full scratchpad to understand the user's request, especially for follow-up questions. Pronouns like \"it\", \"this\", or \"that restaurant\" refer to entities mentioned previously in the conversation or scratchpad.\u001b[39m\n \u001b[90m 700 |\u001b[39m \u001b[32m    - **Prioritize Recent Information:** When resolving references, information from the most recent 'Observation' in the scratchpad is the most reliable source for entities found by tools. The `\u001b[39m\u001b[33m<\u001b[39m\u001b[33mCONVERSATION_HISTORY\u001b[39m\u001b[33m>\u001b[39m\u001b[32m` is the most reliable source for the user's original inputs (like a starting address).\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 701 |\u001b[39m \u001b[32m    - **Maintain Entity-Attribute Links:** When you use an entity (e.g., a restaurant name) from an 'Observation', you MUST use other attributes (like its coordinates) from that *same* 'Observation'. Do not incorrectly associate an entity with an address from a different part of the conversation unless the user's query explicitly links them. For example, if the user asks for travel time to \"that restaurant\", you must identify \"that restaurant\" from the previous scratchpad entries and use the original address from the conversation history as the starting point. If any piece of information is missing (e.g., the origin address was never given, or the restaurant's coordinates are missing), your action MUST be to use a tool to find it (e.g., `\u001b[39mask_user\u001b[32m` or `\u001b[39mgeocode_address\u001b[32m`).\u001b[39m\n \u001b[90m     |\u001b[39m                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 702 |\u001b[39m \u001b[32m3.  **Assess Success:** Did the last action succeed? Did it return the expected information? For example, if you searched for something, did the observation indicate that items were found?\u001b[39m\n \u001b[90m 703 |\u001b[39m \u001b[32m4.  **Adapt Your Plan:**\u001b[39m\n \u001b[90m 704 |\u001b[39m \u001b[32m    - If the observation is unexpected (e.g., \"Found 0 places\", an error message, or \"Tool not implemented\"), DO NOT blindly proceed with the original plan.\u001b[39m\u001b[0m\n    at constructor (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:363:19)\n    at Parser.raise (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:6609:19)\n    at Parser.semicolon (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:6906:10)\n    at Parser.parseVarStatement (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:13150:10)\n    at Parser.parseStatementContent (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:12770:23)\n    at Parser.parseStatementLike (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:12685:17)\n    at Parser.parseStatementListItem (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:12665:17)\n    at Parser.parseBlockOrModuleBlockBody (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:13235:61)\n    at Parser.parseBlockBody (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:13228:10)\n    at Parser.parseBlock (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:13216:10)\n    at Parser.parseStatementContent (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:12777:21)\n    at Parser.parseStatementLike (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:12685:17)\n    at Parser.parseStatementOrSloppyAnnexBFunctionDeclaration (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:12675:17)\n    at Parser.parseIfStatement (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:13050:42)\n    at Parser.parseStatementContent (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:12714:21)\n    at Parser.parseStatementLike (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:12685:17)\n    at Parser.parseStatementListItem (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:12665:17)\n    at Parser.parseBlockOrModuleBlockBody (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:13235:61)\n    at Parser.parseBlockBody (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:13228:10)\n    at Parser.parseBlock (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:13216:10)\n    at Parser.parseFunctionBody (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:12035:24)\n    at Parser.parseFunctionBodyAndFinish (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:12021:10)\n    at Parser.parseMethod (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:11979:31)\n    at Parser.pushClassMethod (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:13642:30)\n    at Parser.parseClassMemberWithIsStatic (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:13553:14)\n    at Parser.parseClassMember (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:13478:10)\n    at C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:13432:14\n    at Parser.withSmartMixTopicForbiddingContext (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:12338:14)\n    at Parser.parseClassBody (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:13414:10)\n    at Parser.parseClass (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:13389:22)\n    at Parser.parseStatementContent (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:12712:21)\n    at Parser.parseStatementLike (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:12685:17)\n    at Parser.parseModuleItem (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:12662:17)\n    at Parser.parseBlockOrModuleBlockBody (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:13235:36)\n    at Parser.parseBlockBody (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:13228:10)\n    at Parser.parseProgram (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:12541:10)\n    at Parser.parseTopLevel (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:12531:25)\n    at Parser.parse (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:14410:10)\n    at parse (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\parser\\lib\\index.js:14444:38)\n    at parser (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\core\\lib\\parser\\index.js:41:34)\n    at parser.next (<anonymous>)\n    at normalizeFile (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\core\\lib\\transformation\\normalize-file.js:64:37)\n    at normalizeFile.next (<anonymous>)\n    at run (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\core\\lib\\transformation\\index.js:22:50)\n    at run.next (<anonymous>)\n    at transform (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\@babel\\core\\lib\\transform.js:22:33)\n    at transform.next (<anonymous>)\n    at step (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\gensync\\index.js:261:32)\n    at C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\gensync\\index.js:273:13\n    at async.call.result.err.err (C:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\node_modules\\gensync\\index.js:223:11)");
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _tools_tool_retriever_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tools/tool_retriever.js */ "./scripts/modules/tools/tool_retriever.js");
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _regeneratorValues(e) { if (null != e) { var t = e["function" == typeof Symbol && Symbol.iterator || "@@iterator"], r = 0; if (t) return t.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) return { next: function next() { return e && r >= e.length && (e = void 0), { value: e && e[r++], done: !e }; } }; } throw new TypeError(_typeof(e) + " is not iterable"); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+// c:\Kiran\Work\GIS\DATAVIZ\GeoInterpreter\scripts\orchestration\react_controller.js
+
+
+// Keep the last 10 pairs of Thought/Action/Observation to prevent excessive token usage.
+var MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT = 30; // 19Jul2025
+var ReActController = /*#__PURE__*/function () {
+  function ReActController(stateManager, communicationBus, aiCore, toolExecutor,
+  // Placeholder for ToolExecutor
+  embeddingManager,
+  // EmbeddingManager instance
+  duckdbConnection // DuckDBConnection instance
+  ) {
+    _classCallCheck(this, ReActController);
+    this.stateManager = stateManager;
+    this.communicationBus = communicationBus;
+    this.duckdbConnection = duckdbConnection; // Store DuckDB connection
+    this.aiCore = aiCore;
+    this.toolExecutor = toolExecutor;
+    this.embeddingManager = embeddingManager;
+    this.toolRetriever = new _tools_tool_retriever_js__WEBPACK_IMPORTED_MODULE_0__["default"](embeddingManager, duckdbConnection);
+    this.scratchpad = []; // Stores Thought, Action, Observation triplets
+    this.userQuery = "";
+    this.isPlanningMode = false; // Flag for hybrid Plan-and-Execute mode
+    this.currentPlanStepIndex = 0; // Tracks current step in active plan
+    this.currentToolLevels = [1]; // Tool levels to use: [1] or [2, 3]
+    this.isCancelled = false; // Flag to stop the run loop
+    this._findPlacesRetryCount = 0;
+    // ?Level 1: High-level, self-contained tools that directly map to a likely step in an analysis plan (e.g., "get user location," "find coordinates for an address," "find hotspots").
+    // ? Level 3: Granular, primitive functions that act as building blocks when higher-level tools are not specific enough (e.g., your SQL functions like st_area, less_than, count).
+
+    // Bind event listeners
+    this.communicationBus.addEventListener("userQuerySubmitted", this._handleUserQuery.bind(this));
+    this.communicationBus.addEventListener("userInputProvided", this._handleUserInput.bind(this));
+    this.communicationBus.addEventListener("cancelProcessing", this._handleCancel.bind(this));
+    this.communicationBus.addEventListener("newSessionRequested", this._handleNewSession.bind(this));
+  }
+
+  /**
+   * Handles a new user query, initiating the ReAct cycle.
+   * @param {CustomEvent} event - The event containing the user query.
+   */
+  return _createClass(ReActController, [{
+    key: "_handleUserQuery",
+    value: (function () {
+      var _handleUserQuery2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(event) {
+        return _regenerator().w(function (_context) {
+          while (1) switch (_context.n) {
+            case 0:
+              this.userQuery = event.detail.query;
+              this.isCancelled = false; // Reset cancellation flag for a new query
+              // this.scratchpad = []; // DO NOT CLEAR. Let it accumulate within a session. It is cleared in _handleNewSession.
+              this.isPlanningMode = true; // Start in planning mode
+              this.currentPlanStepIndex = 0; // Reset plan step index
+              this.currentToolLevels = [1]; // Reset to high-level tools for new query
+              this._findPlacesRetryCount = 0; // Reset retry counter for new query
+
+              this.stateManager.updateState({
+                agentStatus: "planning",
+                conversationHistory: [].concat(_toConsumableArray(this.stateManager.getState().conversationHistory), [{
+                  role: "user",
+                  content: this.userQuery
+                }]),
+                activePlan: null // Clear any previous active plan
+              });
+              console.log("ReActController: Starting ReAct cycle for query:", this.userQuery);
+              _context.n = 1;
+              return this.run();
+            case 1:
+              return _context.a(2);
+          }
+        }, _callee, this);
+      }));
+      function _handleUserQuery(_x) {
+        return _handleUserQuery2.apply(this, arguments);
+      }
+      return _handleUserQuery;
+    }()
+    /**
+     * Executes the main ReAct loop.
+     */
+    )
+  }, {
+    key: "run",
+    value: (function () {
+      var _run = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
+        var _this = this;
+        var finished, loopCount, MAX_LOOP_ITERATIONS, REPETITION_LIMIT, lastActionHistory, _loop, _ret, reason, finalMessage, currentState;
+        return _regenerator().w(function (_context3) {
+          while (1) switch (_context3.n) {
+            case 0:
+              finished = false;
+              loopCount = 0;
+              MAX_LOOP_ITERATIONS = 25; // Increased to allow for more complex reasoning and recovery.
+              REPETITION_LIMIT = 3; // Number of times the same action can be repeated before halting.
+              lastActionHistory = []; // Tracks the last few actions to detect loops.
+              _loop = /*#__PURE__*/_regenerator().m(function _loop() {
+                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, correctedPlan, _errorMsg, _currentState2, observation, questionText, _errorMsg2, standardizedAction, _currentState3, _observation, chosenTool, currentStepType, _observation2, _observation3, finalObservation, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
+                return _regenerator().w(function (_context2) {
+                  while (1) switch (_context2.n) {
+                    case 0:
+                      if (!_this.isCancelled) {
+                        _context2.n = 1;
+                        break;
+                      }
+                      console.log("ReActController: Run loop terminated due to cancellation.");
+                      _this.isCancelled = false; // Reset for the next run
+                      return _context2.a(2, {
+                        v: void 0
+                      });
+                    case 1:
+                      loopCount++;
+                      _this.communicationBus.dispatchEvent("agentLoopUpdate", {
+                        loopCount: loopCount,
+                        maxLoops: MAX_LOOP_ITERATIONS
+                      });
+                      _this.stateManager.updateState({
+                        agentStatus: "thinking"
+                      });
+                      console.log("ReActController: Loop iteration ".concat(loopCount));
+                      _context2.p = 2;
+                      currentGoal = _this.userQuery;
+                      currentStep = null; // Will hold the full step object {description, step_type}
+                      if (!_this.isPlanningMode && _this.stateManager.getState().activePlan) {
+                        activePlan = _this.stateManager.getState().activePlan;
+                        if (_this.currentPlanStepIndex < activePlan.steps.length) {
+                          currentStep = activePlan.steps[_this.currentPlanStepIndex];
+                          currentGoal = activePlan.steps[_this.currentPlanStepIndex].description;
+                          _this.stateManager.updateState({
+                            activePlan: _objectSpread(_objectSpread({}, activePlan), {}, {
+                              currentStepIndex: _this.currentPlanStepIndex
+                            })
+                          });
+                          console.log("ReActController: Executing plan step ".concat(_this.currentPlanStepIndex + 1, ": ").concat(currentGoal));
+                        } else {
+                          // All plan steps completed
+                          // All plan steps have been executed. The AI now needs to be prompted to
+                          // synthesize the results from the scratchpad and provide a final answer to the user's original query: "${this.userQuery}". Use the 'finish' tool to provide the answer.
+                          currentGoal = "All plan steps have been executed. Review the scratchpad and provide a final, comprehensive answer to the user's original query: \"".concat(_this.userQuery, "\". Use the 'finish' tool to provide the answer.");
+                          currentStep = null; // No longer tied to a specific step
+                          console.log("ReActController: All planned steps completed. Now generating final answer.");
+                          // Do not break the loop. Let it run one more time for the final answer.
+                        }
+                      }
+
+                      // 1. Context Assembly
+                      _context2.n = 3;
+                      return _this._assembleContext(currentGoal, currentStep);
+                    case 3:
+                      _yield$_this$_assembl = _context2.v;
+                      messages = _yield$_this$_assembl.messages;
+                      availableTools = _yield$_this$_assembl.availableTools;
+                      console.log("ReActController: Assembled context for AI invocation:", messages);
+
+                      // 2. AI Invocation
+                      _context2.p = 4;
+                      console.log("ReActController: Invoking AI core with messages...");
+                      _context2.n = 5;
+                      return _this.aiCore.chat.completions.create({
+                        messages: messages,
+                        temperature: 0.1,
+                        // A low temperature for more predictable tool usage.
+                        max_gen_len: 512 // A reasonable limit for a thought/action response.
+                      });
+                    case 5:
+                      reply = _context2.v;
+                      console.log("ReActController: AI core responded. Full reply object:", reply);
+                      if (!(reply && reply.choices && reply.choices.length > 0 && reply.choices[0].message)) {
+                        _context2.n = 6;
+                        break;
+                      }
+                      aiResponse = reply.choices[0].message.content;
+                      console.log("ReActController: Extracted AI response content:", aiResponse);
+                      _context2.n = 7;
+                      break;
+                    case 6:
+                      throw new Error("AI response structure is unexpected or empty.");
+                    case 7:
+                      _context2.n = 9;
+                      break;
+                    case 8:
+                      _context2.p = 8;
+                      _t = _context2.v;
+                      console.error("ReActController: Error during AI invocation:", _t);
+                      throw new Error("AI invocation failed: ".concat(_t.message));
+                    case 9:
+                      // 3. Response Parsing
+                      _this$_parseAIRespons = _this._parseAIResponse(aiResponse), thought = _this$_parseAIRespons.thought, action = _this$_parseAIRespons.action;
+                      _this.scratchpad.push({
+                        type: "thought",
+                        content: thought
+                      });
+                      console.log("ReActController: AI Thought:", thought);
+                      _this._dispatchScratchpadUpdate();
+                      console.log("ReActController: AI Action:", action);
+
+                      // *** Repetition Detection Logic ***
+                      // Check if the agent is stuck repeating the same action.
+                      if (!(action.name !== "continue" && action.name !== "parse_error")) {
+                        _context2.n = 11;
+                        break;
+                      }
+                      actionSignature = JSON.stringify({
+                        name: action.name,
+                        params: action.params
+                      });
+                      lastActionHistory.push(actionSignature);
+                      if (lastActionHistory.length > REPETITION_LIMIT) {
+                        lastActionHistory.shift(); // Keep history size limited
+                      }
+
+                      // Check if the last `REPETITION_LIMIT` actions are all identical
+                      if (!(lastActionHistory.length === REPETITION_LIMIT && new Set(lastActionHistory).size === 1)) {
+                        _context2.n = 10;
+                        break;
+                      }
+                      errorMsg = "Error: The agent appears to be stuck in a loop, repeating the action '".concat(action.name, "'. Halting execution to prevent further issues.");
+                      console.error("ReActController: ".concat(errorMsg));
+                      _currentState = _this.stateManager.getState();
+                      _this.stateManager.updateState({
+                        agentStatus: "idle",
+                        conversationHistory: [].concat(_toConsumableArray(_currentState.conversationHistory), [{
+                          role: "assistant",
+                          content: errorMsg
+                        }])
+                      });
+                      _this.communicationBus.dispatchEvent("finalAnswerReady", {
+                        answer: errorMsg
+                      });
+                      finished = true;
+                      return _context2.a(2, 0);
+                    case 10:
+                      _context2.n = 12;
+                      break;
+                    case 11:
+                      // Reset history on non-tool or error actions to not penalize recovery attempts
+                      lastActionHistory = [];
+                    case 12:
+                      if (!(action.name === "continue")) {
+                        _context2.n = 13;
+                        break;
+                      }
+                      _this.scratchpad.push({
+                        type: "observation",
+                        content: "No valid action was taken. Please provide an action in the correct format."
+                      });
+                      // This will cause the loop to run again with the new thought and observation in the scratchpad
+                      return _context2.a(2, 0);
+                    case 13:
+                      if (!_this.isPlanningMode) {
+                        _context2.n = 17;
+                        break;
+                      }
+                      if (!(action.name === "create_plan" && action.params.plan)) {
+                        _context2.n = 15;
+                        break;
+                      }
+                      _context2.n = 14;
+                      return _this._correctPlanStepTypes(action.params.plan);
+                    case 14:
+                      correctedPlan = _context2.v;
+                      // Correct the plan
+                      _this.stateManager.updateState({
+                        activePlan: {
+                          steps: correctedPlan,
+                          // Use the corrected plan
+                          currentStepIndex: 0
+                        }
+                      });
+                      _this.isPlanningMode = false; // Switch to execution mode
+                      _this.scratchpad.push({
+                        type: "action",
+                        content: {
+                          name: "plan_created",
+                          plan: correctedPlan
+                        } // Log corrected plan
+                      });
+                      _this._dispatchScratchpadUpdate();
+                      console.log("ReActController: Plan created and stored.");
+                      console.log("ReActController: Generated Plan:", correctedPlan); // Log corrected plan
+                      // Continue to next loop iteration to execute first step
+                      _context2.n = 16;
+                      break;
+                    case 15:
+                      throw new Error("AI did not return a valid plan in planning mode.");
+                    case 16:
+                      _context2.n = 26;
+                      break;
+                    case 17:
+                      if (!(action.name === "finish")) {
+                        _context2.n = 19;
+                        break;
+                      }
+                      if (!(!action.params.answer || typeof action.params.answer !== "string" || action.params.answer.trim() === "")) {
+                        _context2.n = 18;
+                        break;
+                      }
+                      _errorMsg = "Invalid action: 'finish' tool was called without a valid 'answer' parameter. You MUST provide a complete answer to the user's query based on the information in the scratchpad.";
+                      console.error("ReActController: ".concat(_errorMsg));
+                      _this.scratchpad.push({
+                        type: "action",
+                        content: action
+                      }); // Log the faulty action
+                      _this.scratchpad.push({
+                        type: "observation",
+                        content: _errorMsg
+                      });
+                      _this._dispatchScratchpadUpdate();
+                      return _context2.a(2, 0);
+                    case 18:
+                      finished = true;
+                      _this.scratchpad.push({
+                        type: "action",
+                        content: action
+                      });
+                      _this._dispatchScratchpadUpdate();
+                      _currentState2 = _this.stateManager.getState();
+                      _this.stateManager.updateState({
+                        agentStatus: "idle",
+                        conversationHistory: [].concat(_toConsumableArray(_currentState2.conversationHistory), [{
+                          role: "assistant",
+                          content: action.params.answer
+                        }])
+                      });
+                      _this.communicationBus.dispatchEvent("finalAnswerReady", {
+                        answer: action.params.answer
+                      });
+                      console.log("ReActController: AI finished with answer:", action.params.answer);
+                      _context2.n = 26;
+                      break;
+                    case 19:
+                      if (!(action.name === "escalate_tool_level")) {
+                        _context2.n = 20;
+                        break;
+                      }
+                      // Handle the AI's request to escalate to more granular tools
+                      _this.currentToolLevels = [2, 3];
+                      observation = "High-level tools were not sufficient. Providing a more granular set of tools for the same task. Please try to solve the goal again.";
+                      _this.scratchpad.push({
+                        type: "action",
+                        content: action
+                      });
+                      _this.scratchpad.push({
+                        type: "observation",
+                        content: observation
+                      });
+                      _this._dispatchScratchpadUpdate();
+                      console.log("ReActController: Escalating to lower-level tools.");
+                      // Do NOT increment plan step index, we are retrying the same step with new tools.
+                      return _context2.a(2, 0);
+                    case 20:
+                      if (!(action.name === "ask_user")) {
+                        _context2.n = 22;
+                        break;
+                      }
+                      // Standardize the question parameter, accepting 'prompt' as an alias for 'question'
+                      questionText = action.params.question || action.params.prompt; // Defensive check to ensure the AI provides a question.
+                      if (!(!questionText || typeof questionText !== "string" || questionText.trim() === "")) {
+                        _context2.n = 21;
+                        break;
+                      }
+                      _errorMsg2 = "Invalid action: 'ask_user' tool was called without a valid 'question' or 'prompt' parameter. You must provide a question for the user.";
+                      console.error("ReActController: ".concat(_errorMsg2));
+                      _this.scratchpad.push({
+                        type: "action",
+                        content: action
+                      }); // Log the faulty action
+                      _this.scratchpad.push({
+                        type: "observation",
+                        content: _errorMsg2
+                      });
+                      _this._dispatchScratchpadUpdate();
+                      return _context2.a(2, 0);
+                    case 21:
+                      // Standardize the action for logging and downstream use
+                      standardizedAction = {
+                        name: "ask_user",
+                        params: {
+                          question: questionText,
+                          options: action.params.options || []
+                        }
+                      };
+                      _this.scratchpad.push({
+                        type: "action",
+                        content: standardizedAction
+                      });
+                      _this._dispatchScratchpadUpdate();
+                      _currentState3 = _this.stateManager.getState();
+                      _this.stateManager.updateState({
+                        agentStatus: "waiting_for_user",
+                        conversationHistory: [].concat(_toConsumableArray(_currentState3.conversationHistory), [
+                        // Add the AI's question to the main chat history
+                        {
+                          role: "assistant",
+                          content: questionText
+                        }])
+                      });
+                      _this.communicationBus.dispatchEvent("promptUserForInput", {
+                        question: questionText,
+                        options: standardizedAction.params.options
+                      });
+                      // The run loop will be paused here. It will be resumed by a new event
+                      // handler that listens for the user's response.
+                      return _context2.a(2, {
+                        v: void 0
+                      });
+                    case 22:
+                      if (!(action.name === "parse_error")) {
+                        _context2.n = 23;
+                        break;
+                      }
+                      _observation = "Parse error occurred. The AI response format was incorrect. Please respond with exactly one Thought and one Action in the specified format. Error: ".concat(action.params.error);
+                      _this.scratchpad.push({
+                        type: "action",
+                        content: action
+                      });
+                      _this.scratchpad.push({
+                        type: "observation",
+                        content: _observation
+                      });
+                      _this._dispatchScratchpadUpdate();
+                      console.log("ReActController: Parse error, prompting AI to correct format.");
+                      // Do NOT increment plan step index, we are retrying the same step.
+                      return _context2.a(2, 0);
+                    case 23:
+                      // *** NEW: Mismatch Detection Logic ***
+                      chosenTool = availableTools.find(function (t) {
+                        return t.name === action.name;
+                      });
+                      currentStepType = currentStep ? currentStep.step_type : null;
+                      if (!(currentStepType === "geospatial" && chosenTool && !["geospatial", "data_retrieval"].includes(chosenTool.category.toLowerCase()))) {
+                        _context2.n = 24;
+                        break;
+                      }
+                      console.warn("ReActController: Mismatch detected! Step type is 'geospatial' but chosen tool '".concat(action.name, "' is category '").concat(chosenTool.category, "'."));
+                      _observation2 = "Correction: The current step was labeled 'geospatial', but you chose the tool '".concat(action.name, "' which is a '").concat(chosenTool.category, "' tool. Please reconsider and choose a tool from the 'geospatial' or 'data_retrieval' category to achieve the goal: \"").concat(currentGoal, "\"");
+                      _this.scratchpad.push({
+                        type: "thought",
+                        content: thought
+                      });
+                      _this.scratchpad.push({
+                        type: "action",
+                        content: action
+                      }); // Show the wrong action
+                      _this.scratchpad.push({
+                        type: "observation",
+                        content: _observation2
+                      });
+                      _this._dispatchScratchpadUpdate();
+                      // Do NOT increment plan step index, we are retrying the same step.
+                      return _context2.a(2, 0);
+                    case 24:
+                      // *** END: Mismatch Detection Logic ***
+
+                      _this.scratchpad.push({
+                        type: "action",
+                        content: action
+                      });
+                      _this._dispatchScratchpadUpdate();
+                      _this.stateManager.updateState({
+                        agentStatus: "executing_tool"
+                      });
+                      _this.communicationBus.dispatchEvent("toolExecutionStarted", {
+                        toolName: action.name,
+                        params: action.params
+                      });
+
+                      // 5. Observation Handling
+                      _context2.n = 25;
+                      return _this.toolExecutor.execute(action.name, action.params, _this.stateManager.getState() // Pass current state to the executor
+                      );
+                    case 25:
+                      _observation3 = _context2.v;
+                      finalObservation = _observation3; // Add programmatic guidance for find_places_nearby failures
+                      if (action.name === "find_places_nearby" && typeof _observation3 === "string" && _observation3.startsWith("Found 0 places")) {
+                        _this._findPlacesRetryCount++;
+                        MAX_RETRIES = 3; // Total of 4 attempts (1 initial + 3 retries)
+                        if (_this._findPlacesRetryCount <= MAX_RETRIES) {
+                          finalObservation = "".concat(_observation3, ". Search attempt ").concat(_this._findPlacesRetryCount, " of ").concat(MAX_RETRIES, ". You MUST try again with a larger radius before trying another tool.");
+                        } else {
+                          finalObservation = "".concat(_observation3, ". Multiple search attempts with expanded radius have failed. You should now consider a different strategy.");
+                          _this._findPlacesRetryCount = 0; // Reset for the next time the tool might be used in the plan
+                        }
+                      } else if (action.name === "find_places_nearby") {
+                        // Reset on success or any other observation
+                        _this._findPlacesRetryCount = 0;
+                      }
+
+                      // If the tool was not found, do not advance the plan.
+                      // The loop will re-run with the failure observation in the scratchpad,
+                      // forcing the AI to reconsider its action for the current step.
+                      if (typeof _observation3 === "string" && _observation3.startsWith("Tool '") && _observation3.endsWith("' not implemented in ToolExecutor.")) {
+                        console.log("ReActController: Tool not found, re-evaluating current step. The system prompt will guide recovery.");
+                        _this.scratchpad.push({
+                          type: "observation",
+                          content: _observation3
+                        });
+                        console.log("ReActController: Tool Observation:", _observation3);
+                        // Do NOT increment plan step index.
+                      } else {
+                        _this.scratchpad.push({
+                          type: "observation",
+                          content: finalObservation
+                        });
+                        console.log("ReActController: Tool Observation:", finalObservation);
+                        // Only increment the plan step if the tool was successfully executed (or at least found).
+                        _this.currentPlanStepIndex++;
+                      }
+                      _this._dispatchScratchpadUpdate();
+                    case 26:
+                      _context2.n = 28;
+                      break;
+                    case 27:
+                      _context2.p = 27;
+                      _t2 = _context2.v;
+                      console.error("ReActController: Error during ReAct cycle:", _t2);
+                      _this.scratchpad.push({
+                        type: "observation",
+                        content: "Error: ".concat(_t2.message)
+                      });
+                      _this._dispatchScratchpadUpdate();
+                      _this.stateManager.updateState({
+                        agentStatus: "error"
+                      });
+                      // Allow AI to recover from error in next iteration if not maxed out
+                      if (loopCount >= MAX_LOOP_ITERATIONS) {
+                        finalErrorMessage = "An error occurred: ".concat(_t2.message, ". Max iterations reached.");
+                        _currentState4 = _this.stateManager.getState();
+                        _this.stateManager.updateState({
+                          agentStatus: "idle",
+                          conversationHistory: [].concat(_toConsumableArray(_currentState4.conversationHistory), [{
+                            role: "assistant",
+                            content: finalErrorMessage
+                          }])
+                        });
+                        _this.communicationBus.dispatchEvent("finalAnswerReady", {
+                          answer: finalErrorMessage
+                        });
+                        finished = true;
+                      }
+                    case 28:
+                      return _context2.a(2);
+                  }
+                }, _loop, null, [[4, 8], [2, 27]]);
+              });
+            case 1:
+              if (!(!finished && loopCount < MAX_LOOP_ITERATIONS)) {
+                _context3.n = 5;
+                break;
+              }
+              return _context3.d(_regeneratorValues(_loop()), 2);
+            case 2:
+              _ret = _context3.v;
+              if (!(_ret === 0)) {
+                _context3.n = 3;
+                break;
+              }
+              return _context3.a(3, 1);
+            case 3:
+              if (!_ret) {
+                _context3.n = 4;
+                break;
+              }
+              return _context3.a(2, _ret.v);
+            case 4:
+              _context3.n = 1;
+              break;
+            case 5:
+              if (!finished) {
+                reason = loopCount >= MAX_LOOP_ITERATIONS ? "the maximum number of steps" : "an unrecoverable state";
+                finalMessage = "I could not complete the task within ".concat(reason, ".");
+                console.warn("ReActController: Task ended without finishing. Reason: ".concat(reason, "."));
+                currentState = this.stateManager.getState();
+                this.stateManager.updateState({
+                  agentStatus: "idle",
+                  conversationHistory: [].concat(_toConsumableArray(currentState.conversationHistory), [{
+                    role: "assistant",
+                    content: finalMessage
+                  }])
+                });
+                this.communicationBus.dispatchEvent("finalAnswerReady", {
+                  answer: finalMessage
+                });
+              }
+            case 6:
+              return _context3.a(2);
+          }
+        }, _callee2, this);
+      }));
+      function run() {
+        return _run.apply(this, arguments);
+      }
+      return run;
+    }()
+    /**
+     * Handles the user's response to a prompt from the `ask_user` tool.
+     * @param {CustomEvent} event - The event containing the user's response.
+     * @private
+     */
+    )
+  }, {
+    key: "_handleUserInput",
+    value: (function () {
+      var _handleUserInput2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(event) {
+        var userResponse, currentState;
+        return _regenerator().w(function (_context4) {
+          while (1) switch (_context4.n) {
+            case 0:
+              userResponse = event.detail.response;
+              console.log("ReActController: Received user input:", userResponse);
+              currentState = this.stateManager.getState(); // Add the user's response to the scratchpad as an observation
+              this.scratchpad.push({
+                type: "observation",
+                content: "User provided the following information: \"".concat(userResponse, "\"")
+              });
+              this._dispatchScratchpadUpdate();
+
+              // The agent is no longer waiting, it's thinking about the new info
+              this.stateManager.updateState({
+                agentStatus: "thinking",
+                // Add the user's answer to the main chat history
+                conversationHistory: [].concat(_toConsumableArray(currentState.conversationHistory), [{
+                  role: "user",
+                  content: userResponse
+                }])
+              });
+
+              // Resume the execution loop
+              _context4.n = 1;
+              return this.run();
+            case 1:
+              return _context4.a(2);
+          }
+        }, _callee3, this);
+      }));
+      function _handleUserInput(_x2) {
+        return _handleUserInput2.apply(this, arguments);
+      }
+      return _handleUserInput;
+    }()
+    /**
+     * Handles the cancellation request from the UI.
+     * @private
+     */
+    )
+  }, {
+    key: "_handleCancel",
+    value: function _handleCancel() {
+      console.log("ReActController: Cancellation requested by user.");
+      this.isCancelled = true;
+      // Set the agent status to idle immediately to make the UI responsive.
+      this.stateManager.updateState({
+        agentStatus: "idle"
+      });
+    }
+
+    /**
+     * Handles a new session request, resetting the agent and UI to its initial state.
+     * @private
+     */
+  }, {
+    key: "_handleNewSession",
+    value: function _handleNewSession() {
+      console.log("ReActController: New session requested. Resetting state.");
+      this.isCancelled = true; // Stop any ongoing process
+      this.scratchpad = [];
+      this._dispatchScratchpadUpdate(); // Dispatch empty scratchpad to clear UI
+
+      this.userQuery = "";
+      this.isPlanningMode = false;
+      this.currentPlanStepIndex = 0;
+      this.currentToolLevels = [1];
+      this._findPlacesRetryCount = 0;
+
+      // Reset the state manager completely
+      this.stateManager.updateState({
+        agentStatus: "idle",
+        conversationHistory: [],
+        activePlan: null
+      });
+    }
+    /**
+     * Assembles the context for the AI Core.
+     * This includes the user query, conversation history, scratchpad, and relevant tools retrieved via vector search.
+     * @param {string} currentGoal - The current goal for the AI (user query or plan step).
+     * @param {object|null} currentStep - The full current step object from the plan, if available.
+     * @returns {Promise<{messages: Array, availableTools: Array}>} A promise that resolves to an object containing messages for the AI and the list of tools made available.
+     * @private
+     */
+  }, {
+    key: "_assembleContext",
+    value: (function () {
+      var _assembleContext2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(currentGoal) {
+        var currentStep,
+          state,
+          toolQuery,
+          availableTools,
+          toolNames,
+          formattedHistory,
+          messages,
+          planningTools,
+          systemPrompt,
+          userPrompt,
+          _systemPrompt,
+          _userPrompt,
+          _args5 = arguments;
+        return _regenerator().w(function (_context5) {
+          while (1) switch (_context5.n) {
+            case 0:
+              currentStep = _args5.length > 1 && _args5[1] !== undefined ? _args5[1] : null;
+              state = this.stateManager.getState();
+              toolQuery = currentGoal;
+              if (currentStep && currentStep.step_type) {
+                // Augment the query with the step type for more relevant tool retrieval
+                toolQuery = "".concat(currentStep.step_type, ": ").concat(currentGoal);
+              }
+              console.log("Getting tools for the query:", toolQuery);
+              _context5.n = 1;
+              return this._getRelevantTools(toolQuery, 15, this.currentToolLevels);
+            case 1:
+              availableTools = _context5.v;
+              toolNames = availableTools.map(function (t) {
+                return t.name;
+              });
+              console.log("ReActController: Retrieved available tools: [".concat(toolNames.join(", "), "]"));
+
+              // Format the conversation history, excluding the most recent user query which is the current task.
+              // This provides the model with memory of the session so far.
+              formattedHistory = state.conversationHistory.slice(0, -1) // Exclude the last message (the current query)
+              .map(function (msg) {
+                return "".concat(msg.role.charAt(0).toUpperCase() + msg.role.slice(1), ": ").concat(msg.content);
+              }).join("\n");
+              messages = [];
+              if (this.isPlanningMode) {
+                // In planning mode, we ONLY want the AI to use the 'create_plan' tool.
+                // We filter the available tools to ensure no other tools are presented,
+                // which could confuse the model into trying to execute a step instead of planning.
+                planningTools = availableTools.filter(function (t) {
+                  return t.name === "create_plan";
+                });
+                systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your primary goal is to help the user by breaking down complex requests into a logical, step-by-step plan.\n\n## CRITICAL: YOU ARE IN PLANNING MODE\nYou MUST create a plan using the create_plan tool. Do NOT attempt to execute any other actions.\n\n## RESPONSE FORMAT\nYou MUST respond in the following format, with no other text before or after. Your entire response must start with \"Thought:\".\n\nThought: [Your reasoning for the plan you are about to create.]\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"...\", \"step_type\": \"...\" }, ... ] } }\n\n## PLAN REQUIREMENTS\n- Each step in the plan should be a discrete, self-contained analytical task.\n- For each step, you must provide a 'step_type' from this exact list: [geospatial, aggregation, filter, data_retrieval, calculation, visualization].\n\n## CRITICAL PLANNING INSTRUCTIONS\n- **Prioritize User-Provided Information:** If the user's query contains specific details like a street address, a location name, or a dataset, your plan MUST start by using that information.\n- **Entity Integrity:** Do not invent information. If you need the address of a place you found, your plan must include a step to find that address. Do not assume it's the same as another address mentioned in the conversation.\n- **Example:** If a street address is given, the first step of your plan MUST be to convert this address into geographic coordinates. After getting the coordinates, I can search for the restaurants.\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"Geocode the address '1600 Pennsylvania Avenue NW, Washington, DC'\", \"step_type\": \"geospatial\" }, { \"step\": 2, \"description\": \"Search for Indian restaurants near the geocoded location\", \"step_type\": \"data_retrieval\" } ] } }";
+                userPrompt = "You have access to a single tool to help you. Use this tool to output your plan as a JSON array of steps.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(planningTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is the full conversation history for context:\n<CONVERSATION_HISTORY>\n").concat(formattedHistory || "No previous conversation history.", "\n</CONVERSATION_HISTORY>\n\nHere is the user's request:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
+                  return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
+                }).join("\n"), "\n\nThought:");
+                messages.push({
+                  role: "system",
+                  content: systemPrompt
+                });
+                messages.push({
+                  role: "user",
+                  content: userPrompt
+                });
+              } else {
+                _systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by executing a pre-defined plan ONE STEP AT A TIME.\n\n## CRITICAL: RESPONSE FORMAT\nYou MUST respond with EXACTLY ONE Thought and ONE Action. Your entire response must follow this exact format:\n\nThought: [Your reasoning about the current step, what tool to use, and why. Be concise.]\nAction: { \"name\": \"tool_name\", \"parameters\": { \"param1\": \"value1\" } }\n\n## CRITICAL THINKING & ADAPTATION\n1.  **Analyze the last Observation:** Before deciding your next action, you MUST carefully analyze the most recent Observation in the scratchpad.\n2.  **Contextual Awareness & Entity Integrity:**\n    - **Use Full Context:** You MUST use both the " < CONVERSATION_HISTORY > " and the full scratchpad to understand the user's request, especially for follow-up questions. Pronouns like \"it\", \"this\", or \"that restaurant\" refer to entities mentioned previously in the conversation or scratchpad.\n    - **Prioritize Recent Information:** When resolving references, information from the most recent 'Observation' in the scratchpad is the most reliable source for entities found by tools. The " < CONVERSATION_HISTORY > " is the most reliable source for the user's original inputs (like a starting address).\n    - **Maintain Entity-Attribute Links:** When you use an entity (e.g., a restaurant name) from an 'Observation', you MUST use other attributes (like its coordinates) from that *same* 'Observation'. Do not incorrectly associate an entity with an address from a different part of the conversation unless the user's query explicitly links them. For example, if the user asks for travel time to \"that restaurant\", you must identify \"that restaurant\" from the previous scratchpad entries and use the original address from the conversation history as the starting point. If any piece of information is missing (e.g., the origin address was never given, or the restaurant's coordinates are missing), your action MUST be to use a tool to find it (e.g., 'ask_user' or 'geocode_address').\n3.  **Assess Success:** Did the last action succeed? Did it return the expected information? For example, if you searched for something, did the observation indicate that items were found?\n4.  **Adapt Your Plan:**\n    - If the observation is unexpected (e.g., \"Found 0 places\", an error message, or \"Tool not implemented\"), DO NOT blindly proceed with the original plan.\n    - Your 'Thought' must explain how you are adapting to the new information.\n    - Your next 'Action' should be a direct attempt to recover.\n        - **If you get \"Found 0 places\":** Your primary strategy is to expand the search. The system will track your attempts. If the observation says you MUST try again, then you must call the *same tool* but with a *larger search radius*. Look at the previous action in the scratchpad to see what the last radius was and increase it significantly (e.g., double it). Only if the observation indicates that multiple attempts have failed should you consider a different strategy like using the 'ask_user' tool.\n        - **If a tool is not implemented:** Your thought must be to try a different, more suitable tool from the available list to achieve the same goal.\n        - **If you are truly stuck on a step for other reasons:** Use the 'ask_user' tool for clarification.\n    - Only if the last observation was successful and expected should you proceed to the next step of the plan.\n\n## FINISHING THE TASK\nWhen all steps are complete and you have gathered all necessary information, you MUST use the 'finish' tool.\n- **Thought:** Your thought should summarize the key findings from the scratchpad.\n- **Action:** The 'answer' parameter in the 'finish' tool MUST contain the complete, final answer for the user, synthesized from the observations.\n- **Example:**\n  Thought: The scratchpad shows that the geocoding was successful and the subsequent search found three restaurants. I will now format these results into a final answer for the user.\n  Action: { \"name\": \"finish\", \"parameters\": { \"answer\": \"I found 3 Indian restaurants near your location: [List of restaurants and their details].\" } }\n\n## AVAILABLE ACTIONS\n- Use one of the provided tools.\n- Use the 'finish(answer=...)' tool when you have the final answer.\n- Use the 'escalate_tool_level' tool if the current tools are insufficient.\n- Use the 'ask_user' tool if you need clarification from the user.";
+                _userPrompt = "You have access to the following tools to help you. Select ONE tool to achieve the current goal.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(availableTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is the full conversation history for context:\n<CONVERSATION_HISTORY>\n").concat(formattedHistory || "No previous conversation history.", "\n</CONVERSATION_HISTORY>\n\nHere is the user's current request:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the current goal for this step:\n<CURRENT_GOAL>\n").concat(currentGoal, "\n</CURRENT_GOAL>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
+                  return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
+                }).join("\n"), "\n\nThought:");
+                messages.push({
+                  role: "system",
+                  content: _systemPrompt
+                });
+                messages.push({
+                  role: "user",
+                  content: _userPrompt
+                });
+              }
+              return _context5.a(2, {
+                messages: messages,
+                availableTools: availableTools
+              });
+          }
+        }, _callee4, this);
+      }));
+      function _assembleContext(_x3) {
+        return _assembleContext2.apply(this, arguments);
+      }
+      return _assembleContext;
+    }()
+    /**
+     * Retrieves relevant tools from the tool registry using vector similarity search against the tool descriptions.
+     * @param {string} query - The user query or current plan step.
+     * @returns {Promise<Array>} A promise that resolves to an array of tool definitions formatted for the AI.
+     * @param {number} [topN=15] - The number of top relevant tools to retrieve.
+     * @param {Array<number>} [levels=[1, 2, 3]] - The priority levels of tools to search for. 1=highest priority, 3=lowest priority. 1 = High-level tools (decomposable to many granular functions), 2 = Composite tools (decomposable to a few granular functions), 3 = Granular tools (sql functions, non-decomposable)
+     * @private
+     */
+    // ? Level 1: High-level, self-contained tools that directly map to a likely step in an analysis plan (e.g., "get user location," "find coordinates for an address," "find hotspots").
+    // ? Level 3: Granular, primitive functions that act as building blocks when higher-level tools are not specific enough (e.g., your SQL functions like st_area, less_than, count).
+    )
+  }, {
+    key: "_getRelevantTools",
+    value: (function () {
+      var _getRelevantTools2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(query) {
+        var topN,
+          levels,
+          dbTools,
+          internalTools,
+          uniqueTools,
+          _iterator,
+          _step,
+          _tool,
+          _i,
+          _internalTools,
+          tool,
+          _args6 = arguments;
+        return _regenerator().w(function (_context6) {
+          while (1) switch (_context6.n) {
+            case 0:
+              topN = _args6.length > 1 && _args6[1] !== undefined ? _args6[1] : 15;
+              levels = _args6.length > 2 && _args6[2] !== undefined ? _args6[2] : [1, 2, 3];
+              _context6.n = 1;
+              return this.toolRetriever.getRelevantTools(query, topN, levels);
+            case 1:
+              dbTools = _context6.v;
+              if (dbTools.length > 0) {
+                console.log("ReActController: Tools retrieved from DB: [".concat(dbTools.map(function (t) {
+                  return t.name;
+                }).join(", "), "]"));
+              } else {
+                console.log("ReActController: No tools retrieved from DB for query: \"".concat(query, "\""));
+              }
+
+              // Conditionally add internal tools based on the agent's mode.
+              internalTools = []; // The 'create_plan' tool is always available for initial planning or for course-correction via re-planning.
+              internalTools.push({
+                name: "create_plan",
+                description: "Breaks down a complex user request into a logical, step-by-step plan. Use this for initial planning or to create a new plan if the current one is flawed.",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    plan: {
+                      type: "array",
+                      description: "A JSON array representing the multi-step plan.",
+                      items: {
+                        type: "object",
+                        properties: {
+                          step: {
+                            type: "number"
+                          },
+                          description: {
+                            type: "string"
+                          },
+                          step_type: {
+                            type: "string",
+                            "enum": ["geospatial", "aggregation", "filter", "data_retrieval", "calculation", "visualization"]
+                          }
+                        },
+                        required: ["step", "description", "step_type"]
+                      }
+                    }
+                  },
+                  required: ["plan"]
+                }
+              });
+
+              // 'finish' and 'escalate_tool_level' are always needed for control flow during execution.
+              internalTools.push({
+                name: "finish",
+                description: "Call this tool when you have fully answered the user's request. Provide the final answer in the 'answer' parameter.",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    answer: {
+                      type: "string",
+                      description: "The final answer to the user's question."
+                    }
+                  },
+                  required: ["answer"]
+                }
+              }, {
+                name: "escalate_tool_level",
+                description: "If you cannot solve the current goal with the available high-level tools, use this tool to request a more granular set of tools to break down the problem further.",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    reason: {
+                      type: "string",
+                      description: "A brief reason why the current tools are insufficient."
+                    }
+                  },
+                  required: ["reason"]
+                }
+              }, {
+                name: "ask_user",
+                description: "Asks the user for clarification or additional information when you are stuck or need more input to proceed. The user's response will be provided in the next Observation.",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    question: {
+                      type: "string",
+                      description: "The clear, specific question to ask the user."
+                    },
+                    options: {
+                      type: "array",
+                      description: "Optional. A list of suggested response options for the user to choose from.",
+                      items: {
+                        type: "string"
+                      }
+                    }
+                  },
+                  required: ["question"]
+                }
+              });
+
+              // Combine DB tools with internal tools, ensuring internal tools take precedence.
+              uniqueTools = new Map();
+              _iterator = _createForOfIteratorHelper(dbTools);
+              try {
+                for (_iterator.s(); !(_step = _iterator.n()).done;) {
+                  _tool = _step.value;
+                  uniqueTools.set(_tool.name, _tool);
+                }
+              } catch (err) {
+                _iterator.e(err);
+              } finally {
+                _iterator.f();
+              }
+              for (_i = 0, _internalTools = internalTools; _i < _internalTools.length; _i++) {
+                tool = _internalTools[_i];
+                uniqueTools.set(tool.name, tool); // Internal tools always override or add
+              }
+              return _context6.a(2, Array.from(uniqueTools.values()));
+          }
+        }, _callee5, this);
+      }));
+      function _getRelevantTools(_x4) {
+        return _getRelevantTools2.apply(this, arguments);
+      }
+      return _getRelevantTools;
+    }()
+    /**
+     * Parses the AI's response to extract thought and action.
+     * @param {string} aiResponse - The raw response from the AI.
+     * @returns {{thought: string, action: object}} The parsed thought and action.
+     * @private
+     */
+    )
+  }, {
+    key: "_parseAIResponse",
+    value: function _parseAIResponse(aiResponse) {
+      console.log("ReActController: Parsing AI response:", "\"".concat(aiResponse, "\""));
+      var cleanResponse = aiResponse.trim();
+      var thought = "No thought provided.";
+      var action = {
+        name: "continue",
+        params: {}
+      }; // Default action
+
+      // Find the last occurrence of "Action:" to reliably separate thought from action.
+      var actionPrefix = "Action:";
+      var actionIndex = cleanResponse.lastIndexOf(actionPrefix);
+      if (actionIndex !== -1) {
+        // If "Action:" is present, parse both thought and action
+        var rawThought = cleanResponse.substring(0, actionIndex).trim();
+        var thoughtPrefix = "Thought:";
+        if (rawThought.startsWith(thoughtPrefix)) {
+          rawThought = rawThought.substring(thoughtPrefix.length).trim();
+        }
+        if (rawThought) {
+          thought = rawThought;
+        }
+        var actionString = cleanResponse.substring(actionIndex + actionPrefix.length).trim();
+        try {
+          // Find the first '{' and last '}' to extract the JSON object
+          var jsonStart = actionString.indexOf('{');
+          var jsonEnd = actionString.lastIndexOf('}');
+          if (jsonStart === -1 || jsonEnd === -1 || jsonEnd < jsonStart) {
+            throw new Error("No valid JSON object found in the action part.");
+          }
+          var jsonString = actionString.substring(jsonStart, jsonEnd + 1);
+          var parsedAction = JSON.parse(jsonString);
+          if (parsedAction && typeof parsedAction.name === 'string') {
+            // Assign to the existing 'action' variable, don't redeclare
+            action = {
+              name: parsedAction.name,
+              params: parsedAction.parameters || parsedAction.params || {}
+            };
+          } else {
+            throw new Error("Parsed JSON is not a valid action object (missing 'name').");
+          }
+        } catch (e) {
+          console.error("ReActController: Failed to parse action JSON. Error: ".concat(e.message, ". Raw action string: \"").concat(actionString, "\""));
+          // If parsing fails, we create a special action to inform the agent.
+          action = {
+            name: "parse_error",
+            params: {
+              error: e.message,
+              response: actionString
+            }
+          };
+        }
+      } else {
+        // If "Action:" is not present, the entire response is the thought.
+        // This handles cases where the AI is just thinking or recovering.
+        var _thoughtPrefix = "Thought:";
+        if (cleanResponse.startsWith(_thoughtPrefix)) {
+          thought = cleanResponse.substring(_thoughtPrefix.length).trim();
+        } else {
+          thought = cleanResponse;
+        }
+      }
+      console.log("ReActController: Successfully parsed - Thought:", thought);
+      console.log("ReActController: Successfully parsed - Action:", action);
+      return {
+        thought: thought,
+        action: action
+      };
+    }
+  }, {
+    key: "_correctPlanStepTypes",
+    value: function () {
+      var _correctPlanStepTypes2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7(plan) {
+        var _this2 = this;
+        var SIMILARITY_THRESHOLD, correctedPlanPromises;
+        return _regenerator().w(function (_context8) {
+          while (1) switch (_context8.n) {
+            case 0:
+              SIMILARITY_THRESHOLD = 0.6; // Min similarity to be considered 'geospatial'.
+              // This assumes a table 'geospatial_term_embeddings' exists with 'term' and 'embedding' columns.
+              correctedPlanPromises = plan.map(/*#__PURE__*/function () {
+                var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(step) {
+                  var descriptionEmbedding, descriptionEmbeddingString, querySql, result, rows, similarity, _t3;
+                  return _regenerator().w(function (_context7) {
+                    while (1) switch (_context7.n) {
+                      case 0:
+                        if (["data_retrieval", "calculation", "filter", "aggregation"].includes(step.step_type)) {
+                          _context7.n = 1;
+                          break;
+                        }
+                        return _context7.a(2, step);
+                      case 1:
+                        console.log("ReActController: Evaluating step ".concat(step.step, " with step_type '").concat(step.step_type, "' and description: \"").concat(step.description, "\""));
+                        _context7.p = 2;
+                        _context7.n = 3;
+                        return _this2.embeddingManager.generateEmbedding(step.description);
+                      case 3:
+                        descriptionEmbedding = _context7.v;
+                        descriptionEmbeddingString = JSON.stringify(Array.from(descriptionEmbedding)); // Query the geospatial terms database for the most similar term
+                        querySql = "\n        SELECT\n          array_cosine_distance(\n              embedding,\n              CAST('".concat(descriptionEmbeddingString, "' AS DOUBLE[384])\n          ) AS distance\n        FROM\n          tool_registry_db.geospatial_term_embeddings\n        ORDER BY\n          distance ASC\n        LIMIT 1;\n      ");
+                        _context7.n = 4;
+                        return _this2.duckdbConnection.query(querySql);
+                      case 4:
+                        result = _context7.v;
+                        rows = result.toArray();
+                        if (!(rows.length > 0)) {
+                          _context7.n = 7;
+                          break;
+                        }
+                        // Convert distance to similarity for threshold comparison
+                        similarity = 1 - rows[0].distance;
+                        console.log("ReActController: Step ".concat(step.step, " (").concat(step.step_type, ") similarity to geospatial terms: ").concat(similarity.toFixed(4), " (threshold: ").concat(SIMILARITY_THRESHOLD, ")"));
+                        if (!(similarity >= SIMILARITY_THRESHOLD)) {
+                          _context7.n = 5;
+                          break;
+                        }
+                        console.log("ReActController: Correcting step ".concat(step.step, " from '").concat(step.step_type, "' to 'geospatial' based on semantic similarity (").concat(similarity.toFixed(2), ")."));
+                        return _context7.a(2, _objectSpread(_objectSpread({}, step), {}, {
+                          step_type: "geospatial"
+                        }));
+                      case 5:
+                        console.log("ReActController: Step ".concat(step.step, " (").concat(step.step_type, ") similarity ").concat(similarity.toFixed(4), " below threshold, keeping original step_type."));
+                      case 6:
+                        _context7.n = 8;
+                        break;
+                      case 7:
+                        console.log("ReActController: No geospatial terms found in database for step ".concat(step.step, "."));
+                      case 8:
+                        _context7.n = 10;
+                        break;
+                      case 9:
+                        _context7.p = 9;
+                        _t3 = _context7.v;
+                        console.error("ReActController: Could not query geospatial term embeddings. Does the table exist? Error: ".concat(_t3.message));
+                        // If the query fails, just return the original step.
+                        return _context7.a(2, step);
+                      case 10:
+                        return _context7.a(2, step);
+                    }
+                  }, _callee6, null, [[2, 9]]);
+                }));
+                return function (_x6) {
+                  return _ref.apply(this, arguments);
+                };
+              }());
+              return _context8.a(2, Promise.all(correctedPlanPromises));
+          }
+        }, _callee7);
+      }));
+      function _correctPlanStepTypes(_x5) {
+        return _correctPlanStepTypes2.apply(this, arguments);
+      }
+      return _correctPlanStepTypes;
+    }()
+    /**
+     * Dispatches an event to update the UI with the current scratchpad content.
+     */
+  }, {
+    key: "_dispatchScratchpadUpdate",
+    value: function _dispatchScratchpadUpdate() {
+      var thinkingProcess = this.scratchpad.map(function (entry) {
+        var formattedEntry = "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content, null, 2) : entry.content);
+        if (entry.type === "observation") {
+          // Add a visual separator after an observation to clearly delineate
+          // the result of an action from the next thought process.
+          return formattedEntry + "\n" + ".".repeat(80);
+        }
+        return formattedEntry;
+      }).join("\n\n");
+      this.communicationBus.dispatchEvent("aiThinkingStream", {
+        content: thinkingProcess
+      });
+    }
+  }]);
+}();
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ReActController);
 
 /***/ }),
 
@@ -128291,6 +129430,140 @@ var ToolExecutor = /*#__PURE__*/function () {
   }]);
 }();
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ToolExecutor);
+
+/***/ }),
+
+/***/ "./scripts/modules/tools/tool_retriever.js":
+/*!*************************************************!*\
+  !*** ./scripts/modules/tools/tool_retriever.js ***!
+  \*************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+// c:\Kiran\Work\GIS\DATAVIZ\GeoInterpreter\scripts\modules\tools\tool_retriever.js
+/**
+ * Retrieves relevant tools from a DuckDB tool registry based on vector similarity search.
+ */
+var ToolRetriever = /*#__PURE__*/function () {
+  /**
+   * @param {import('./embedding_manager.js').default} embeddingManager - An initialized EmbeddingManager instance.
+   * @param {import('@duckdb/duckdb-wasm').AsyncDuckDBConnection} duckdbConnection - An active DuckDB connection.
+   */
+  function ToolRetriever(embeddingManager, duckdbConnection) {
+    _classCallCheck(this, ToolRetriever);
+    if (!embeddingManager || !embeddingManager.readyPromise) {
+      throw new Error("ToolRetriever: An EmbeddingManager instance with a readyPromise is required.");
+    }
+    if (!duckdbConnection) {
+      throw new Error("ToolRetriever: A DuckDB connection is required.");
+    }
+    this.embeddingManager = embeddingManager;
+    this.duckdbConnection = duckdbConnection;
+  }
+
+  /**
+   * Retrieves relevant tools from the tool registry using vector similarity search.
+   * @param {string} query - The user query or current plan step.
+   * @param {number} [topN=15] - The number of top relevant tools to retrieve.
+   * @param {Array<number>} [levels=[1, 2, 3]] - The priority levels of tools to search for.
+   * @returns {Promise<Array<object>>} A promise that resolves to an array of tool definitions,
+   * including a `similarity` score (where 1 is a perfect match).
+   */
+  return _createClass(ToolRetriever, [{
+    key: "getRelevantTools",
+    value: (function () {
+      var _getRelevantTools = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(query) {
+        var topN,
+          levels,
+          queryEmbedding,
+          queryEmbeddingString,
+          levelFilter,
+          querySql,
+          result,
+          tools,
+          toolRows,
+          _iterator,
+          _step,
+          row,
+          _args = arguments;
+        return _regenerator().w(function (_context) {
+          while (1) switch (_context.n) {
+            case 0:
+              topN = _args.length > 1 && _args[1] !== undefined ? _args[1] : 15;
+              levels = _args.length > 2 && _args[2] !== undefined ? _args[2] : [1, 2, 3];
+              _context.n = 1;
+              return this.embeddingManager.readyPromise;
+            case 1:
+              _context.n = 2;
+              return this.embeddingManager.generateEmbedding(query);
+            case 2:
+              queryEmbedding = _context.v;
+              queryEmbeddingString = JSON.stringify(Array.from(queryEmbedding));
+              console.log("ToolRetriever: Embedding generated for query: \"".concat(query, "\""));
+
+              // 2. Build the WHERE clause for tool levels.
+              levelFilter = "WHERE level IN (".concat(levels.join(','), ")"); // 2. Perform a vector similarity search in DuckDB.
+              // The embeddings were generated using Xenova/all-MiniLM-L6-v2 model (384 dimensions).
+              querySql = "\n            SELECT\n                tool_id,\n                category,\n                semantic_description,\n                parameters_json,\n                array_cosine_distance(\n                    semantic_description_embedding,\n                    CAST('".concat(queryEmbeddingString, "' AS DOUBLE[384])\n                ) AS distance\n            FROM\n                tool_registry_db.duckdb_tools\n            ").concat(levelFilter, "\n            ORDER BY\n                distance ASC\n            LIMIT ").concat(topN, ";\n        ");
+              _context.n = 3;
+              return this.duckdbConnection.query(querySql)["catch"](function (e) {
+                console.error("ToolRetriever: Error querying tool registry:", e);
+                throw new Error("Failed to retrieve tools from DuckDB: " + e.message);
+              });
+            case 3:
+              result = _context.v;
+              // 3. Parse DuckDB results into tool definitions.
+              tools = [];
+              if (result && result.toArray) {
+                toolRows = result.toArray();
+                _iterator = _createForOfIteratorHelper(toolRows);
+                try {
+                  for (_iterator.s(); !(_step = _iterator.n()).done;) {
+                    row = _step.value;
+                    tools.push({
+                      name: row.tool_id,
+                      category: row.category,
+                      description: row.semantic_description,
+                      parameters: JSON.parse(row.parameters_json),
+                      // Convert cosine distance to cosine similarity (1 is a perfect match)
+                      similarity: 1 - row.distance
+                    });
+                  }
+                } catch (err) {
+                  _iterator.e(err);
+                } finally {
+                  _iterator.f();
+                }
+              }
+              return _context.a(2, tools);
+          }
+        }, _callee, this);
+      }));
+      function getRelevantTools(_x) {
+        return _getRelevantTools.apply(this, arguments);
+      }
+      return getRelevantTools;
+    }())
+  }]);
+}();
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ToolRetriever);
 
 /***/ }),
 
