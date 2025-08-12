@@ -127629,7 +127629,7 @@ var MemoryManager = /*#__PURE__*/function () {
     key: "addSemanticFacts",
     value: (function () {
       var _addSemanticFacts = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(facts) {
-        var entityNameToIdMap, _iterator, _step, entity, entityQuery, entityResult, entityId, _i, _Object$entries, _Object$entries$_i, key, value, attrQuery, geoQuery, _iterator2, _step2, rel, sourceId, targetId, relQuery, _t4, _t5, _t6;
+        var entityNameToIdMap, _iterator, _step, entity, entityId, selectQuery, selectResult, insertQuery, insertResult, _i, _Object$entries, _Object$entries$_i, key, value, attrQuery, geoQuery, _iterator2, _step2, rel, sourceId, targetId, relQuery, _t4, _t5, _t6;
         return _regenerator().w(function (_context4) {
           while (1) switch (_context4.n) {
             case 0:
@@ -127654,7 +127654,7 @@ var MemoryManager = /*#__PURE__*/function () {
             case 4:
               entityNameToIdMap = new Map(); // 1. Process Entities and their Attributes
               if (!facts.entities) {
-                _context4.n = 15;
+                _context4.n = 18;
                 break;
               }
               _iterator = _createForOfIteratorHelper(facts.entities);
@@ -127662,124 +127662,140 @@ var MemoryManager = /*#__PURE__*/function () {
               _iterator.s();
             case 6:
               if ((_step = _iterator.n()).done) {
-                _context4.n = 12;
+                _context4.n = 15;
                 break;
               }
               entity = _step.value;
-              // Upsert the entity and get its ID.
-              // If a conflict on (name, type) occurs, we do an update to trigger the RETURNING clause,
-              // which gives us the ID of the existing row.
-              entityQuery = "\n            INSERT INTO entities (entity_id, entity_name, entity_type)\n            VALUES (uuid(), ?, ?)\n            ON CONFLICT (entity_name, entity_type)\n            DO UPDATE SET created_at = current_timestamp\n            RETURNING entity_id;\n          ";
+              // "Get or Create" pattern to robustly find or insert an entity and get its ID.
+              // This avoids a persistent issue with INSERT..ON CONFLICT..RETURNING in the driver.
+              entityId = void 0;
+              selectQuery = "SELECT entity_id FROM entities WHERE entity_name = ? AND entity_type = ?;";
               _context4.n = 7;
-              return this.db.query(entityQuery, [entity.name, entity.type]);
+              return this.db.query(selectQuery, [entity.name, entity.type]);
             case 7:
-              entityResult = _context4.v;
-              entityId = entityResult.get(0).toJSON().entity_id;
+              selectResult = _context4.v;
+              if (!(selectResult.numRows > 0)) {
+                _context4.n = 8;
+                break;
+              }
+              // Entity exists, use its ID
+              entityId = selectResult.get(0).toJSON().entity_id;
+              _context4.n = 10;
+              break;
+            case 8:
+              // Entity does not exist, insert it and get the new ID
+              insertQuery = "\n              INSERT INTO entities (entity_id, entity_name, entity_type)\n              VALUES (uuid(), ?, ?)\n              RETURNING entity_id;\n            ";
+              _context4.n = 9;
+              return this.db.query(insertQuery, [entity.name, entity.type]);
+            case 9:
+              insertResult = _context4.v;
+              entityId = insertResult.get(0).toJSON().entity_id;
+            case 10:
               entityNameToIdMap.set(entity.name, entityId);
 
               // Process simple attributes
               if (!entity.attributes) {
-                _context4.n = 10;
+                _context4.n = 13;
                 break;
               }
               _i = 0, _Object$entries = Object.entries(entity.attributes);
-            case 8:
+            case 11:
               if (!(_i < _Object$entries.length)) {
-                _context4.n = 10;
+                _context4.n = 13;
                 break;
               }
               _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2), key = _Object$entries$_i[0], value = _Object$entries$_i[1];
               attrQuery = "\n                INSERT INTO entity_attributes (attribute_id, entity_id, attribute_key, attribute_value)\n                VALUES (uuid(), ?, ?, ?)\n                ON CONFLICT (entity_id, attribute_key)\n                DO UPDATE SET attribute_value = excluded.attribute_value;\n              ";
-              _context4.n = 9;
+              _context4.n = 12;
               return this.db.query(attrQuery, [entityId, key, String(value)]);
-            case 9:
+            case 12:
               _i++;
-              _context4.n = 8;
+              _context4.n = 11;
               break;
-            case 10:
+            case 13:
               if (!entity.geometry) {
-                _context4.n = 11;
+                _context4.n = 14;
                 break;
               }
               geoQuery = "\n              INSERT INTO geospatial_attributes (geo_id, entity_id, geometry)\n              VALUES (uuid(), ?, ST_GeomFromText(?))\n              ON CONFLICT (entity_id)\n              DO UPDATE SET geometry = excluded.geometry;\n            ";
-              _context4.n = 11;
+              _context4.n = 14;
               return this.db.query(geoQuery, [entityId, entity.geometry]);
-            case 11:
+            case 14:
               _context4.n = 6;
               break;
-            case 12:
-              _context4.n = 14;
+            case 15:
+              _context4.n = 17;
               break;
-            case 13:
-              _context4.p = 13;
+            case 16:
+              _context4.p = 16;
               _t4 = _context4.v;
               _iterator.e(_t4);
-            case 14:
-              _context4.p = 14;
+            case 17:
+              _context4.p = 17;
               _iterator.f();
-              return _context4.f(14);
-            case 15:
+              return _context4.f(17);
+            case 18:
               if (!facts.relationships) {
-                _context4.n = 24;
+                _context4.n = 27;
                 break;
               }
               _iterator2 = _createForOfIteratorHelper(facts.relationships);
-              _context4.p = 16;
+              _context4.p = 19;
               _iterator2.s();
-            case 17:
+            case 20:
               if ((_step2 = _iterator2.n()).done) {
-                _context4.n = 21;
+                _context4.n = 24;
                 break;
               }
               rel = _step2.value;
               sourceId = entityNameToIdMap.get(rel.source);
               targetId = entityNameToIdMap.get(rel.target);
               if (!(sourceId && targetId)) {
-                _context4.n = 19;
+                _context4.n = 22;
                 break;
               }
               relQuery = "\n              INSERT INTO relationships (relationship_id, source_entity_id, target_entity_id, relationship_type)\n              VALUES (uuid(), ?, ?, ?)\n              ON CONFLICT (source_entity_id, target_entity_id, relationship_type)\n              DO NOTHING;\n            ";
-              _context4.n = 18;
+              _context4.n = 21;
               return this.db.query(relQuery, [sourceId, targetId, rel.type]);
-            case 18:
-              _context4.n = 20;
-              break;
-            case 19:
-              console.warn("MemoryManager: Could not create relationship due to missing entity. Source: '".concat(rel.source, "', Target: '").concat(rel.target, "'"));
-            case 20:
-              _context4.n = 17;
-              break;
             case 21:
               _context4.n = 23;
               break;
             case 22:
-              _context4.p = 22;
+              console.warn("MemoryManager: Could not create relationship due to missing entity. Source: '".concat(rel.source, "', Target: '").concat(rel.target, "'"));
+            case 23:
+              _context4.n = 20;
+              break;
+            case 24:
+              _context4.n = 26;
+              break;
+            case 25:
+              _context4.p = 25;
               _t5 = _context4.v;
               _iterator2.e(_t5);
-            case 23:
-              _context4.p = 23;
-              _iterator2.f();
-              return _context4.f(23);
-            case 24:
-              _context4.n = 25;
-              return this.db.query('COMMIT;');
-            case 25:
-              console.log("MemoryManager: Semantic facts successfully consolidated.");
-              _context4.n = 27;
-              break;
             case 26:
               _context4.p = 26;
+              _iterator2.f();
+              return _context4.f(26);
+            case 27:
+              _context4.n = 28;
+              return this.db.query('COMMIT;');
+            case 28:
+              console.log("MemoryManager: Semantic facts successfully consolidated.");
+              _context4.n = 30;
+              break;
+            case 29:
+              _context4.p = 29;
               _t6 = _context4.v;
               console.error("MemoryManager: Failed to add semantic facts. Rolling back transaction.", {
                 facts: facts,
                 error: _t6
               });
-              _context4.n = 27;
+              _context4.n = 30;
               return this.db.query('ROLLBACK;');
-            case 27:
+            case 30:
               return _context4.a(2);
           }
-        }, _callee4, this, [[16, 22, 23, 24], [5, 13, 14, 15], [3, 26]]);
+        }, _callee4, this, [[19, 25, 26, 27], [5, 16, 17, 18], [3, 29]]);
       }));
       function addSemanticFacts(_x4) {
         return _addSemanticFacts.apply(this, arguments);
