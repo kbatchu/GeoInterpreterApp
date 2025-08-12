@@ -127373,6 +127373,533 @@ var EmbeddingManager = /*#__PURE__*/function () {
 
 /***/ }),
 
+/***/ "./scripts/modules/orchestration/memory_manager.js":
+/*!*********************************************************!*\
+  !*** ./scripts/modules/orchestration/memory_manager.js ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+// c:\Kiran\Work\GIS\DATAVIZ\GeoInterpreter\scripts\modules\orchestration\memory_manager.js
+/**
+ * Manages the agent's long-term memory, built on DuckDB.
+ * This class implements the "Geo-Contextual Knowledge Store" (GCKS) architecture,
+ * which is divided into an Episodic (conversational) Layer and a Semantic (factual) Layer.
+ */
+var MemoryManager = /*#__PURE__*/function () {
+  /**
+   * @param {object} duckdbConnection - An initialized DuckDB connection wrapper.
+   * @param {object} embeddingManager - An initialized EmbeddingManager instance.
+   */
+  function MemoryManager(duckdbConnection, embeddingManager) {
+    _classCallCheck(this, MemoryManager);
+    this.db = duckdbConnection;
+    this.embeddingManager = embeddingManager;
+    this.ready = false;
+    // A promise that resolves when the memory tables are ready.
+    this.readyPromise = this._initialize();
+  }
+
+  /**
+   * Initializes the memory system by creating the necessary tables in DuckDB.
+   * This function is idempotent and can be safely called multiple times.
+   * @private
+   */
+  return _createClass(MemoryManager, [{
+    key: "_initialize",
+    value: (function () {
+      var _initialize2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+        var _t;
+        return _regenerator().w(function (_context) {
+          while (1) switch (_context.n) {
+            case 0:
+              _context.p = 0;
+              console.log("MemoryManager: Initializing memory store...");
+
+              // Layer 2: Semantic/Factual Layer (Geospatial Knowledge Graph)
+              _context.n = 1;
+              return this.db.run("\n        CREATE TABLE IF NOT EXISTS entities (\n            entity_id UUID PRIMARY KEY,\n            entity_name VARCHAR,\n            entity_type VARCHAR, -- e.g., 'Restaurant', 'Address', 'User', 'GeographicRegion',\n            UNIQUE(entity_name, entity_type),\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
+            case 1:
+              _context.n = 2;
+              return this.db.run("\n        CREATE TABLE IF NOT EXISTS entity_attributes (\n            attribute_id UUID PRIMARY KEY,\n            entity_id UUID REFERENCES entities(entity_id),\n            attribute_key VARCHAR,\n            attribute_value VARCHAR,\n            UNIQUE(entity_id, attribute_key),\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
+            case 2:
+              _context.n = 3;
+              return this.db.run("\n        CREATE TABLE IF NOT EXISTS geospatial_attributes (\n            geo_id UUID PRIMARY KEY,\n            entity_id UUID REFERENCES entities(entity_id) UNIQUE,\n            geometry GEOMETRY, -- Uses the GEOMETRY type from the spatial extension\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
+            case 3:
+              // Note: Spatial index creation might need to be handled carefully,
+              // as creating it on an empty table or repeatedly can cause issues.
+              // For now, we'll log the intent.
+              console.log("MemoryManager: Geospatial table ready. For performance, a spatial index should be created on the 'geometry' column.");
+              _context.n = 4;
+              return this.db.run("\n        CREATE TABLE IF NOT EXISTS relationships (\n            relationship_id UUID PRIMARY KEY,\n            source_entity_id UUID REFERENCES entities(entity_id),\n            target_entity_id UUID REFERENCES entities(entity_id),\n            relationship_type VARCHAR, -- e.g., 'has_location', 'near', 'serves_cuisine',\n            UNIQUE(source_entity_id, target_entity_id, relationship_type),\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
+            case 4:
+              _context.n = 5;
+              return this.db.run("\n        CREATE TABLE IF NOT EXISTS conversation_chunks (\n            chunk_id UUID PRIMARY KEY,\n            session_id VARCHAR,\n            turn INTEGER,\n            speaker VARCHAR, -- 'user' or 'agent'\n            content TEXT,\n            embedding FLOAT[384], -- DuckDB requires vector dimensions\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
+            case 5:
+              this.ready = true;
+              console.log("MemoryManager: Memory store initialized successfully.");
+              _context.n = 7;
+              break;
+            case 6:
+              _context.p = 6;
+              _t = _context.v;
+              console.error("MemoryManager: Failed to initialize memory tables", _t);
+              this.ready = false;
+              throw _t;
+            case 7:
+              return _context.a(2);
+          }
+        }, _callee, this, [[0, 6]]);
+      }));
+      function _initialize() {
+        return _initialize2.apply(this, arguments);
+      }
+      return _initialize;
+    }()
+    /**
+     * Adds a conversational turn to the episodic memory.
+     * @param {object} turnData - The conversational turn data.
+     * @param {string} turnData.session_id - The ID of the current session.
+     * @param {number} turnData.turn - The turn number in the conversation.
+     * @param {string} turnData.speaker - 'user' or 'agent'.
+     * @param {string} turnData.content - The text content of the turn.
+     */
+    )
+  }, {
+    key: "addEpisodicMemory",
+    value: (function () {
+      var _addEpisodicMemory = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(turnData) {
+        var session_id, turn, speaker, content, embedding, query, _t2;
+        return _regenerator().w(function (_context2) {
+          while (1) switch (_context2.n) {
+            case 0:
+              _context2.p = 0;
+              if (this.ready) {
+                _context2.n = 1;
+                break;
+              }
+              _context2.n = 1;
+              return this.readyPromise;
+            case 1:
+              session_id = turnData.session_id, turn = turnData.turn, speaker = turnData.speaker, content = turnData.content; // Don't store empty or whitespace-only content to avoid noise in memory.
+              if (!(!content || content.trim() === "")) {
+                _context2.n = 2;
+                break;
+              }
+              return _context2.a(2);
+            case 2:
+              _context2.n = 3;
+              return this.embeddingManager.generateEmbedding(content);
+            case 3:
+              embedding = _context2.v;
+              // 2. Prepare and execute the INSERT statement using parameterized queries.
+              // This is the secure way to handle potentially unsafe content and avoids SQL injection.
+              query = "\n        INSERT INTO conversation_chunks (chunk_id, session_id, turn, speaker, content, embedding)\n        VALUES (uuid(), ?, ?, ?, ?, ?);\n      "; // The duckdb-wasm library's `run` method on a connection supports parameters.
+              // We assume `this.db` is a connection or a wrapper that exposes this functionality.
+              // The embedding array is passed directly.
+              _context2.n = 4;
+              return this.db.run(query, [session_id, turn, speaker, content, embedding]);
+            case 4:
+              console.log("MemoryManager: Added episodic memory for turn ".concat(turn, " by ").concat(speaker, "."));
+              _context2.n = 6;
+              break;
+            case 5:
+              _context2.p = 5;
+              _t2 = _context2.v;
+              console.error("MemoryManager: Failed to add episodic memory.", {
+                turnData: turnData,
+                error: _t2
+              });
+              // We don't re-throw, as failing to save memory shouldn't crash the agent's main loop.
+            case 6:
+              return _context2.a(2);
+          }
+        }, _callee2, this, [[0, 5]]);
+      }));
+      function addEpisodicMemory(_x) {
+        return _addEpisodicMemory.apply(this, arguments);
+      }
+      return addEpisodicMemory;
+    }()
+    /**
+     * Retrieves relevant conversational turns from episodic memory using semantic search.
+     * @param {string} queryText - The text to search for.
+     * @param {string} sessionId - The ID of the current session to scope the search.
+     * @param {number} [topK=3] - The number of most relevant turns to retrieve.
+     * @returns {Promise<Array<object>>} A promise that resolves to an array of conversation chunks.
+     */
+    )
+  }, {
+    key: "retrieveEpisodicMemory",
+    value: (function () {
+      var _retrieveEpisodicMemory = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(queryText, sessionId) {
+        var topK,
+          queryEmbedding,
+          query,
+          results,
+          _args3 = arguments,
+          _t3;
+        return _regenerator().w(function (_context3) {
+          while (1) switch (_context3.n) {
+            case 0:
+              topK = _args3.length > 2 && _args3[2] !== undefined ? _args3[2] : 3;
+              _context3.p = 1;
+              if (this.ready) {
+                _context3.n = 2;
+                break;
+              }
+              _context3.n = 2;
+              return this.readyPromise;
+            case 2:
+              if (!(!queryText || queryText.trim() === "")) {
+                _context3.n = 3;
+                break;
+              }
+              return _context3.a(2, []);
+            case 3:
+              _context3.n = 4;
+              return this.embeddingManager.generateEmbedding(queryText);
+            case 4:
+              queryEmbedding = _context3.v;
+              // 2. Prepare the SQL query for vector similarity search.
+              // We use parameterized queries to safely pass the embedding and other values.
+              query = "\n        SELECT\n            content,\n            speaker,\n            turn,\n            array_cosine_distance(embedding, ?) AS distance\n        FROM\n            conversation_chunks\n        WHERE\n            session_id = ?\n        ORDER BY\n            distance ASC\n        LIMIT ?;\n      "; // 3. Execute the query.
+              // The sessionId is added to the parameters to scope the search.
+              _context3.n = 5;
+              return this.db.query(query, [queryEmbedding, sessionId, topK]);
+            case 5:
+              results = _context3.v;
+              console.log("MemoryManager: Retrieved ".concat(results.numRows, " relevant episodic memories for query: \"").concat(queryText, "\""));
+
+              // 4. Convert the Apache Arrow result to an array of plain JavaScript objects.
+              return _context3.a(2, results.toArray().map(function (row) {
+                return row.toJSON();
+              }));
+            case 6:
+              _context3.p = 6;
+              _t3 = _context3.v;
+              console.error("MemoryManager: Failed to retrieve episodic memory.", {
+                queryText: queryText,
+                error: _t3
+              });
+              // Return an empty array on failure so the agent can proceed without memory context.
+              return _context3.a(2, []);
+          }
+        }, _callee3, this, [[1, 6]]);
+      }));
+      function retrieveEpisodicMemory(_x2, _x3) {
+        return _retrieveEpisodicMemory.apply(this, arguments);
+      }
+      return retrieveEpisodicMemory;
+    }()
+    /**
+     * Adds structured facts (entities, attributes, relationships) to the semantic memory.
+     * @param {object} facts - The structured facts to add.
+     */
+    )
+  }, {
+    key: "addSemanticFacts",
+    value: (function () {
+      var _addSemanticFacts = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(facts) {
+        var entityNameToIdMap, _iterator, _step, entity, entityQuery, entityResult, entityId, _i, _Object$entries, _Object$entries$_i, key, value, attrQuery, geoQuery, _iterator2, _step2, rel, sourceId, targetId, relQuery, _t4, _t5, _t6;
+        return _regenerator().w(function (_context4) {
+          while (1) switch (_context4.n) {
+            case 0:
+              if (this.ready) {
+                _context4.n = 1;
+                break;
+              }
+              _context4.n = 1;
+              return this.readyPromise;
+            case 1:
+              if (!(!facts || !facts.entities && !facts.relationships)) {
+                _context4.n = 2;
+                break;
+              }
+              console.log("MemoryManager: addSemanticFacts called with no facts to add.");
+              return _context4.a(2);
+            case 2:
+              console.log("MemoryManager: Consolidating semantic facts into knowledge graph...", facts);
+              _context4.p = 3;
+              _context4.n = 4;
+              return this.db.run('BEGIN TRANSACTION;');
+            case 4:
+              entityNameToIdMap = new Map(); // 1. Process Entities and their Attributes
+              if (!facts.entities) {
+                _context4.n = 15;
+                break;
+              }
+              _iterator = _createForOfIteratorHelper(facts.entities);
+              _context4.p = 5;
+              _iterator.s();
+            case 6:
+              if ((_step = _iterator.n()).done) {
+                _context4.n = 12;
+                break;
+              }
+              entity = _step.value;
+              // Upsert the entity and get its ID.
+              // If a conflict on (name, type) occurs, we do an update to trigger the RETURNING clause,
+              // which gives us the ID of the existing row.
+              entityQuery = "\n            INSERT INTO entities (entity_id, entity_name, entity_type)\n            VALUES (uuid(), ?, ?)\n            ON CONFLICT (entity_name, entity_type)\n            DO UPDATE SET entity_name = excluded.entity_name\n            RETURNING entity_id;\n          ";
+              _context4.n = 7;
+              return this.db.query(entityQuery, [entity.name, entity.type]);
+            case 7:
+              entityResult = _context4.v;
+              entityId = entityResult.get(0).toJSON().entity_id;
+              entityNameToIdMap.set(entity.name, entityId);
+
+              // Process simple attributes
+              if (!entity.attributes) {
+                _context4.n = 10;
+                break;
+              }
+              _i = 0, _Object$entries = Object.entries(entity.attributes);
+            case 8:
+              if (!(_i < _Object$entries.length)) {
+                _context4.n = 10;
+                break;
+              }
+              _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2), key = _Object$entries$_i[0], value = _Object$entries$_i[1];
+              attrQuery = "\n                INSERT INTO entity_attributes (attribute_id, entity_id, attribute_key, attribute_value)\n                VALUES (uuid(), ?, ?, ?)\n                ON CONFLICT (entity_id, attribute_key)\n                DO UPDATE SET attribute_value = excluded.attribute_value;\n              ";
+              _context4.n = 9;
+              return this.db.run(attrQuery, [entityId, key, String(value)]);
+            case 9:
+              _i++;
+              _context4.n = 8;
+              break;
+            case 10:
+              if (!entity.geometry) {
+                _context4.n = 11;
+                break;
+              }
+              geoQuery = "\n              INSERT INTO geospatial_attributes (geo_id, entity_id, geometry)\n              VALUES (uuid(), ?, ST_GeomFromText(?))\n              ON CONFLICT (entity_id)\n              DO UPDATE SET geometry = excluded.geometry;\n            ";
+              _context4.n = 11;
+              return this.db.run(geoQuery, [entityId, entity.geometry]);
+            case 11:
+              _context4.n = 6;
+              break;
+            case 12:
+              _context4.n = 14;
+              break;
+            case 13:
+              _context4.p = 13;
+              _t4 = _context4.v;
+              _iterator.e(_t4);
+            case 14:
+              _context4.p = 14;
+              _iterator.f();
+              return _context4.f(14);
+            case 15:
+              if (!facts.relationships) {
+                _context4.n = 24;
+                break;
+              }
+              _iterator2 = _createForOfIteratorHelper(facts.relationships);
+              _context4.p = 16;
+              _iterator2.s();
+            case 17:
+              if ((_step2 = _iterator2.n()).done) {
+                _context4.n = 21;
+                break;
+              }
+              rel = _step2.value;
+              sourceId = entityNameToIdMap.get(rel.source);
+              targetId = entityNameToIdMap.get(rel.target);
+              if (!(sourceId && targetId)) {
+                _context4.n = 19;
+                break;
+              }
+              relQuery = "\n              INSERT INTO relationships (relationship_id, source_entity_id, target_entity_id, relationship_type)\n              VALUES (uuid(), ?, ?, ?)\n              ON CONFLICT (source_entity_id, target_entity_id, relationship_type)\n              DO NOTHING;\n            ";
+              _context4.n = 18;
+              return this.db.run(relQuery, [sourceId, targetId, rel.type]);
+            case 18:
+              _context4.n = 20;
+              break;
+            case 19:
+              console.warn("MemoryManager: Could not create relationship due to missing entity. Source: '".concat(rel.source, "', Target: '").concat(rel.target, "'"));
+            case 20:
+              _context4.n = 17;
+              break;
+            case 21:
+              _context4.n = 23;
+              break;
+            case 22:
+              _context4.p = 22;
+              _t5 = _context4.v;
+              _iterator2.e(_t5);
+            case 23:
+              _context4.p = 23;
+              _iterator2.f();
+              return _context4.f(23);
+            case 24:
+              _context4.n = 25;
+              return this.db.run('COMMIT;');
+            case 25:
+              console.log("MemoryManager: Semantic facts successfully consolidated.");
+              _context4.n = 27;
+              break;
+            case 26:
+              _context4.p = 26;
+              _t6 = _context4.v;
+              console.error("MemoryManager: Failed to add semantic facts. Rolling back transaction.", {
+                facts: facts,
+                error: _t6
+              });
+              _context4.n = 27;
+              return this.db.run('ROLLBACK;');
+            case 27:
+              return _context4.a(2);
+          }
+        }, _callee4, this, [[16, 22, 23, 24], [5, 13, 14, 15], [3, 26]]);
+      }));
+      function addSemanticFacts(_x4) {
+        return _addSemanticFacts.apply(this, arguments);
+      }
+      return addSemanticFacts;
+    }()
+    /**
+     * Retrieves structured facts for given entities from semantic memory.
+     * @param {Array<string>} entityNames - An array of entity names to look up.
+     * @returns {Promise<object|null>} A promise that resolves to an object containing the facts, or null if none found.
+     */
+    )
+  }, {
+    key: "retrieveSemanticFacts",
+    value: (function () {
+      var _retrieveSemanticFacts = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(entityNames) {
+        var facts, entityDetailsQuery, entityDetailsResult, entityRows, _iterator3, _step3, row, entity_name, entity_type, attribute_key, attribute_value, geometry_wkt, relationshipsQuery, relationshipsResult, relationshipRows, _iterator4, _step4, _row, source_name, target_name, relationship_type, relString, _t7;
+        return _regenerator().w(function (_context5) {
+          while (1) switch (_context5.n) {
+            case 0:
+              if (this.ready) {
+                _context5.n = 1;
+                break;
+              }
+              _context5.n = 1;
+              return this.readyPromise;
+            case 1:
+              if (!(!entityNames || entityNames.length === 0)) {
+                _context5.n = 2;
+                break;
+              }
+              return _context5.a(2, null);
+            case 2:
+              console.log("MemoryManager: Retrieving semantic facts for entities:", entityNames);
+              facts = {};
+              _context5.p = 3;
+              // Query 1: Get entities, their attributes, and geometries
+              entityDetailsQuery = "\n        SELECT\n          e.entity_name,\n          e.entity_type,\n          a.attribute_key,\n          a.attribute_value,\n          ST_AsText(g.geometry) AS geometry_wkt\n        FROM entities e\n        LEFT JOIN entity_attributes a ON e.entity_id = a.entity_id\n        LEFT JOIN geospatial_attributes g ON e.entity_id = g.entity_id\n        WHERE e.entity_name IN (SELECT * FROM unnest(?));\n      ";
+              _context5.n = 4;
+              return this.db.query(entityDetailsQuery, [entityNames]);
+            case 4:
+              entityDetailsResult = _context5.v;
+              entityRows = entityDetailsResult.toArray().map(function (row) {
+                return row.toJSON();
+              });
+              if (!(entityRows.length === 0)) {
+                _context5.n = 5;
+                break;
+              }
+              console.log("MemoryManager: No semantic facts found for the given entities.");
+              return _context5.a(2, null);
+            case 5:
+              // Process entity details into the facts object
+              _iterator3 = _createForOfIteratorHelper(entityRows);
+              try {
+                for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+                  row = _step3.value;
+                  entity_name = row.entity_name, entity_type = row.entity_type, attribute_key = row.attribute_key, attribute_value = row.attribute_value, geometry_wkt = row.geometry_wkt;
+                  if (!facts[entity_name]) {
+                    facts[entity_name] = {
+                      type: entity_type,
+                      attributes: {},
+                      relationships: [],
+                      // Initialize empty
+                      geometry: geometry_wkt || null
+                    };
+                  }
+                  if (attribute_key && attribute_value) {
+                    facts[entity_name].attributes[attribute_key] = attribute_value;
+                  }
+                }
+
+                // Query 2: Get relationships involving these entities
+              } catch (err) {
+                _iterator3.e(err);
+              } finally {
+                _iterator3.f();
+              }
+              relationshipsQuery = "\n        SELECT\n          r.relationship_type,\n          source.entity_name as source_name,\n          target.entity_name as target_name\n        FROM relationships r\n        JOIN entities source ON r.source_entity_id = source.entity_id\n        JOIN entities target ON r.target_entity_id = target.entity_id\n        WHERE\n          source.entity_name IN (SELECT * FROM unnest(?)) OR\n          target.entity_name IN (SELECT * FROM unnest(?));\n      ";
+              _context5.n = 6;
+              return this.db.query(relationshipsQuery, [entityNames]);
+            case 6:
+              relationshipsResult = _context5.v;
+              relationshipRows = relationshipsResult.toArray().map(function (row) {
+                return row.toJSON();
+              }); // Process and add relationships to the facts object
+              _iterator4 = _createForOfIteratorHelper(relationshipRows);
+              try {
+                for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+                  _row = _step4.value;
+                  source_name = _row.source_name, target_name = _row.target_name, relationship_type = _row.relationship_type; // Add relationship to source entity if it's in our list of targets
+                  if (facts[source_name]) {
+                    relString = "".concat(relationship_type, " -> ").concat(target_name);
+                    if (!facts[source_name].relationships.includes(relString)) {
+                      facts[source_name].relationships.push(relString);
+                    }
+                  }
+                }
+              } catch (err) {
+                _iterator4.e(err);
+              } finally {
+                _iterator4.f();
+              }
+              console.log("MemoryManager: Retrieved and structured semantic facts:", facts);
+              return _context5.a(2, Object.keys(facts).length > 0 ? facts : null);
+            case 7:
+              _context5.p = 7;
+              _t7 = _context5.v;
+              console.error("MemoryManager: Failed to retrieve semantic facts.", {
+                entityNames: entityNames,
+                error: _t7
+              });
+              return _context5.a(2, null);
+          }
+        }, _callee5, this, [[3, 7]]);
+      }));
+      function retrieveSemanticFacts(_x5) {
+        return _retrieveSemanticFacts.apply(this, arguments);
+      }
+      return retrieveSemanticFacts;
+    }())
+  }]);
+}();
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (MemoryManager);
+
+/***/ }),
+
 /***/ "./scripts/modules/orchestration/react_controller.js":
 /*!***********************************************************!*\
   !*** ./scripts/modules/orchestration/react_controller.js ***!
@@ -127385,20 +127912,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _tools_tool_retriever_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tools/tool_retriever.js */ "./scripts/modules/tools/tool_retriever.js");
+/* harmony import */ var _memory_manager_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./memory_manager.js */ "./scripts/modules/orchestration/memory_manager.js");
 function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _regeneratorValues(e) { if (null != e) { var t = e["function" == typeof Symbol && Symbol.iterator || "@@iterator"], r = 0; if (t) return t.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) return { next: function next() { return e && r >= e.length && (e = void 0), { value: e && e[r++], done: !e }; } }; } throw new TypeError(_typeof(e) + " is not iterable"); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
-function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
-function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
 function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
 function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
@@ -127407,6 +127935,7 @@ function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), 
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 // c:\Kiran\Work\GIS\DATAVIZ\GeoInterpreter\scripts\orchestration\react_controller.js
+
 
 
 // Keep the last 10 pairs of Thought/Action/Observation to prevent excessive token usage.
@@ -127425,6 +127954,10 @@ var ReActController = /*#__PURE__*/function () {
     this.aiCore = aiCore;
     this.toolExecutor = toolExecutor;
     this.embeddingManager = embeddingManager;
+
+    // Initialize the memory manager with the required dependencies.
+    // The MemoryManager will handle the creation of memory tables asynchronously.
+    this.memoryManager = new _memory_manager_js__WEBPACK_IMPORTED_MODULE_1__["default"](duckdbConnection, embeddingManager);
     this.toolRetriever = new _tools_tool_retriever_js__WEBPACK_IMPORTED_MODULE_0__["default"](embeddingManager, duckdbConnection);
     this.scratchpad = []; // Stores Thought, Action, Observation triplets
     this.userQuery = "";
@@ -127432,6 +127965,7 @@ var ReActController = /*#__PURE__*/function () {
     this.currentPlanStepIndex = 0; // Tracks current step in active plan
     this.currentToolLevels = [1]; // Tool levels to use: [1] or [2, 3]
     this.isCancelled = false; // Flag to stop the run loop
+    this.sessionId = null; // Will be set by _startNewSession
     this._findPlacesRetryCount = 0;
     // ?Level 1: High-level, self-contained tools that directly map to a likely step in an analysis plan (e.g., "get user location," "find coordinates for an address," "find hotspots").
     // ? Level 3: Granular, primitive functions that act as building blocks when higher-level tools are not specific enough (e.g., your SQL functions like st_area, less_than, count).
@@ -127441,6 +127975,9 @@ var ReActController = /*#__PURE__*/function () {
     this.communicationBus.addEventListener("userInputProvided", this._handleUserInput.bind(this));
     this.communicationBus.addEventListener("cancelProcessing", this._handleCancel.bind(this));
     this.communicationBus.addEventListener("newSessionRequested", this._handleNewSession.bind(this));
+
+    // Initialize the first session when the controller is created.
+    this._startNewSession();
   }
 
   /**
@@ -127451,26 +127988,24 @@ var ReActController = /*#__PURE__*/function () {
     key: "_handleUserQuery",
     value: (function () {
       var _handleUserQuery2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(event) {
+        var history;
         return _regenerator().w(function (_context) {
           while (1) switch (_context.n) {
             case 0:
               this.userQuery = event.detail.query;
-              this.isCancelled = false; // Reset cancellation flag for a new query
-              this.scratchpad = []; // Clear scratchpad for new query
-              this.isPlanningMode = true; // Start in planning mode
-              this.currentPlanStepIndex = 0; // Reset plan step index
-              this.currentToolLevels = [1]; // Reset to high-level tools for new query
-              this._findPlacesRetryCount = 0; // Reset retry counter for new query
-
-              this.stateManager.updateState({
-                agentStatus: "planning",
-                conversationHistory: [].concat(_toConsumableArray(this.stateManager.getState().conversationHistory), [{
-                  role: "user",
-                  content: this.userQuery
-                }]),
-                activePlan: null // Clear any previous active plan
-              });
               console.log("ReActController: Starting ReAct cycle for query:", this.userQuery);
+              this.stateManager.updateState({
+                agentStatus: "planning"
+              });
+
+              // --- MEMORY: Add user query to episodic memory ---
+              history = this.stateManager.getState().conversationHistory; // The memoryManager might still be initializing, but its methods are designed to wait.
+              this.memoryManager.addEpisodicMemory({
+                session_id: this.sessionId,
+                turn: history.length,
+                speaker: "user",
+                content: this.userQuery
+              }); // No need to await this, let it run in the background.
               _context.n = 1;
               return this.run();
             case 1:
@@ -127502,7 +128037,7 @@ var ReActController = /*#__PURE__*/function () {
               REPETITION_LIMIT = 3; // Number of times the same action can be repeated before halting.
               lastActionHistory = []; // Tracks the last few actions to detect loops.
               _loop = /*#__PURE__*/_regenerator().m(function _loop() {
-                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, correctedPlan, _errorMsg, _currentState2, observation, questionText, _errorMsg2, standardizedAction, _currentState3, _observation, chosenTool, currentStepType, _observation2, _observation3, finalObservation, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
+                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, correctedPlan, _errorMsg, _currentState2, finalHistory, observation, questionText, _errorMsg2, standardizedAction, _currentState3, agentQuestionHistory, _observation, chosenTool, currentStepType, _observation2, _observation3, finalObservation, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
                 return _regenerator().w(function (_context2) {
                   while (1) switch (_context2.n) {
                     case 0:
@@ -127732,6 +128267,24 @@ var ReActController = /*#__PURE__*/function () {
                       _this.communicationBus.dispatchEvent("finalAnswerReady", {
                         answer: action.params.answer
                       });
+                      // --- MEMORY: Add agent's final answer to episodic memory ---
+                      finalHistory = _this.stateManager.getState().conversationHistory;
+                      _this.memoryManager.addEpisodicMemory({
+                        session_id: _this.sessionId,
+                        turn: finalHistory.length,
+                        speaker: "agent",
+                        content: action.params.answer
+                      }); // No need to await this, let it run in the background.
+
+                      // --- MEMORY CONSOLIDATION ---
+                      // The final answer itself can be a source of facts.
+                      // Add a synthetic observation to the scratchpad for the consolidation logic.
+                      _this.scratchpad.push({
+                        type: "observation",
+                        content: "Final Answer: ".concat(action.params.answer)
+                      });
+                      _this._consolidateMemory(); // Fire-and-forget fact extraction
+
                       console.log("ReActController: AI finished with answer:", action.params.answer);
                       _context2.n = 26;
                       break;
@@ -127806,6 +128359,15 @@ var ReActController = /*#__PURE__*/function () {
                         question: questionText,
                         options: standardizedAction.params.options
                       });
+
+                      // --- MEMORY: Add agent's question to episodic memory ---
+                      agentQuestionHistory = _this.stateManager.getState().conversationHistory;
+                      _this.memoryManager.addEpisodicMemory({
+                        session_id: _this.sessionId,
+                        turn: agentQuestionHistory.length,
+                        speaker: "agent",
+                        content: questionText
+                      }); // No need to await this, let it run in the background.
                       // The run loop will be paused here. It will be resumed by a new event
                       // handler that listens for the user's response.
                       return _context2.a(2, {
@@ -127910,6 +128472,13 @@ var ReActController = /*#__PURE__*/function () {
                           content: finalObservation
                         });
                         console.log("ReActController: Tool Observation:", finalObservation);
+
+                        // --- MEMORY CONSOLIDATION ---
+                        // After a successful tool observation, try to extract facts.
+                        // This is a "fire-and-forget" operation.
+                        _this._consolidateMemory();
+                        // ---
+
                         // Only increment the plan step if the tool was successfully executed (or at least found).
                         _this.currentPlanStepIndex++;
                       }
@@ -128009,7 +128578,7 @@ var ReActController = /*#__PURE__*/function () {
     key: "_handleUserInput",
     value: (function () {
       var _handleUserInput2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(event) {
-        var userResponse, currentState;
+        var userResponse, currentState, userResponseHistory;
         return _regenerator().w(function (_context4) {
           while (1) switch (_context4.n) {
             case 0:
@@ -128031,6 +128600,15 @@ var ReActController = /*#__PURE__*/function () {
                   content: userResponse
                 }])
               });
+
+              // --- MEMORY: Add user's response to episodic memory ---
+              userResponseHistory = this.stateManager.getState().conversationHistory;
+              this.memoryManager.addEpisodicMemory({
+                session_id: this.sessionId,
+                turn: userResponseHistory.length,
+                speaker: "user",
+                content: userResponse
+              }); // No need to await this, let it run in the background.
 
               // Resume the execution loop
               _context4.n = 1;
@@ -128068,42 +128646,47 @@ var ReActController = /*#__PURE__*/function () {
   }, {
     key: "_handleNewSession",
     value: function _handleNewSession() {
-      console.log("ReActController: New session requested. Resetting state.");
       this.isCancelled = true; // Stop any ongoing process
+      this._startNewSession();
+    }
+
+    /**
+     * Resets the controller and state for a new session.
+     * @private
+     */
+  }, {
+    key: "_startNewSession",
+    value: function _startNewSession() {
+      this.sessionId = crypto.randomUUID();
+      console.log("ReActController: Starting new session: ".concat(this.sessionId));
       this.scratchpad = [];
       this._dispatchScratchpadUpdate(); // Dispatch empty scratchpad to clear UI
 
       this.userQuery = "";
-      this.isPlanningMode = false;
+      this.isPlanningMode = true; // A new session always starts with planning
       this.currentPlanStepIndex = 0;
       this.currentToolLevels = [1];
       this._findPlacesRetryCount = 0;
-
-      // Reset the state manager completely
       this.stateManager.updateState({
         agentStatus: "idle",
         conversationHistory: [],
         activePlan: null
       });
     }
-    /**
-     * Assembles the context for the AI Core.
-     * This includes the user query, conversation history, scratchpad, and relevant tools retrieved via vector search.
-     * @param {string} currentGoal - The current goal for the AI (user query or plan step).
-     * @param {object|null} currentStep - The full current step object from the plan, if available.
-     * @returns {Promise<{messages: Array, availableTools: Array}>} A promise that resolves to an object containing messages for the AI and the list of tools made available.
-     * @private
-     */
   }, {
     key: "_assembleContext",
-    value: (function () {
+    value: function () {
       var _assembleContext2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(currentGoal) {
         var currentStep,
           state,
           toolQuery,
+          episodicContext,
+          textForEntityExtraction,
+          entityNames,
+          semanticContext,
+          formattedEpisodicContext,
           availableTools,
           toolNames,
-          formattedHistory,
           messages,
           planningTools,
           systemPrompt,
@@ -128122,21 +128705,33 @@ var ReActController = /*#__PURE__*/function () {
                 toolQuery = "".concat(currentStep.step_type, ": ").concat(currentGoal);
               }
               console.log("Getting tools for the query:", toolQuery);
+
+              // --- MEMORY: Retrieve relevant episodic and semantic context ---
               _context5.n = 1;
-              return this._getRelevantTools(toolQuery, 15, this.currentToolLevels);
+              return this.memoryManager.retrieveEpisodicMemory(toolQuery, this.sessionId);
             case 1:
+              episodicContext = _context5.v;
+              // --- Entity Extraction for Semantic Memory Retrieval ---
+              // Combine the current goal and episodic context to find potential entities.
+              textForEntityExtraction = [toolQuery].concat(_toConsumableArray(episodicContext.map(function (e) {
+                return e.content;
+              }))).join("\n");
+              entityNames = this._extractEntityNames(textForEntityExtraction);
+              _context5.n = 2;
+              return this.memoryManager.retrieveSemanticFacts(entityNames);
+            case 2:
+              semanticContext = _context5.v;
+              formattedEpisodicContext = episodicContext.length > 0 ? episodicContext.map(function (e) {
+                return e.content;
+              }).join('\n---\n') : "No relevant conversation history found in memory.";
+              _context5.n = 3;
+              return this._getRelevantTools(toolQuery, 15, this.currentToolLevels);
+            case 3:
               availableTools = _context5.v;
               toolNames = availableTools.map(function (t) {
                 return t.name;
               });
               console.log("ReActController: Retrieved available tools: [".concat(toolNames.join(", "), "]"));
-
-              // Format the conversation history, excluding the most recent user query which is the current task.
-              // This provides the model with memory of the session so far.
-              formattedHistory = state.conversationHistory.slice(0, -1) // Exclude the last message (the current query)
-              .map(function (msg) {
-                return "".concat(msg.role.charAt(0).toUpperCase() + msg.role.slice(1), ": ").concat(msg.content);
-              }).join("\n");
               messages = [];
               if (this.isPlanningMode) {
                 // In planning mode, we ONLY want the AI to use the 'create_plan' tool.
@@ -128146,7 +128741,7 @@ var ReActController = /*#__PURE__*/function () {
                   return t.name === "create_plan";
                 });
                 systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your primary goal is to help the user by breaking down complex requests into a logical, step-by-step plan.\n\n## CRITICAL: YOU ARE IN PLANNING MODE\nYou MUST create a plan using the create_plan tool. Do NOT attempt to execute any other actions.\n\n## RESPONSE FORMAT\nYou MUST respond in the following format, with no other text before or after. Your entire response must start with \"Thought:\".\n\nThought: [Your reasoning for the plan you are about to create.]\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"...\", \"step_type\": \"...\" }, ... ] } }\n\n## PLAN REQUIREMENTS\n- Each step in the plan should be a discrete, self-contained analytical task.\n- For each step, you must provide a 'step_type' from this exact list: [geospatial, aggregation, filter, data_retrieval, calculation, visualization].\n\n## CRITICAL PLANNING INSTRUCTIONS\n- **Prioritize User-Provided Information:** If the user's query contains specific details like a street address, a location name, or a dataset, your plan MUST start by using that information.\n- **Entity Integrity:** Do not invent information. If you need the address of a place you found, your plan must include a step to find that address. Do not assume it's the same as another address mentioned in the conversation.\n- **Example:** If a street address is given, the first step of your plan MUST be to convert this address into geographic coordinates. After getting the coordinates, I can search for the restaurants.\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"Geocode the address '1600 Pennsylvania Avenue NW, Washington, DC'\", \"step_type\": \"geospatial\" }, { \"step\": 2, \"description\": \"Search for Indian restaurants near the geocoded location\", \"step_type\": \"data_retrieval\" } ] } }";
-                userPrompt = "You have access to a single tool to help you. Use this tool to output your plan as a JSON array of steps.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(planningTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is the full conversation history for context:\n<CONVERSATION_HISTORY>\n").concat(formattedHistory || "No previous conversation history.", "\n</CONVERSATION_HISTORY>\n\nHere is the user's request:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
+                userPrompt = "You have access to a single tool to help you. Use this tool to output your plan as a JSON array of steps.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(planningTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is some relevant context from past conversations:\n<RELEVANT_PAST_CONVERSATION>\n").concat(formattedEpisodicContext, "\n</CONVERSATION_HISTORY>\n\nHere is the user's request:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
                   return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
                 }).join("\n"), "\n\nThought:");
                 messages.push({
@@ -128159,7 +128754,7 @@ var ReActController = /*#__PURE__*/function () {
                 });
               } else {
                 _systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by executing a pre-defined plan ONE STEP AT A TIME.\n\n## CRITICAL: RESPONSE FORMAT\nYou MUST respond with EXACTLY ONE Thought and ONE Action. Your entire response must follow this exact format:\n\nThought: [Your reasoning about the current step, what tool to use, and why. Be concise.]\nAction: { \"name\": \"tool_name\", \"parameters\": { \"param1\": \"value1\" } }\n\n## CRITICAL THINKING & ADAPTATION\n1.  **Analyze the last Observation:** Before deciding your next action, you MUST carefully analyze the most recent Observation in the scratchpad.\n2.  **Entity-Attribute Integrity:** When you identify an entity (e.g., a restaurant name) from an 'Observation', you MUST use other attributes (like its address) from that *same* 'Observation'. Do NOT combine an entity from an 'Observation' with an address from the user's original query in '<CONVERSATION_HISTORY>'. If an attribute like an address is missing for a found entity, your action should be to use a tool to find it.\n3.  **Assess Success:** Did the last action succeed? Did it return the expected information? For example, if you searched for something, did the observation indicate that items were found?\n4.  **Adapt Your Plan:**\n    - If the observation is unexpected (e.g., \"Found 0 places\", an error message, or \"Tool not implemented\"), DO NOT blindly proceed with the original plan.\n    - Your 'Thought' must explain how you are adapting to the new information.\n    - Your next 'Action' should be a direct attempt to recover.\n        - **If you get \"Found 0 places\":** Your primary strategy is to expand the search. The system will track your attempts. If the observation says you MUST try again, then you must call the *same tool* but with a *larger search radius*. Look at the previous action in the scratchpad to see what the last radius was and increase it significantly (e.g., double it). Only if the observation indicates that multiple attempts have failed should you consider a different strategy like using the 'ask_user' tool.\n        - **If a tool is not implemented:** Your thought must be to try a different, more suitable tool from the available list to achieve the same goal.\n        - **If you are truly stuck on a step for other reasons:** Use the 'ask_user' tool for clarification.\n    - Only if the last observation was successful and expected should you proceed to the next step of the plan.\n\n## FINISHING THE TASK\nWhen all steps are complete and you have gathered all necessary information, you MUST use the 'finish' tool.\n- **Thought:** Your thought should summarize the key findings from the scratchpad.\n- **Action:** The 'answer' parameter in the 'finish' tool MUST contain the complete, final answer for the user, synthesized from the observations.\n- **Example:**\n  Thought: The scratchpad shows that the geocoding was successful and the subsequent search found three restaurants. I will now format these results into a final answer for the user.\n  Action: { \"name\": \"finish\", \"parameters\": { \"answer\": \"I found 3 Indian restaurants near your location: [List of restaurants and their details].\" } }\n\n## AVAILABLE ACTIONS\n- Use one of the provided tools.\n- Use the 'finish(answer=...)' tool when you have the final answer.\n- Use the 'escalate_tool_level' tool if the current tools are insufficient.\n- Use the 'ask_user' tool if you need clarification from the user.";
-                _userPrompt = "You have access to the following tools to help you. Select ONE tool to achieve the current goal.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(availableTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is the full conversation history for context:\n<CONVERSATION_HISTORY>\n").concat(formattedHistory || "No previous conversation history.", "\n</CONVERSATION_HISTORY>\n\nHere is the user's original request for context:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the current goal for this step:\n<CURRENT_GOAL>\n").concat(currentGoal, "\n</CURRENT_GOAL>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
+                _userPrompt = "You have access to the following tools to help you. Select ONE tool to achieve the current goal.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(availableTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is some relevant context from past conversations:\n<RELEVANT_PAST_CONVERSATION>\n").concat(formattedEpisodicContext, "\n</RELEVANT_PAST_CONVERSATION>\n\nHere are known facts from the knowledge base:\n<KNOWN_FACTS>\n").concat(JSON.stringify(semanticContext, null, 2) || "No known facts relevant to this query.", "\n</KNOWN_FACTS>\n\nHere is the user's original request for context:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the current goal for this step:\n<CURRENT_GOAL>\n").concat(currentGoal, "\n</CURRENT_GOAL>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
                   return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
                 }).join("\n"), "\n\nThought:");
                 messages.push({
@@ -128193,7 +128788,6 @@ var ReActController = /*#__PURE__*/function () {
      */
     // ? Level 1: High-level, self-contained tools that directly map to a likely step in an analysis plan (e.g., "get user location," "find coordinates for an address," "find hotspots").
     // ? Level 3: Granular, primitive functions that act as building blocks when higher-level tools are not specific enough (e.g., your SQL functions like st_area, less_than, count).
-    )
   }, {
     key: "_getRelevantTools",
     value: (function () {
@@ -128413,85 +129007,182 @@ var ReActController = /*#__PURE__*/function () {
         action: action
       };
     }
+
+    /**
+     * @private
+     * A simple heuristic to extract potential entity names from text.
+     * It looks for sequences of capitalized words, ignoring common start-of-sentence words.
+     * @param {string} text - The text to extract entities from.
+     * @returns {Array<string>} An array of unique potential entity names.
+     */
+  }, {
+    key: "_extractEntityNames",
+    value: function _extractEntityNames(text) {
+      if (!text) return [];
+      // This regex finds sequences of words starting with a capital letter.
+      // It handles single-word entities (e.g., "Atlanta") and multi-word entities (e.g., "Taj Mahal").
+      var regex = /\b([A-Z][a-z']+(\s[A-Z][a-z']+)*)\b/g;
+      var matches = text.match(regex);
+      if (!matches) return [];
+
+      // Filter out common English words that might be capitalized at the start of a sentence.
+      var stopWords = new Set(['What', 'Where', 'When', 'Who', 'Why', 'How', 'The', 'Is', 'Are', 'Do', 'Does', 'Find', 'Show', 'List']);
+      var entities = matches.map(function (e) {
+        return e.trim();
+      }).filter(function (e) {
+        return !stopWords.has(e) && e.length > 2;
+      }); // Also filter short words
+
+      // Return unique entities
+      return _toConsumableArray(new Set(entities));
+    }
+
+    /**
+     * @private
+     * After a successful action, this method prompts the AI to extract structured facts
+     * from the recent conversation and observation, then adds them to semantic memory.
+     * This is a "fire-and-forget" operation to avoid blocking the main loop.
+     */
+  }, {
+    key: "_consolidateMemory",
+    value: (function () {
+      var _consolidateMemory2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6() {
+        var recentHistory, contextForExtraction, extractionPrompt, reply, responseContent, jsonMatch, facts, _t3;
+        return _regenerator().w(function (_context7) {
+          while (1) switch (_context7.n) {
+            case 0:
+              // 1. Get the last few entries from the scratchpad to provide context.
+              // We'll take the last thought, action, and observation.
+              recentHistory = this.scratchpad.slice(-3);
+              if (!(recentHistory.length < 3 || recentHistory[recentHistory.length - 1].type !== 'observation')) {
+                _context7.n = 1;
+                break;
+              }
+              return _context7.a(2);
+            case 1:
+              contextForExtraction = recentHistory.map(function (entry) {
+                return "".concat(entry.type, ": ").concat(_typeof(entry.content) === 'object' ? JSON.stringify(entry.content) : entry.content);
+              }).join('\n'); // 2. Create a specialized prompt for fact extraction.
+              extractionPrompt = "\nYou are a data extraction sub-module. Your task is to analyze the following interaction (Thought, Action, Observation) and extract any new, concrete facts about entities.\n- An entity has a 'name' and a 'type' (e.g., 'Restaurant', 'Address', 'City').\n- Extract attributes as key-value pairs (e.g., \"cuisine\": \"Indian\").\n- Extract relationships between entities (e.g., source: \"Taj Mahal\", target: \"123 Main St\", type: \"has_location\").\n- Extract geospatial information as Well-Known Text (WKT) strings (e.g., \"POINT(lon lat)\").\n- ONLY extract new information from the 'Observation'. Do not extract from the 'Thought' or 'Action'.\n- If no new facts are present, return an empty JSON object {}.\n\nInteraction:\n<INTERACTION>\n".concat(contextForExtraction, "\n</INTERACTION>\n\nRespond ONLY with a JSON object in the following format. Do not include any other text or markdown.\n{\n  \"entities\": [\n    {\n      \"name\": \"Entity Name\",\n      \"type\": \"Entity Type\",\n      \"attributes\": { \"key\": \"value\" },\n      \"geometry\": \"WKT_GEOMETRY_STRING\"\n    }\n  ],\n  \"relationships\": [\n    { \"source\": \"Source Entity Name\", \"target\": \"Target Entity Name\", \"type\": \"relationship_type\" }\n  ]\n}");
+              _context7.p = 2;
+              console.log("ReActController: Starting memory consolidation...");
+              _context7.n = 3;
+              return this.aiCore.chat.completions.create({
+                messages: [{
+                  role: 'user',
+                  content: extractionPrompt
+                }],
+                temperature: 0.0
+              });
+            case 3:
+              reply = _context7.v;
+              responseContent = reply.choices[0].message.content;
+              jsonMatch = responseContent.match(/\{[\s\S]*\}/);
+              if (jsonMatch) {
+                _context7.n = 4;
+                break;
+              }
+              console.warn("Memory Consolidation: AI did not return valid JSON.", responseContent);
+              return _context7.a(2);
+            case 4:
+              facts = JSON.parse(jsonMatch[0]);
+              this.memoryManager.addSemanticFacts(facts); // Fire-and-forget
+              _context7.n = 6;
+              break;
+            case 5:
+              _context7.p = 5;
+              _t3 = _context7.v;
+              console.error("ReActController: Error during memory consolidation.", _t3);
+              // Don't re-throw, this is a background task.
+            case 6:
+              return _context7.a(2);
+          }
+        }, _callee6, this, [[2, 5]]);
+      }));
+      function _consolidateMemory() {
+        return _consolidateMemory2.apply(this, arguments);
+      }
+      return _consolidateMemory;
+    }())
   }, {
     key: "_correctPlanStepTypes",
     value: function () {
-      var _correctPlanStepTypes2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7(plan) {
+      var _correctPlanStepTypes2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8(plan) {
         var _this2 = this;
         var SIMILARITY_THRESHOLD, correctedPlanPromises;
-        return _regenerator().w(function (_context8) {
-          while (1) switch (_context8.n) {
+        return _regenerator().w(function (_context9) {
+          while (1) switch (_context9.n) {
             case 0:
               SIMILARITY_THRESHOLD = 0.6; // Min similarity to be considered 'geospatial'.
               // This assumes a table 'geospatial_term_embeddings' exists with 'term' and 'embedding' columns.
               correctedPlanPromises = plan.map(/*#__PURE__*/function () {
-                var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(step) {
-                  var descriptionEmbedding, descriptionEmbeddingString, querySql, result, rows, similarity, _t3;
-                  return _regenerator().w(function (_context7) {
-                    while (1) switch (_context7.n) {
+                var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7(step) {
+                  var descriptionEmbedding, descriptionEmbeddingString, querySql, result, rows, similarity, _t4;
+                  return _regenerator().w(function (_context8) {
+                    while (1) switch (_context8.n) {
                       case 0:
                         if (["data_retrieval", "calculation", "filter", "aggregation"].includes(step.step_type)) {
-                          _context7.n = 1;
+                          _context8.n = 1;
                           break;
                         }
-                        return _context7.a(2, step);
+                        return _context8.a(2, step);
                       case 1:
                         console.log("ReActController: Evaluating step ".concat(step.step, " with step_type '").concat(step.step_type, "' and description: \"").concat(step.description, "\""));
-                        _context7.p = 2;
-                        _context7.n = 3;
+                        _context8.p = 2;
+                        _context8.n = 3;
                         return _this2.embeddingManager.generateEmbedding(step.description);
                       case 3:
-                        descriptionEmbedding = _context7.v;
+                        descriptionEmbedding = _context8.v;
                         descriptionEmbeddingString = JSON.stringify(Array.from(descriptionEmbedding)); // Query the geospatial terms database for the most similar term
                         querySql = "\n        SELECT\n          array_cosine_distance(\n              embedding,\n              CAST('".concat(descriptionEmbeddingString, "' AS DOUBLE[384])\n          ) AS distance\n        FROM\n          tool_registry_db.geospatial_term_embeddings\n        ORDER BY\n          distance ASC\n        LIMIT 1;\n      ");
-                        _context7.n = 4;
+                        _context8.n = 4;
                         return _this2.duckdbConnection.query(querySql);
                       case 4:
-                        result = _context7.v;
+                        result = _context8.v;
                         rows = result.toArray();
                         if (!(rows.length > 0)) {
-                          _context7.n = 7;
+                          _context8.n = 7;
                           break;
                         }
                         // Convert distance to similarity for threshold comparison
                         similarity = 1 - rows[0].distance;
                         console.log("ReActController: Step ".concat(step.step, " (").concat(step.step_type, ") similarity to geospatial terms: ").concat(similarity.toFixed(4), " (threshold: ").concat(SIMILARITY_THRESHOLD, ")"));
                         if (!(similarity >= SIMILARITY_THRESHOLD)) {
-                          _context7.n = 5;
+                          _context8.n = 5;
                           break;
                         }
                         console.log("ReActController: Correcting step ".concat(step.step, " from '").concat(step.step_type, "' to 'geospatial' based on semantic similarity (").concat(similarity.toFixed(2), ")."));
-                        return _context7.a(2, _objectSpread(_objectSpread({}, step), {}, {
+                        return _context8.a(2, _objectSpread(_objectSpread({}, step), {}, {
                           step_type: "geospatial"
                         }));
                       case 5:
                         console.log("ReActController: Step ".concat(step.step, " (").concat(step.step_type, ") similarity ").concat(similarity.toFixed(4), " below threshold, keeping original step_type."));
                       case 6:
-                        _context7.n = 8;
+                        _context8.n = 8;
                         break;
                       case 7:
                         console.log("ReActController: No geospatial terms found in database for step ".concat(step.step, "."));
                       case 8:
-                        _context7.n = 10;
+                        _context8.n = 10;
                         break;
                       case 9:
-                        _context7.p = 9;
-                        _t3 = _context7.v;
-                        console.error("ReActController: Could not query geospatial term embeddings. Does the table exist? Error: ".concat(_t3.message));
+                        _context8.p = 9;
+                        _t4 = _context8.v;
+                        console.error("ReActController: Could not query geospatial term embeddings. Does the table exist? Error: ".concat(_t4.message));
                         // If the query fails, just return the original step.
-                        return _context7.a(2, step);
+                        return _context8.a(2, step);
                       case 10:
-                        return _context7.a(2, step);
+                        return _context8.a(2, step);
                     }
-                  }, _callee6, null, [[2, 9]]);
+                  }, _callee7, null, [[2, 9]]);
                 }));
                 return function (_x6) {
                   return _ref.apply(this, arguments);
                 };
               }());
-              return _context8.a(2, Promise.all(correctedPlanPromises));
+              return _context9.a(2, Promise.all(correctedPlanPromises));
           }
-        }, _callee7);
+        }, _callee8);
       }));
       function _correctPlanStepTypes(_x5) {
         return _correctPlanStepTypes2.apply(this, arguments);
