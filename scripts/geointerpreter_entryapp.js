@@ -127443,23 +127443,23 @@ var MemoryManager = /*#__PURE__*/function () {
 
               // Layer 2: Semantic/Factual Layer (Geospatial Knowledge Graph)
               _context.n = 1;
-              return this.db.run("\n        CREATE TABLE IF NOT EXISTS entities (\n            entity_id UUID PRIMARY KEY,\n            entity_name VARCHAR,\n            entity_type VARCHAR, -- e.g., 'Restaurant', 'Address', 'User', 'GeographicRegion',\n            UNIQUE(entity_name, entity_type),\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
+              return this.db.query("\n        CREATE TABLE IF NOT EXISTS entities (\n            entity_id UUID PRIMARY KEY,\n            entity_name VARCHAR,\n            entity_type VARCHAR, -- e.g., 'Restaurant', 'Address', 'User', 'GeographicRegion',\n            UNIQUE(entity_name, entity_type),\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
             case 1:
               _context.n = 2;
-              return this.db.run("\n        CREATE TABLE IF NOT EXISTS entity_attributes (\n            attribute_id UUID PRIMARY KEY,\n            entity_id UUID REFERENCES entities(entity_id),\n            attribute_key VARCHAR,\n            attribute_value VARCHAR,\n            UNIQUE(entity_id, attribute_key),\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
+              return this.db.query("\n        CREATE TABLE IF NOT EXISTS entity_attributes (\n            attribute_id UUID PRIMARY KEY,\n            entity_id UUID REFERENCES entities(entity_id),\n            attribute_key VARCHAR,\n            attribute_value VARCHAR,\n            UNIQUE(entity_id, attribute_key),\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
             case 2:
               _context.n = 3;
-              return this.db.run("\n        CREATE TABLE IF NOT EXISTS geospatial_attributes (\n            geo_id UUID PRIMARY KEY,\n            entity_id UUID REFERENCES entities(entity_id) UNIQUE,\n            geometry GEOMETRY, -- Uses the GEOMETRY type from the spatial extension\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
+              return this.db.query("\n        CREATE TABLE IF NOT EXISTS geospatial_attributes (\n            geo_id UUID PRIMARY KEY,\n            entity_id UUID REFERENCES entities(entity_id) UNIQUE,\n            geometry GEOMETRY, -- Uses the GEOMETRY type from the spatial extension\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
             case 3:
               // Note: Spatial index creation might need to be handled carefully,
               // as creating it on an empty table or repeatedly can cause issues.
               // For now, we'll log the intent.
               console.log("MemoryManager: Geospatial table ready. For performance, a spatial index should be created on the 'geometry' column.");
               _context.n = 4;
-              return this.db.run("\n        CREATE TABLE IF NOT EXISTS relationships (\n            relationship_id UUID PRIMARY KEY,\n            source_entity_id UUID REFERENCES entities(entity_id),\n            target_entity_id UUID REFERENCES entities(entity_id),\n            relationship_type VARCHAR, -- e.g., 'has_location', 'near', 'serves_cuisine',\n            UNIQUE(source_entity_id, target_entity_id, relationship_type),\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
+              return this.db.query("\n        CREATE TABLE IF NOT EXISTS relationships (\n            relationship_id UUID PRIMARY KEY,\n            source_entity_id UUID REFERENCES entities(entity_id),\n            target_entity_id UUID REFERENCES entities(entity_id),\n            relationship_type VARCHAR, -- e.g., 'has_location', 'near', 'serves_cuisine',\n            UNIQUE(source_entity_id, target_entity_id, relationship_type),\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
             case 4:
               _context.n = 5;
-              return this.db.run("\n        CREATE TABLE IF NOT EXISTS conversation_chunks (\n            chunk_id UUID PRIMARY KEY,\n            session_id VARCHAR,\n            turn INTEGER,\n            speaker VARCHAR, -- 'user' or 'agent'\n            content TEXT,\n            embedding FLOAT[384], -- DuckDB requires vector dimensions\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
+              return this.db.query("\n        CREATE TABLE IF NOT EXISTS conversation_chunks (\n            chunk_id UUID PRIMARY KEY,\n            session_id VARCHAR,\n            turn INTEGER,\n            speaker VARCHAR, -- 'user' or 'agent'\n            content TEXT,\n            embedding FLOAT[384], -- DuckDB requires vector dimensions\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
             case 5:
               this.ready = true;
               console.log("MemoryManager: Memory store initialized successfully.");
@@ -127494,7 +127494,7 @@ var MemoryManager = /*#__PURE__*/function () {
     key: "addEpisodicMemory",
     value: (function () {
       var _addEpisodicMemory = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(turnData) {
-        var session_id, turn, speaker, content, embedding, query, _t2;
+        var session_id, turn, speaker, content, escapedContent, embedding, embeddingString, query, _t2;
         return _regenerator().w(function (_context2) {
           while (1) switch (_context2.n) {
             case 0:
@@ -127513,17 +127513,18 @@ var MemoryManager = /*#__PURE__*/function () {
               }
               return _context2.a(2);
             case 2:
+              // To prevent SQL injection, we must escape single quotes in the content string.
+              escapedContent = content.replace(/'/g, "''"); // 1. Generate embedding for the content.
               _context2.n = 3;
               return this.embeddingManager.generateEmbedding(content);
             case 3:
               embedding = _context2.v;
-              // 2. Prepare and execute the INSERT statement using parameterized queries.
-              // This is the secure way to handle potentially unsafe content and avoids SQL injection.
-              query = "\n        INSERT INTO conversation_chunks (chunk_id, session_id, turn, speaker, content, embedding)\n        VALUES (uuid(), ?, ?, ?, ?, ?);\n      "; // The duckdb-wasm library's `run` method on a connection supports parameters.
-              // We assume `this.db` is a connection or a wrapper that exposes this functionality.
-              // The embedding array is passed directly.
+              embeddingString = JSON.stringify(Array.from(embedding)); // 2. Prepare the INSERT statement by interpolating all values directly.
+              // This avoids a driver quirk with mixed parameter types (placeholders and injected values).
+              // The content is escaped to prevent SQL injection.
+              query = "\n        INSERT INTO conversation_chunks (chunk_id, session_id, turn, speaker, content, embedding)\n        VALUES (uuid(), '".concat(session_id, "', ").concat(turn, ", '").concat(speaker, "', '").concat(escapedContent, "', CAST('").concat(embeddingString, "' AS FLOAT[384]));\n      "); // Execute the query without parameters, as all values are now part of the query string.
               _context2.n = 4;
-              return this.db.run(query, [session_id, turn, speaker, content, embedding]);
+              return this.db.query(query);
             case 4:
               console.log("MemoryManager: Added episodic memory for turn ".concat(turn, " by ").concat(speaker, "."));
               _context2.n = 6;
@@ -127560,6 +127561,7 @@ var MemoryManager = /*#__PURE__*/function () {
       var _retrieveEpisodicMemory = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(queryText, sessionId) {
         var topK,
           queryEmbedding,
+          queryEmbeddingString,
           query,
           results,
           _args3 = arguments,
@@ -127586,12 +127588,13 @@ var MemoryManager = /*#__PURE__*/function () {
               return this.embeddingManager.generateEmbedding(queryText);
             case 4:
               queryEmbedding = _context3.v;
-              // 2. Prepare the SQL query for vector similarity search.
-              // We use parameterized queries to safely pass the embedding and other values.
-              query = "\n        SELECT\n            content,\n            speaker,\n            turn,\n            array_cosine_distance(embedding, ?) AS distance\n        FROM\n            conversation_chunks\n        WHERE\n            session_id = ?\n        ORDER BY\n            distance ASC\n        LIMIT ?;\n      "; // 3. Execute the query.
-              // The sessionId is added to the parameters to scope the search.
+              queryEmbeddingString = JSON.stringify(Array.from(queryEmbedding)); // 2. Prepare the SQL query for vector similarity search.
+              // All dynamic values are interpolated directly into the query string.
+              // This is safe as sessionId is a UUID and topK is a number, and it avoids
+              // a driver quirk with mixed parameter types.
+              query = "\n        SELECT\n            content,\n            speaker,\n            turn,\n            array_cosine_distance(embedding, CAST('".concat(queryEmbeddingString, "' AS FLOAT[384])) AS distance\n        FROM\n            conversation_chunks\n        WHERE\n            session_id = '").concat(sessionId, "'\n        ORDER BY\n            distance ASC\n        LIMIT ").concat(topK, ";\n      "); // 3. Execute the query without parameters.
               _context3.n = 5;
-              return this.db.query(query, [queryEmbedding, sessionId, topK]);
+              return this.db.query(query);
             case 5:
               results = _context3.v;
               console.log("MemoryManager: Retrieved ".concat(results.numRows, " relevant episodic memories for query: \"").concat(queryText, "\""));
@@ -127647,7 +127650,7 @@ var MemoryManager = /*#__PURE__*/function () {
               console.log("MemoryManager: Consolidating semantic facts into knowledge graph...", facts);
               _context4.p = 3;
               _context4.n = 4;
-              return this.db.run('BEGIN TRANSACTION;');
+              return this.db.query('BEGIN TRANSACTION;');
             case 4:
               entityNameToIdMap = new Map(); // 1. Process Entities and their Attributes
               if (!facts.entities) {
@@ -127688,7 +127691,7 @@ var MemoryManager = /*#__PURE__*/function () {
               _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2), key = _Object$entries$_i[0], value = _Object$entries$_i[1];
               attrQuery = "\n                INSERT INTO entity_attributes (attribute_id, entity_id, attribute_key, attribute_value)\n                VALUES (uuid(), ?, ?, ?)\n                ON CONFLICT (entity_id, attribute_key)\n                DO UPDATE SET attribute_value = excluded.attribute_value;\n              ";
               _context4.n = 9;
-              return this.db.run(attrQuery, [entityId, key, String(value)]);
+              return this.db.query(attrQuery, [entityId, key, String(value)]);
             case 9:
               _i++;
               _context4.n = 8;
@@ -127700,7 +127703,7 @@ var MemoryManager = /*#__PURE__*/function () {
               }
               geoQuery = "\n              INSERT INTO geospatial_attributes (geo_id, entity_id, geometry)\n              VALUES (uuid(), ?, ST_GeomFromText(?))\n              ON CONFLICT (entity_id)\n              DO UPDATE SET geometry = excluded.geometry;\n            ";
               _context4.n = 11;
-              return this.db.run(geoQuery, [entityId, entity.geometry]);
+              return this.db.query(geoQuery, [entityId, entity.geometry]);
             case 11:
               _context4.n = 6;
               break;
@@ -127737,7 +127740,7 @@ var MemoryManager = /*#__PURE__*/function () {
               }
               relQuery = "\n              INSERT INTO relationships (relationship_id, source_entity_id, target_entity_id, relationship_type)\n              VALUES (uuid(), ?, ?, ?)\n              ON CONFLICT (source_entity_id, target_entity_id, relationship_type)\n              DO NOTHING;\n            ";
               _context4.n = 18;
-              return this.db.run(relQuery, [sourceId, targetId, rel.type]);
+              return this.db.query(relQuery, [sourceId, targetId, rel.type]);
             case 18:
               _context4.n = 20;
               break;
@@ -127759,7 +127762,7 @@ var MemoryManager = /*#__PURE__*/function () {
               return _context4.f(23);
             case 24:
               _context4.n = 25;
-              return this.db.run('COMMIT;');
+              return this.db.query('COMMIT;');
             case 25:
               console.log("MemoryManager: Semantic facts successfully consolidated.");
               _context4.n = 27;
@@ -127772,7 +127775,7 @@ var MemoryManager = /*#__PURE__*/function () {
                 error: _t6
               });
               _context4.n = 27;
-              return this.db.run('ROLLBACK;');
+              return this.db.query('ROLLBACK;');
             case 27:
               return _context4.a(2);
           }
@@ -127793,7 +127796,7 @@ var MemoryManager = /*#__PURE__*/function () {
     key: "retrieveSemanticFacts",
     value: (function () {
       var _retrieveSemanticFacts = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(entityNames) {
-        var facts, entityDetailsQuery, entityDetailsResult, entityRows, _iterator3, _step3, row, entity_name, entity_type, attribute_key, attribute_value, geometry_wkt, relationshipsQuery, relationshipsResult, relationshipRows, _iterator4, _step4, _row, source_name, target_name, relationship_type, relString, _t7;
+        var facts, escapedEntityNames, entityDetailsQuery, entityDetailsResult, entityRows, _iterator3, _step3, row, entity_name, entity_type, attribute_key, attribute_value, geometry_wkt, relationshipsQuery, relationshipsResult, relationshipRows, _iterator4, _step4, _row, source_name, target_name, relationship_type, relString, _t7;
         return _regenerator().w(function (_context5) {
           while (1) switch (_context5.n) {
             case 0:
@@ -127813,10 +127816,15 @@ var MemoryManager = /*#__PURE__*/function () {
               console.log("MemoryManager: Retrieving semantic facts for entities:", entityNames);
               facts = {};
               _context5.p = 3;
-              // Query 1: Get entities, their attributes, and geometries
-              entityDetailsQuery = "\n        SELECT\n          e.entity_name,\n          e.entity_type,\n          a.attribute_key,\n          a.attribute_value,\n          ST_AsText(g.geometry) AS geometry_wkt\n        FROM entities e\n        LEFT JOIN entity_attributes a ON e.entity_id = a.entity_id\n        LEFT JOIN geospatial_attributes g ON e.entity_id = g.entity_id\n        WHERE e.entity_name IN (SELECT * FROM unnest(?));\n      ";
+              // To avoid SQL injection and handle names with single quotes, we escape them
+              // and build the list for the IN clause manually. This avoids parameter binding
+              // issues with array types in the wasm driver.
+              escapedEntityNames = entityNames.map(function (name) {
+                return "'".concat(name.replace(/'/g, "''"), "'");
+              }).join(','); // Query 1: Get entities, their attributes, and geometries
+              entityDetailsQuery = "\n        SELECT\n          e.entity_name,\n          e.entity_type,\n          a.attribute_key,\n          a.attribute_value,\n          ST_AsText(g.geometry) AS geometry_wkt\n        FROM entities e\n        LEFT JOIN entity_attributes a ON e.entity_id = a.entity_id\n        LEFT JOIN geospatial_attributes g ON e.entity_id = g.entity_id\n        WHERE e.entity_name IN (".concat(escapedEntityNames, ");\n      ");
               _context5.n = 4;
-              return this.db.query(entityDetailsQuery, [entityNames]);
+              return this.db.query(entityDetailsQuery);
             case 4:
               entityDetailsResult = _context5.v;
               entityRows = entityDetailsResult.toArray().map(function (row) {
@@ -127855,9 +127863,9 @@ var MemoryManager = /*#__PURE__*/function () {
               } finally {
                 _iterator3.f();
               }
-              relationshipsQuery = "\n        SELECT\n          r.relationship_type,\n          source.entity_name as source_name,\n          target.entity_name as target_name\n        FROM relationships r\n        JOIN entities source ON r.source_entity_id = source.entity_id\n        JOIN entities target ON r.target_entity_id = target.entity_id\n        WHERE\n          source.entity_name IN (SELECT * FROM unnest(?)) OR\n          target.entity_name IN (SELECT * FROM unnest(?));\n      ";
+              relationshipsQuery = "\n        SELECT\n          r.relationship_type,\n          source.entity_name as source_name,\n          target.entity_name as target_name\n        FROM relationships r\n        JOIN entities source ON r.source_entity_id = source.entity_id\n        JOIN entities target ON r.target_entity_id = target.entity_id\n        WHERE\n          source.entity_name IN (".concat(escapedEntityNames, ") OR\n          target.entity_name IN (").concat(escapedEntityNames, ");\n      ");
               _context5.n = 6;
-              return this.db.query(relationshipsQuery, [entityNames]);
+              return this.db.query(relationshipsQuery);
             case 6:
               relationshipsResult = _context5.v;
               relationshipRows = relationshipsResult.toArray().map(function (row) {
