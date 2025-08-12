@@ -127669,7 +127669,7 @@ var MemoryManager = /*#__PURE__*/function () {
               // Upsert the entity and get its ID.
               // If a conflict on (name, type) occurs, we do an update to trigger the RETURNING clause,
               // which gives us the ID of the existing row.
-              entityQuery = "\n            INSERT INTO entities (entity_id, entity_name, entity_type)\n            VALUES (uuid(), ?, ?)\n            ON CONFLICT (entity_name, entity_type)\n            DO UPDATE SET entity_name = excluded.entity_name\n            RETURNING entity_id;\n          ";
+              entityQuery = "\n            INSERT INTO entities (entity_id, entity_name, entity_type)\n            VALUES (uuid(), ?, ?)\n            ON CONFLICT (entity_name, entity_type)\n            DO UPDATE SET created_at = current_timestamp\n            RETURNING entity_id;\n          ";
               _context4.n = 7;
               return this.db.query(entityQuery, [entity.name, entity.type]);
             case 7:
