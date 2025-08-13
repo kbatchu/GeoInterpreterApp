@@ -131862,30 +131862,41 @@ var MemoryManager = /*#__PURE__*/function () {
               _context.n = 3;
               return this.db.query("\n        CREATE TABLE IF NOT EXISTS geospatial_attributes (\n            geo_id UUID PRIMARY KEY,\n            entity_id UUID REFERENCES entities(entity_id) UNIQUE,\n            geometry GEOMETRY, -- Uses the GEOMETRY type from the spatial extension\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
             case 3:
-              // Note: Spatial index creation might need to be handled carefully,
-              // as creating it on an empty table or repeatedly can cause issues.
-              // For now, we'll log the intent.
-              console.log("MemoryManager: Geospatial table ready. For performance, a spatial index should be created on the 'geometry' column.");
               _context.n = 4;
               return this.db.query("\n        CREATE TABLE IF NOT EXISTS relationships (\n            relationship_id UUID PRIMARY KEY,\n            source_entity_id UUID REFERENCES entities(entity_id),\n            target_entity_id UUID REFERENCES entities(entity_id),\n            relationship_type VARCHAR, -- e.g., 'has_location', 'near', 'serves_cuisine',\n            UNIQUE(source_entity_id, target_entity_id, relationship_type),\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
             case 4:
               _context.n = 5;
               return this.db.query("\n        CREATE TABLE IF NOT EXISTS conversation_chunks (\n            chunk_id UUID PRIMARY KEY,\n            session_id VARCHAR,\n            turn INTEGER,\n            speaker VARCHAR, -- 'user' or 'agent'\n            content TEXT,\n            embedding FLOAT[384], -- DuckDB requires vector dimensions\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
             case 5:
+              // --- PERFORMANCE FIX: Add indexes to memory tables ---
+              // These indexes are crucial for fast retrieval as the memory grows.
+              // Using "IF NOT EXISTS" makes this operation idempotent.
+              console.log("MemoryManager: Creating indexes for performance. This may take a moment on first run...");
+
+              // Index for semantic (vector) search on conversations.
+              _context.n = 6;
+              return this.db.query("\n        CREATE INDEX IF NOT EXISTS idx_conversation_embedding ON conversation_chunks USING HNSW (embedding);\n      ");
+            case 6:
+              _context.n = 7;
+              return this.db.query("\n        CREATE INDEX IF NOT EXISTS idx_entity_name ON entities (entity_name);\n      ");
+            case 7:
+              _context.n = 8;
+              return this.db.query("\n        CREATE INDEX IF NOT EXISTS idx_geospatial_geometry ON geospatial_attributes USING RTREE (geometry);\n      ");
+            case 8:
               this.ready = true;
               console.log("MemoryManager: Memory store initialized successfully.");
-              _context.n = 7;
+              _context.n = 10;
               break;
-            case 6:
-              _context.p = 6;
+            case 9:
+              _context.p = 9;
               _t = _context.v;
               console.error("MemoryManager: Failed to initialize memory tables", _t);
               this.ready = false;
               throw _t;
-            case 7:
+            case 10:
               return _context.a(2);
           }
-        }, _callee, this, [[0, 6]]);
+        }, _callee, this, [[0, 9]]);
       }));
       function _initialize() {
         return _initialize2.apply(this, arguments);
