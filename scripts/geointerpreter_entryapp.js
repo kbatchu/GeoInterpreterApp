@@ -132275,7 +132275,7 @@ var MemoryManager = /*#__PURE__*/function () {
     key: "retrieveSemanticFacts",
     value: (function () {
       var _retrieveSemanticFacts = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(entityNames) {
-        var cachedFacts, namesToQueryFromDB, _iterator4, _step4, _name, facts, escapedEntityNames, entityDetailsQuery, entityDetailsResult, entityRows, _iterator5, _step5, row, entity_name, entity_type, attribute_key, attribute_value, geometry_wkt, relationshipsQuery, relationshipsResult, relationshipRows, _iterator6, _step6, _row, source_name, target_name, relationship_type, relString, _i2, _Object$entries2, _Object$entries2$_i, name, factData, allFacts, _t7;
+        var cachedFacts, namesToQueryFromDB, _iterator4, _step4, _name, facts, escapedEntityNames, entityDetailsQuery, entityDetailsResult, entityRows, _iterator5, _step5, row, entity_name, entity_type, attribute_key, attribute_value, geometry_wkt, relationshipsQuery, relationshipsResult, relationshipRows, _iterator6, _step6, _row, source_name, target_name, relationship_type, relString, _i2, _namesToQueryFromDB, name, allFacts, _t7;
         return _regenerator().w(function (_context5) {
           while (1) switch (_context5.n) {
             case 0:
@@ -132388,15 +132388,22 @@ var MemoryManager = /*#__PURE__*/function () {
                   }
                 }
 
-                // --- PERFORMANCE: Add newly retrieved DB facts to the cache ---
+                // --- PERFORMANCE: Update cache with both positive and negative results ---
+                // This is the crucial negative caching step.
               } catch (err) {
                 _iterator6.e(err);
               } finally {
                 _iterator6.f();
               }
-              for (_i2 = 0, _Object$entries2 = Object.entries(facts); _i2 < _Object$entries2.length; _i2++) {
-                _Object$entries2$_i = _slicedToArray(_Object$entries2[_i2], 2), name = _Object$entries2$_i[0], factData = _Object$entries2$_i[1];
-                this.semanticCache.set(name, factData);
+              for (_i2 = 0, _namesToQueryFromDB = namesToQueryFromDB; _i2 < _namesToQueryFromDB.length; _i2++) {
+                name = _namesToQueryFromDB[_i2];
+                if (facts[name]) {
+                  // Positive hit: The entity was found in the DB. Cache the data.
+                  this.semanticCache.set(name, facts[name]);
+                } else {
+                  // Negative hit: The entity was not in the DB. Cache 'null' to prevent future lookups.
+                  this.semanticCache.set(name, null);
+                }
               }
               allFacts = _objectSpread(_objectSpread({}, cachedFacts), facts);
               console.log("MemoryManager: Retrieved and structured semantic facts:", allFacts);
