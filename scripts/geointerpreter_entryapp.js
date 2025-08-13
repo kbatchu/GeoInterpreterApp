@@ -131804,6 +131804,9 @@ function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLim
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
 function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
@@ -131834,6 +131837,8 @@ var MemoryManager = /*#__PURE__*/function () {
     this.ready = false;
     // A promise that resolves when the memory tables are ready.
     this.readyPromise = this._initialize();
+    // --- PERFORMANCE: In-memory cache for semantic facts ---
+    this.semanticCache = new Map();
   }
 
   /**
@@ -132051,7 +132056,7 @@ var MemoryManager = /*#__PURE__*/function () {
     key: "addSemanticFacts",
     value: (function () {
       var _addSemanticFacts = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(facts) {
-        var entityNameToIdMap, _iterator, _step, entity, entityId, selectQuery, selectResult, insertQuery, insertResult, _i, _Object$entries, _Object$entries$_i, key, value, attrQuery, escapedGeometry, geoQuery, _iterator2, _step2, rel, sourceId, targetId, relQuery, _t4, _t5, _t6;
+        var _iterator, _step, entity, existingData, updatedData, entityNameToIdMap, _iterator2, _step2, _entity, entityId, selectQuery, selectResult, insertQuery, insertResult, _i, _Object$entries, _Object$entries$_i, key, value, attrQuery, escapedGeometry, geoQuery, _iterator3, _step3, rel, sourceId, targetId, relQuery, _t4, _t5, _t6;
         return _regenerator().w(function (_context4) {
           while (1) switch (_context4.n) {
             case 0:
@@ -132069,6 +132074,33 @@ var MemoryManager = /*#__PURE__*/function () {
               console.log("MemoryManager: addSemanticFacts called with no facts to add.");
               return _context4.a(2);
             case 2:
+              // --- PERFORMANCE: Update the in-memory cache immediately (synchronously) ---
+              // This makes the facts available for the next turn without waiting for the DB.
+              if (facts.entities) {
+                _iterator = _createForOfIteratorHelper(facts.entities);
+                try {
+                  for (_iterator.s(); !(_step = _iterator.n()).done;) {
+                    entity = _step.value;
+                    if (entity.name) {
+                      existingData = this.semanticCache.get(entity.name) || {
+                        type: entity.type,
+                        attributes: {},
+                        relationships: [],
+                        geometry: null
+                      };
+                      updatedData = _objectSpread(_objectSpread({}, existingData), {}, {
+                        attributes: _objectSpread(_objectSpread({}, existingData.attributes), entity.attributes),
+                        geometry: entity.geometry || existingData.geometry
+                      });
+                      this.semanticCache.set(entity.name, updatedData);
+                    }
+                  }
+                } catch (err) {
+                  _iterator.e(err);
+                } finally {
+                  _iterator.f();
+                }
+              }
               console.log("MemoryManager: Consolidating semantic facts into knowledge graph...", facts);
               _context4.p = 3;
               _context4.n = 4;
@@ -132079,20 +132111,20 @@ var MemoryManager = /*#__PURE__*/function () {
                 _context4.n = 19;
                 break;
               }
-              _iterator = _createForOfIteratorHelper(facts.entities);
+              _iterator2 = _createForOfIteratorHelper(facts.entities);
               _context4.p = 5;
-              _iterator.s();
+              _iterator2.s();
             case 6:
-              if ((_step = _iterator.n()).done) {
+              if ((_step2 = _iterator2.n()).done) {
                 _context4.n = 16;
                 break;
               }
-              entity = _step.value;
-              if (!(!entity.name || !entity.type)) {
+              _entity = _step2.value;
+              if (!(!_entity.name || !_entity.type)) {
                 _context4.n = 7;
                 break;
               }
-              console.warn("MemoryManager: Skipping entity with missing name or type.", entity);
+              console.warn("MemoryManager: Skipping entity with missing name or type.", _entity);
               return _context4.a(3, 15);
             case 7:
               // "Get or Create" pattern to robustly find or insert an entity and get its ID.
@@ -132100,7 +132132,7 @@ var MemoryManager = /*#__PURE__*/function () {
               entityId = void 0;
               selectQuery = "SELECT entity_id FROM entities WHERE entity_name = ? AND entity_type = ?;";
               _context4.n = 8;
-              return this.db.query(selectQuery, [entity.name, entity.type]);
+              return this.db.query(selectQuery, [_entity.name, _entity.type]);
             case 8:
               selectResult = _context4.v;
               if (!(selectResult.numRows > 0)) {
@@ -132115,19 +132147,19 @@ var MemoryManager = /*#__PURE__*/function () {
               // Entity does not exist, insert it and get the new ID
               insertQuery = "\n              INSERT INTO entities (entity_id, entity_name, entity_type)\n              VALUES (uuid(), ?, ?)\n              RETURNING entity_id;\n            ";
               _context4.n = 10;
-              return this.db.query(insertQuery, [entity.name, entity.type]);
+              return this.db.query(insertQuery, [_entity.name, _entity.type]);
             case 10:
               insertResult = _context4.v;
               entityId = insertResult.get(0).toJSON().entity_id;
             case 11:
-              entityNameToIdMap.set(entity.name, entityId);
+              entityNameToIdMap.set(_entity.name, entityId);
 
               // Process simple attributes
-              if (!entity.attributes) {
+              if (!_entity.attributes) {
                 _context4.n = 14;
                 break;
               }
-              _i = 0, _Object$entries = Object.entries(entity.attributes);
+              _i = 0, _Object$entries = Object.entries(_entity.attributes);
             case 12:
               if (!(_i < _Object$entries.length)) {
                 _context4.n = 14;
@@ -132142,12 +132174,12 @@ var MemoryManager = /*#__PURE__*/function () {
               _context4.n = 12;
               break;
             case 14:
-              if (!entity.geometry) {
+              if (!_entity.geometry) {
                 _context4.n = 15;
                 break;
               }
               // WKT strings don't typically have single quotes, but we escape them for safety.
-              escapedGeometry = entity.geometry.replace(/'/g, "''");
+              escapedGeometry = _entity.geometry.replace(/'/g, "''");
               geoQuery = "\n              INSERT INTO geospatial_attributes (geo_id, entity_id, geometry)\n              VALUES (uuid(), '".concat(entityId, "', ST_GeomFromText('").concat(escapedGeometry, "'))\n              ON CONFLICT (entity_id)\n              DO UPDATE SET geometry = excluded.geometry;\n            "); // Execute the query without parameters, as all values are now safely part of the query string.
               _context4.n = 15;
               return this.db.query(geoQuery);
@@ -132160,25 +132192,25 @@ var MemoryManager = /*#__PURE__*/function () {
             case 17:
               _context4.p = 17;
               _t4 = _context4.v;
-              _iterator.e(_t4);
+              _iterator2.e(_t4);
             case 18:
               _context4.p = 18;
-              _iterator.f();
+              _iterator2.f();
               return _context4.f(18);
             case 19:
               if (!facts.relationships) {
                 _context4.n = 28;
                 break;
               }
-              _iterator2 = _createForOfIteratorHelper(facts.relationships);
+              _iterator3 = _createForOfIteratorHelper(facts.relationships);
               _context4.p = 20;
-              _iterator2.s();
+              _iterator3.s();
             case 21:
-              if ((_step2 = _iterator2.n()).done) {
+              if ((_step3 = _iterator3.n()).done) {
                 _context4.n = 25;
                 break;
               }
-              rel = _step2.value;
+              rel = _step3.value;
               sourceId = entityNameToIdMap.get(rel.source);
               targetId = entityNameToIdMap.get(rel.target);
               if (!(sourceId && targetId)) {
@@ -132202,10 +132234,10 @@ var MemoryManager = /*#__PURE__*/function () {
             case 26:
               _context4.p = 26;
               _t5 = _context4.v;
-              _iterator2.e(_t5);
+              _iterator3.e(_t5);
             case 27:
               _context4.p = 27;
-              _iterator2.f();
+              _iterator3.f();
               return _context4.f(27);
             case 28:
               _context4.n = 29;
@@ -132243,7 +132275,7 @@ var MemoryManager = /*#__PURE__*/function () {
     key: "retrieveSemanticFacts",
     value: (function () {
       var _retrieveSemanticFacts = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(entityNames) {
-        var facts, escapedEntityNames, entityDetailsQuery, entityDetailsResult, entityRows, _iterator3, _step3, row, entity_name, entity_type, attribute_key, attribute_value, geometry_wkt, relationshipsQuery, relationshipsResult, relationshipRows, _iterator4, _step4, _row, source_name, target_name, relationship_type, relString, _t7;
+        var cachedFacts, namesToQueryFromDB, _iterator4, _step4, _name, facts, escapedEntityNames, entityDetailsQuery, entityDetailsResult, entityRows, _iterator5, _step5, row, entity_name, entity_type, attribute_key, attribute_value, geometry_wkt, relationshipsQuery, relationshipsResult, relationshipRows, _iterator6, _step6, _row, source_name, target_name, relationship_type, relString, _i2, _Object$entries2, _Object$entries2$_i, name, factData, allFacts, _t7;
         return _regenerator().w(function (_context5) {
           while (1) switch (_context5.n) {
             case 0:
@@ -132260,35 +132292,60 @@ var MemoryManager = /*#__PURE__*/function () {
               }
               return _context5.a(2, null);
             case 2:
+              // --- PERFORMANCE: Check the in-memory cache first ---
+              cachedFacts = {};
+              namesToQueryFromDB = [];
+              _iterator4 = _createForOfIteratorHelper(entityNames);
+              try {
+                for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+                  _name = _step4.value;
+                  if (this.semanticCache.has(_name)) {
+                    cachedFacts[_name] = this.semanticCache.get(_name);
+                  } else {
+                    namesToQueryFromDB.push(_name);
+                  }
+                }
+              } catch (err) {
+                _iterator4.e(err);
+              } finally {
+                _iterator4.f();
+              }
+              if (!(namesToQueryFromDB.length === 0)) {
+                _context5.n = 3;
+                break;
+              }
+              console.log("MemoryManager: All facts retrieved from cache.", cachedFacts);
+              return _context5.a(2, Object.keys(cachedFacts).length > 0 ? cachedFacts : null);
+            case 3:
               console.log("MemoryManager: Retrieving semantic facts for entities:", entityNames);
               facts = {};
-              _context5.p = 3;
+              _context5.p = 4;
               // To avoid SQL injection and handle names with single quotes, we escape them
               // and build the list for the IN clause manually. This avoids parameter binding
               // issues with array types in the wasm driver.
-              escapedEntityNames = entityNames.map(function (name) {
+              escapedEntityNames = namesToQueryFromDB.map(function (name) {
                 return "'".concat(name.replace(/'/g, "''"), "'");
               }).join(','); // Query 1: Get entities, their attributes, and geometries
               entityDetailsQuery = "\n        SELECT\n          e.entity_name,\n          e.entity_type,\n          a.attribute_key,\n          a.attribute_value,\n          ST_AsText(g.geometry) AS geometry_wkt\n        FROM entities e\n        LEFT JOIN entity_attributes a ON e.entity_id = a.entity_id\n        LEFT JOIN geospatial_attributes g ON e.entity_id = g.entity_id\n        WHERE e.entity_name IN (".concat(escapedEntityNames, ");\n      ");
-              _context5.n = 4;
+              _context5.n = 5;
               return this.db.query(entityDetailsQuery);
-            case 4:
+            case 5:
               entityDetailsResult = _context5.v;
               entityRows = entityDetailsResult.toArray().map(function (row) {
                 return row.toJSON();
               });
               if (!(entityRows.length === 0)) {
-                _context5.n = 5;
+                _context5.n = 6;
                 break;
               }
               console.log("MemoryManager: No semantic facts found for the given entities.");
               return _context5.a(2, null);
-            case 5:
+            case 6:
               // Process entity details into the facts object
-              _iterator3 = _createForOfIteratorHelper(entityRows);
+              _iterator5 = _createForOfIteratorHelper(entityRows);
               try {
-                for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
-                  row = _step3.value;
+                for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
+                  row = _step5.value;
                   entity_name = row.entity_name, entity_type = row.entity_type, attribute_key = row.attribute_key, attribute_value = row.attribute_value, geometry_wkt = row.geometry_wkt;
                   if (!facts[entity_name]) {
                     facts[entity_name] = {
@@ -132306,22 +132363,22 @@ var MemoryManager = /*#__PURE__*/function () {
 
                 // Query 2: Get relationships involving these entities
               } catch (err) {
-                _iterator3.e(err);
+                _iterator5.e(err);
               } finally {
-                _iterator3.f();
+                _iterator5.f();
               }
               relationshipsQuery = "\n        SELECT\n          r.relationship_type,\n          source.entity_name as source_name,\n          target.entity_name as target_name\n        FROM relationships r\n        JOIN entities source ON r.source_entity_id = source.entity_id\n        JOIN entities target ON r.target_entity_id = target.entity_id\n        WHERE\n          source.entity_name IN (".concat(escapedEntityNames, ") OR\n          target.entity_name IN (").concat(escapedEntityNames, ");\n      ");
-              _context5.n = 6;
+              _context5.n = 7;
               return this.db.query(relationshipsQuery);
-            case 6:
+            case 7:
               relationshipsResult = _context5.v;
               relationshipRows = relationshipsResult.toArray().map(function (row) {
                 return row.toJSON();
               }); // Process and add relationships to the facts object
-              _iterator4 = _createForOfIteratorHelper(relationshipRows);
+              _iterator6 = _createForOfIteratorHelper(relationshipRows);
               try {
-                for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
-                  _row = _step4.value;
+                for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
+                  _row = _step6.value;
                   source_name = _row.source_name, target_name = _row.target_name, relationship_type = _row.relationship_type; // Add relationship to source entity if it's in our list of targets
                   if (facts[source_name]) {
                     relString = "".concat(relationship_type, " -> ").concat(target_name);
@@ -132330,15 +132387,22 @@ var MemoryManager = /*#__PURE__*/function () {
                     }
                   }
                 }
+
+                // --- PERFORMANCE: Add newly retrieved DB facts to the cache ---
               } catch (err) {
-                _iterator4.e(err);
+                _iterator6.e(err);
               } finally {
-                _iterator4.f();
+                _iterator6.f();
               }
-              console.log("MemoryManager: Retrieved and structured semantic facts:", facts);
-              return _context5.a(2, Object.keys(facts).length > 0 ? facts : null);
-            case 7:
-              _context5.p = 7;
+              for (_i2 = 0, _Object$entries2 = Object.entries(facts); _i2 < _Object$entries2.length; _i2++) {
+                _Object$entries2$_i = _slicedToArray(_Object$entries2[_i2], 2), name = _Object$entries2$_i[0], factData = _Object$entries2$_i[1];
+                this.semanticCache.set(name, factData);
+              }
+              allFacts = _objectSpread(_objectSpread({}, cachedFacts), facts);
+              console.log("MemoryManager: Retrieved and structured semantic facts:", allFacts);
+              return _context5.a(2, Object.keys(allFacts).length > 0 ? allFacts : null);
+            case 8:
+              _context5.p = 8;
               _t7 = _context5.v;
               console.error("MemoryManager: Failed to retrieve semantic facts.", {
                 entityNames: entityNames,
@@ -132346,7 +132410,7 @@ var MemoryManager = /*#__PURE__*/function () {
               });
               return _context5.a(2, null);
           }
-        }, _callee5, this, [[3, 7]]);
+        }, _callee5, this, [[4, 8]]);
       }));
       function retrieveSemanticFacts(_x5) {
         return _retrieveSemanticFacts.apply(this, arguments);
