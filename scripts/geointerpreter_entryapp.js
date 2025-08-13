@@ -68556,8 +68556,12 @@ function Geointerpreter() {
           case 0:
             // --- Worker Setup ---
             // All heavy lifting (AI, DB) is moved to the worker.
-            worker = new Worker(new URL(/* worker import */ __webpack_require__.p + __webpack_require__.u("scripts_geointerpreter-worker_js"), __webpack_require__.b), {
-              type: undefined
+            // The `import.meta.url` construct is the modern standard, but can fail in some
+            // development environments or bundlers that don't support it correctly.
+            // Using a direct path relative to the HTML file is a more robust fallback.
+            // This assumes your HTML file is in the root directory and scripts are in a 'scripts' folder.
+            worker = new Worker('./scripts/geointerpreter-worker.js', {
+              type: 'module'
             });
             outputElement = document.getElementById("analysis-output");
             userInputField = document.getElementById("user-input");
@@ -69727,15 +69731,6 @@ function Mediator() {
 /******/ 		};
 /******/ 	})();
 /******/ 	
-/******/ 	/* webpack/runtime/get javascript chunk filename */
-/******/ 	(() => {
-/******/ 		// This function allow to reference async chunks
-/******/ 		__webpack_require__.u = (chunkId) => {
-/******/ 			// return url for filenames based on template
-/******/ 			return "" + chunkId + "app.js";
-/******/ 		};
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
 /******/ 	(() => {
 /******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
@@ -69750,16 +69745,6 @@ function Mediator() {
 /******/ 			}
 /******/ 			Object.defineProperty(exports, '__esModule', { value: true });
 /******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/publicPath */
-/******/ 	(() => {
-/******/ 		__webpack_require__.p = "scripts/";
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/base uri */
-/******/ 	(() => {
-/******/ 		__webpack_require__.b = undefined;
 /******/ 	})();
 /******/ 	
 /************************************************************************/
