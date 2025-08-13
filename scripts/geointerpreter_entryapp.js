@@ -133455,16 +133455,33 @@ var ReActController = /*#__PURE__*/function () {
         }
         var actionString = cleanResponse.substring(actionIndex + actionPrefix.length).trim();
         try {
-          // Find the first '{' and last '}' to extract the JSON object
+          // Find the first '{' and the matching closing '}' for the JSON object
           var jsonStart = actionString.indexOf("{");
-          var jsonEnd = actionString.lastIndexOf("}");
-          if (jsonStart === -1 || jsonEnd === -1 || jsonEnd < jsonStart) {
-            throw new Error("No valid JSON object found in the action part.");
+          if (jsonStart === -1) {
+            throw new Error("No opening brace found in the action part.");
+          }
+
+          // Find the matching closing brace by counting braces
+          var braceCount = 0;
+          var jsonEnd = -1;
+          for (var i = jsonStart; i < actionString.length; i++) {
+            if (actionString[i] === "{") {
+              braceCount++;
+            } else if (actionString[i] === "}") {
+              braceCount--;
+              if (braceCount === 0) {
+                jsonEnd = i;
+                break;
+              }
+            }
+          }
+          if (jsonEnd === -1) {
+            throw new Error("No matching closing brace found in the action part.");
           }
           var jsonString = actionString.substring(jsonStart, jsonEnd + 1);
+          console.log("ReActController: Extracted JSON string:", jsonString);
           var parsedAction = JSON.parse(jsonString);
           if (parsedAction && typeof parsedAction.name === "string") {
-            // Assign to the existing 'action' variable, don't redeclare
             action = {
               name: parsedAction.name,
               params: parsedAction.parameters || parsedAction.params || {}
@@ -133485,7 +133502,6 @@ var ReActController = /*#__PURE__*/function () {
         }
       } else {
         // If "Action:" is not present, the entire response is the thought.
-        // This handles cases where the AI is just thinking or recovering.
         var _thoughtPrefix = "Thought:";
         if (cleanResponse.startsWith(_thoughtPrefix)) {
           thought = cleanResponse.substring(_thoughtPrefix.length).trim();
