@@ -132966,12 +132966,6 @@ var ReActController = /*#__PURE__*/function () {
                         });
                         console.log("ReActController: Tool Observation:", finalObservation);
 
-                        // --- MEMORY CONSOLIDATION ---
-                        // After a successful tool observation, try to extract facts.
-                        // This is a "fire-and-forget" operation.
-                        _this._consolidateMemory();
-                        // ---
-
                         // Only increment the plan step if the tool was successfully executed (or at least found).
                         _this.currentPlanStepIndex++;
                       }
@@ -133548,34 +133542,44 @@ var ReActController = /*#__PURE__*/function () {
 
     /**
      * @private
-     * After a successful action, this method prompts the AI to extract structured facts
-     * from the recent conversation and observation, then adds them to semantic memory.
+     * At the end of a task, this method prompts the AI to extract structured facts
+     * from the entire interaction history (scratchpad), then adds them to semantic memory.
      * This is a "fire-and-forget" operation to avoid blocking the main loop.
      */
   }, {
     key: "_consolidateMemory",
     value: (function () {
       var _consolidateMemory2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6() {
-        var recentHistory, contextForExtraction, extractionPrompt, reply, responseContent, jsonMatch, rawFacts, validationResult, _t3;
+        var fullInteraction, contextForExtraction, extractionPrompt, reply, responseContent, jsonMatch, rawFacts, validationResult, _t3;
         return _regenerator().w(function (_context7) {
           while (1) switch (_context7.n) {
             case 0:
-              // 1. Get the last few entries from the scratchpad to provide context.
-              // We'll take the last thought, action, and observation.
-              recentHistory = this.scratchpad.slice(-3);
-              if (!(recentHistory.length < 3 || recentHistory[recentHistory.length - 1].type !== "observation")) {
+              // 1. Get the entire scratchpad for this query to provide full context for extraction.
+              fullInteraction = this.scratchpad;
+              if (!(fullInteraction.length === 0)) {
                 _context7.n = 1;
                 break;
               }
               return _context7.a(2);
             case 1:
-              contextForExtraction = recentHistory.map(function (entry) {
-                return "".concat(entry.type, ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
-              }).join("\n"); // 2. Create a specialized prompt for fact extraction.
-              extractionPrompt = "\nYou are a data extraction sub-module. Your task is to analyze the following interaction (Thought, Action, Observation) and extract\n- Extract geospatial information as Well-Known Text (WKT) strings (e.g., \"POINT(lon lat)\").\n- ONLY extract new information from the 'Observation'. Do not extract from the 'Thought' or 'Action'.\n- If no new facts are present, return an empty JSON object {}.\n\nInteraction:\n<INTERACTION>\n".concat(contextForExtraction, "\n</INTERACTION>\n\nRespond ONLY with a JSON object in the following format. Do not include any other text or markdown.\n{\n  \"entities\": [\n    {\n      \"name\": \"Entity Name\",\n      \"type\": \"Entity Type\",\n      \"attributes\": { \"key\": \"value\" },\n      \"geometry\": \"WKT_GEOMETRY_STRING\"\n    }\n  ],\n  \"relationships\": [\n    { \"source\": \"Source Entity Name\", \"target\": \"Target Entity Name\", \"type\": \"relationship_type\" }\n  ]\n}");
-              _context7.p = 2;
+              // We only care about observations, as they contain the new facts.
+              contextForExtraction = fullInteraction.filter(function (entry) {
+                return entry.type === "observation";
+              }).map(function (entry) {
+                return "Observation: ".concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
+              }).join("\n\n");
+              if (!(contextForExtraction.trim() === "")) {
+                _context7.n = 2;
+                break;
+              }
+              console.log("Memory Consolidation: No observations found in scratchpad to extract facts from.");
+              return _context7.a(2);
+            case 2:
+              // 2. Create a specialized prompt for fact extraction.
+              extractionPrompt = "\nYou are a data extraction sub-module. Your task is to analyze the following series of observations from an AI agent's work and extract ALL key facts, entities, and relationships.\n- Consolidate information. If an entity is mentioned multiple times, merge its attributes.\n- Extract geospatial information as Well-Known Text (WKT) strings (e.g., \"POINT(lon lat)\").\n- Focus ONLY on information from the observations.\n- If no new facts are present, return an empty JSON object {}.\n\nObservations:\n<OBSERVATIONS>\n".concat(contextForExtraction, "\n</OBSERVATIONS>\n\nRespond ONLY with a JSON object in the following format. Do not include any other text or markdown.\n{\n  \"entities\": [\n    {\n      \"name\": \"Entity Name\",\n      \"type\": \"Entity Type\",\n      \"attributes\": { \"key\": \"value\" },\n      \"geometry\": \"WKT_GEOMETRY_STRING\"\n    }\n  ],\n  \"relationships\": [\n    { \"source\": \"Source Entity Name\", \"target\": \"Target Entity Name\", \"type\": \"relationship_type\" }\n  ]\n}");
+              _context7.p = 3;
               console.log("ReActController: Starting memory consolidation...");
-              _context7.n = 3;
+              _context7.n = 4;
               return this.aiCore.chat.completions.create({
                 messages: [{
                   role: "user",
@@ -133583,17 +133587,17 @@ var ReActController = /*#__PURE__*/function () {
                 }],
                 temperature: 0.0
               });
-            case 3:
+            case 4:
               reply = _context7.v;
               responseContent = reply.choices[0].message.content;
               jsonMatch = responseContent.match(/\{[\s\S]*\}/);
               if (jsonMatch) {
-                _context7.n = 4;
+                _context7.n = 5;
                 break;
               }
               console.warn("Memory Consolidation: AI did not return valid JSON.", responseContent);
               return _context7.a(2);
-            case 4:
+            case 5:
               rawFacts = JSON.parse(jsonMatch[0]);
               validationResult = FactSchema.safeParse(rawFacts);
               if (validationResult.success) {
@@ -133602,17 +133606,17 @@ var ReActController = /*#__PURE__*/function () {
               } else {
                 console.warn("Memory Consolidation: AI response failed schema validation.", validationResult.error.flatten());
               }
-              _context7.n = 6;
+              _context7.n = 7;
               break;
-            case 5:
-              _context7.p = 5;
+            case 6:
+              _context7.p = 6;
               _t3 = _context7.v;
               console.error("ReActController: Error during memory consolidation.", _t3);
               // Don't re-throw, this is a background task.
-            case 6:
+            case 7:
               return _context7.a(2);
           }
-        }, _callee6, this, [[2, 5]]);
+        }, _callee6, this, [[3, 6]]);
       }));
       function _consolidateMemory() {
         return _consolidateMemory2.apply(this, arguments);
