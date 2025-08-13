@@ -133556,7 +133556,7 @@ var ReActController = /*#__PURE__*/function () {
     key: "_consolidateMemory",
     value: (function () {
       var _consolidateMemory2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6() {
-        var recentHistory, contextForExtraction, extractionPrompt, reply, responseContent, jsonMatch, facts, _t3;
+        var recentHistory, contextForExtraction, extractionPrompt, reply, responseContent, jsonMatch, rawFacts, validationResult, _t3;
         return _regenerator().w(function (_context7) {
           while (1) switch (_context7.n) {
             case 0:
@@ -133594,8 +133594,14 @@ var ReActController = /*#__PURE__*/function () {
               console.warn("Memory Consolidation: AI did not return valid JSON.", responseContent);
               return _context7.a(2);
             case 4:
-              facts = JSON.parse(jsonMatch[0]);
-              this.memoryManager.addSemanticFacts(facts); // Fire-and-forget
+              rawFacts = JSON.parse(jsonMatch[0]);
+              validationResult = FactSchema.safeParse(rawFacts);
+              if (validationResult.success) {
+                // Use the validated and typed data
+                this.memoryManager.addSemanticFacts(validationResult.data); // Fire-and-forget
+              } else {
+                console.warn("Memory Consolidation: AI response failed schema validation.", validationResult.error.flatten());
+              }
               _context7.n = 6;
               break;
             case 5:
