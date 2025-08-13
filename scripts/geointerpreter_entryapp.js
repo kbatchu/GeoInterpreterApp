@@ -127629,7 +127629,7 @@ var MemoryManager = /*#__PURE__*/function () {
     key: "addSemanticFacts",
     value: (function () {
       var _addSemanticFacts = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(facts) {
-        var entityNameToIdMap, _iterator, _step, entity, entityId, selectQuery, selectResult, insertQuery, insertResult, _i, _Object$entries, _Object$entries$_i, key, value, attrQuery, geoQuery, _iterator2, _step2, rel, sourceId, targetId, relQuery, _t4, _t5, _t6;
+        var entityNameToIdMap, _iterator, _step, entity, entityId, selectQuery, selectResult, insertQuery, insertResult, _i, _Object$entries, _Object$entries$_i, key, value, attrQuery, escapedGeometry, geoQuery, _iterator2, _step2, rel, sourceId, targetId, relQuery, _t4, _t5, _t6;
         return _regenerator().w(function (_context4) {
           while (1) switch (_context4.n) {
             case 0:
@@ -127717,9 +127717,11 @@ var MemoryManager = /*#__PURE__*/function () {
                 _context4.n = 14;
                 break;
               }
-              geoQuery = "\n              INSERT INTO geospatial_attributes (geo_id, entity_id, geometry)\n              VALUES (uuid(), ?, ST_GeomFromText(?))\n              ON CONFLICT (entity_id)\n              DO UPDATE SET geometry = excluded.geometry;\n            ";
+              // WKT strings don't typically have single quotes, but we escape them for safety.
+              escapedGeometry = entity.geometry.replace(/'/g, "''");
+              geoQuery = "\n              INSERT INTO geospatial_attributes (geo_id, entity_id, geometry)\n              VALUES (uuid(), '".concat(entityId, "', ST_GeomFromText('").concat(escapedGeometry, "'))\n              ON CONFLICT (entity_id)\n              DO UPDATE SET geometry = excluded.geometry;\n            "); // Execute the query without parameters, as all values are now safely part of the query string.
               _context4.n = 14;
-              return this.db.query(geoQuery, [entityId, entity.geometry]);
+              return this.db.query(geoQuery);
             case 14:
               _context4.n = 6;
               break;
