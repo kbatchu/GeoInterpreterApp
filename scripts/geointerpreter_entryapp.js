@@ -131921,7 +131921,7 @@ var MemoryManager = /*#__PURE__*/function () {
     key: "addEpisodicMemory",
     value: (function () {
       var _addEpisodicMemory = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(turnData) {
-        var session_id, turn, speaker, content, escapedContent, embedding, embeddingString, query, _t2;
+        var session_id, turn, speaker, content, embedding, insertQuery, _t2;
         return _regenerator().w(function (_context2) {
           while (1) switch (_context2.n) {
             case 0:
@@ -131940,18 +131940,15 @@ var MemoryManager = /*#__PURE__*/function () {
               }
               return _context2.a(2);
             case 2:
-              // To prevent SQL injection, we must escape single quotes in the content string.
-              escapedContent = content.replace(/'/g, "''"); // 1. Generate embedding for the content.
               _context2.n = 3;
               return this.embeddingManager.generateEmbedding(content);
             case 3:
               embedding = _context2.v;
-              embeddingString = JSON.stringify(Array.from(embedding)); // 2. Prepare the INSERT statement by interpolating all values directly.
-              // This avoids a driver quirk with mixed parameter types (placeholders and injected values).
-              // The content is escaped to prevent SQL injection.
-              query = "\n        INSERT INTO conversation_chunks (chunk_id, session_id, turn, speaker, content, embedding)\n        VALUES (uuid(), '".concat(session_id, "', ").concat(turn, ", '").concat(speaker, "', '").concat(escapedContent, "', CAST('").concat(embeddingString, "' AS FLOAT[384]));\n      "); // Execute the query without parameters, as all values are now part of the query string.
+              // 2. Use a parameterized query to safely insert data.
+              // The driver handles escaping and type conversion.
+              insertQuery = "\n        INSERT INTO conversation_chunks (chunk_id, session_id, turn, speaker, content, embedding)\n        VALUES (uuid(), ?, ?, ?, ?, ?);\n      "; // The DuckDB WASM driver can handle the array of floats for the embedding parameter.
               _context2.n = 4;
-              return this.db.query(query);
+              return this.db.send(insertQuery, [session_id, turn, speaker, content, embedding]);
             case 4:
               console.log("MemoryManager: Added episodic memory for turn ".concat(turn, " by ").concat(speaker, "."));
               _context2.n = 6;
@@ -131988,8 +131985,7 @@ var MemoryManager = /*#__PURE__*/function () {
       var _retrieveEpisodicMemory = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(queryText, sessionId) {
         var topK,
           queryEmbedding,
-          queryEmbeddingString,
-          query,
+          selectQuery,
           results,
           _args3 = arguments,
           _t3;
@@ -132015,13 +132011,10 @@ var MemoryManager = /*#__PURE__*/function () {
               return this.embeddingManager.generateEmbedding(queryText);
             case 4:
               queryEmbedding = _context3.v;
-              queryEmbeddingString = JSON.stringify(Array.from(queryEmbedding)); // 2. Prepare the SQL query for vector similarity search.
-              // All dynamic values are interpolated directly into the query string.
-              // This is safe as sessionId is a UUID and topK is a number, and it avoids
-              // a driver quirk with mixed parameter types.
-              query = "\n        SELECT\n            content,\n            speaker,\n            turn,\n            array_cosine_distance(embedding, CAST('".concat(queryEmbeddingString, "' AS FLOAT[384])) AS distance\n        FROM\n            conversation_chunks\n        WHERE\n            session_id = '").concat(sessionId, "'\n        ORDER BY\n            distance ASC\n        LIMIT ").concat(topK, ";\n      "); // 3. Execute the query without parameters.
+              // 2. Prepare the SQL query for vector similarity search.
+              selectQuery = "\n        SELECT\n            content,\n            speaker,\n            turn,\n            array_cosine_distance(embedding, ?) AS distance\n        FROM\n            conversation_chunks\n        WHERE\n            session_id = ?\n        ORDER BY\n            distance ASC\n        LIMIT ?;\n      "; // 3. Execute the parameterized query.
               _context3.n = 5;
-              return this.db.query(query);
+              return this.db.send(selectQuery, [queryEmbedding, sessionId, topK]);
             case 5:
               results = _context3.v;
               console.log("MemoryManager: Retrieved ".concat(results.numRows, " relevant episodic memories for query: \"").concat(queryText, "\""));
@@ -132056,7 +132049,7 @@ var MemoryManager = /*#__PURE__*/function () {
     key: "addSemanticFacts",
     value: (function () {
       var _addSemanticFacts = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(facts) {
-        var _iterator, _step, entity, existingData, updatedData, entityNameToIdMap, _iterator2, _step2, _entity, entityId, selectQuery, selectResult, insertQuery, insertResult, _i, _Object$entries, _Object$entries$_i, key, value, attrQuery, escapedGeometry, geoQuery, _iterator3, _step3, rel, sourceId, targetId, relQuery, _t4, _t5, _t6;
+        var _iterator, _step, entity, existingData, updatedData, entityNameToIdMap, _iterator2, _step2, _entity, entityId, selectQuery, selectResult, insertQuery, insertResult, _i, _Object$entries, _Object$entries$_i, key, value, attrQuery, geoQuery, _iterator3, _step3, rel, sourceId, targetId, relQuery, _t4, _t5, _t6;
         return _regenerator().w(function (_context4) {
           while (1) switch (_context4.n) {
             case 0:
@@ -132132,7 +132125,7 @@ var MemoryManager = /*#__PURE__*/function () {
               entityId = void 0;
               selectQuery = "SELECT entity_id FROM entities WHERE entity_name = ? AND entity_type = ?;";
               _context4.n = 8;
-              return this.db.query(selectQuery, [_entity.name, _entity.type]);
+              return this.db.send(selectQuery, [_entity.name, _entity.type]);
             case 8:
               selectResult = _context4.v;
               if (!(selectResult.numRows > 0)) {
@@ -132147,7 +132140,7 @@ var MemoryManager = /*#__PURE__*/function () {
               // Entity does not exist, insert it and get the new ID
               insertQuery = "\n              INSERT INTO entities (entity_id, entity_name, entity_type)\n              VALUES (uuid(), ?, ?)\n              RETURNING entity_id;\n            ";
               _context4.n = 10;
-              return this.db.query(insertQuery, [_entity.name, _entity.type]);
+              return this.db.send(insertQuery, [_entity.name, _entity.type]);
             case 10:
               insertResult = _context4.v;
               entityId = insertResult.get(0).toJSON().entity_id;
@@ -132168,7 +132161,7 @@ var MemoryManager = /*#__PURE__*/function () {
               _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2), key = _Object$entries$_i[0], value = _Object$entries$_i[1];
               attrQuery = "\n                INSERT INTO entity_attributes (attribute_id, entity_id, attribute_key, attribute_value)\n                VALUES (uuid(), ?, ?, ?)\n                ON CONFLICT (entity_id, attribute_key)\n                DO UPDATE SET attribute_value = excluded.attribute_value;\n              ";
               _context4.n = 13;
-              return this.db.query(attrQuery, [entityId, key, String(value)]);
+              return this.db.send(attrQuery, [entityId, key, String(value)]);
             case 13:
               _i++;
               _context4.n = 12;
@@ -132178,11 +132171,9 @@ var MemoryManager = /*#__PURE__*/function () {
                 _context4.n = 15;
                 break;
               }
-              // WKT strings don't typically have single quotes, but we escape them for safety.
-              escapedGeometry = _entity.geometry.replace(/'/g, "''");
-              geoQuery = "\n              INSERT INTO geospatial_attributes (geo_id, entity_id, geometry)\n              VALUES (uuid(), '".concat(entityId, "', ST_GeomFromText('").concat(escapedGeometry, "'))\n              ON CONFLICT (entity_id)\n              DO UPDATE SET geometry = excluded.geometry;\n            "); // Execute the query without parameters, as all values are now safely part of the query string.
+              geoQuery = "\n              INSERT INTO geospatial_attributes (geo_id, entity_id, geometry)\n              VALUES (uuid(), ?, ST_GeomFromText(?))\n              ON CONFLICT (entity_id)\n              DO UPDATE SET geometry = excluded.geometry;\n            ";
               _context4.n = 15;
-              return this.db.query(geoQuery);
+              return this.db.send(geoQuery, [entityId, _entity.geometry]);
             case 15:
               _context4.n = 6;
               break;
@@ -132219,7 +132210,7 @@ var MemoryManager = /*#__PURE__*/function () {
               }
               relQuery = "\n              INSERT INTO relationships (relationship_id, source_entity_id, target_entity_id, relationship_type)\n              VALUES (uuid(), ?, ?, ?)\n              ON CONFLICT (source_entity_id, target_entity_id, relationship_type)\n              DO NOTHING;\n            ";
               _context4.n = 22;
-              return this.db.query(relQuery, [sourceId, targetId, rel.type]);
+              return this.db.send(relQuery, [sourceId, targetId, rel.type]);
             case 22:
               _context4.n = 24;
               break;
