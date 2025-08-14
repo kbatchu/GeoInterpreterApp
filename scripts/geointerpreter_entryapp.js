@@ -132303,7 +132303,7 @@ var MemoryManager = /*#__PURE__*/function () {
               facts = {};
               _context6.p = 3;
               // Query 1: Get entities, their attributes, and geometries
-              entityDetailsQuery = "\n        SELECT\n          e.entity_name,\n          e.entity_type,\n          a.attribute_key,\n          a.attribute_value,\n          ST_AsText(g.geometry) AS geometry_wkt\n        FROM entities e\n        LEFT JOIN entity_attributes a ON e.entity_id = a.entity_id\n        LEFT JOIN geospatial_attributes g ON e.entity_id = g.entity_id\n        WHERE e.entity_name IN (SELECT unnest(?) AS name);\n    "; // DuckDB's `unnest` function can turn an array parameter into a list for the IN clause.
+              entityDetailsQuery = "\n        SELECT\n          e.entity_name,\n          e.entity_type,\n          a.attribute_key,\n          a.attribute_value,\n          ST_AsText(g.geometry) AS geometry_wkt\n        FROM entities e\n        LEFT JOIN entity_attributes a ON e.entity_id = a.entity_id\n        LEFT JOIN geospatial_attributes g ON e.entity_id = g.entity_id\n        WHERE e.entity_name IN (SELECT unnest(?) AS name);\n      "; // DuckDB's `unnest` function can turn an array parameter into a list for the IN clause.
               _context6.n = 4;
               return this.db.query(entityDetailsQuery, entityNames);
             case 4:
