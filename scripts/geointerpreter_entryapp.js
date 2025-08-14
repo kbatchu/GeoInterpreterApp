@@ -131937,7 +131937,7 @@ var MemoryManager = /*#__PURE__*/function () {
             case 4:
               stmt = _context2.v;
               _context2.n = 5;
-              return stmt.query(session_id, turn, speaker, content, embedding);
+              return stmt.query(session_id, turn, speaker, content, new Float32Array(embedding));
             case 5:
               console.log("MemoryManager: Added episodic memory for turn ".concat(turn, " by ").concat(speaker, "."));
               _context2.n = 7;
@@ -132016,7 +132016,7 @@ var MemoryManager = /*#__PURE__*/function () {
             case 5:
               stmt = _context3.v;
               _context3.n = 6;
-              return stmt.query(queryEmbedding, sessionId, topK);
+              return stmt.query(new Float32Array(queryEmbedding), sessionId, topK);
             case 6:
               results = _context3.v;
               console.log("MemoryManager: Retrieved ".concat(results.numRows, " relevant episodic memories for query: \"").concat(queryText, "\""));
