@@ -131942,7 +131942,7 @@ var MemoryManager = /*#__PURE__*/function () {
               // 2. Use a parameterized query to prevent SQL injection.
               query = "\n        INSERT INTO conversation_chunks (chunk_id, session_id, turn, speaker, content, embedding)\n        VALUES (uuid(), ?, ?, ?, ?, ?);\n      "; // The DuckDB-WASM driver can handle various data types as parameters.
               _context2.n = 4;
-              return this.db.query(query, [session_id, turn, speaker, content, embedding]);
+              return this.db.query(query, session_id, turn, speaker, content, embedding);
             case 4:
               console.log("MemoryManager: Added episodic memory for turn ".concat(turn, " by ").concat(speaker, "."));
               _context2.n = 6;
