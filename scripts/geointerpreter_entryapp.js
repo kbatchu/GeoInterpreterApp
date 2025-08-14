@@ -132008,7 +132008,7 @@ var MemoryManager = /*#__PURE__*/function () {
               // 2. Prepare the SQL query for vector similarity search.
               query = "\n        SELECT\n            content,\n            speaker,\n            turn,\n            array_cosine_distance(embedding, ?) AS distance\n        FROM\n            conversation_chunks\n        WHERE\n            session_id = ?\n        ORDER BY\n            distance ASC\n        LIMIT ?;\n      "; // 3. Execute the query with parameters.
               _context3.n = 5;
-              return this.db.query(query, [queryEmbedding, sessionId, topK]);
+              return this.db.query(query, queryEmbedding, sessionId, topK);
             case 5:
               results = _context3.v;
               console.log("MemoryManager: Retrieved ".concat(results.numRows, " relevant episodic memories for query: \"").concat(queryText, "\""));
@@ -132087,7 +132087,7 @@ var MemoryManager = /*#__PURE__*/function () {
     key: "addSemanticFacts",
     value: (function () {
       var _addSemanticFacts = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(facts) {
-        var entityNameToIdMap, _iterator, _step, entity, entityId, _i, _Object$entries, _Object$entries$_i, key, value, attrQuery, geoQuery, _iterator2, _step2, rel, sourceId, targetId, relQuery, _t4, _t5, _t6;
+        var entityNameToIdMap, entityNameToTypeMap, _iterator, _step, entity, entityId, _i, _Object$entries, _Object$entries$_i, key, value, attrQuery, geoQuery, _iterator2, _step2, rel, sourceType, targetType, sourceId, targetId, relQuery, _t4, _t5, _t6;
         return _regenerator().w(function (_context5) {
           while (1) switch (_context5.n) {
             case 0:
@@ -132110,7 +132110,8 @@ var MemoryManager = /*#__PURE__*/function () {
               _context5.n = 4;
               return this.db.query("BEGIN TRANSACTION;");
             case 4:
-              entityNameToIdMap = new Map(); // 1. Process Entities and their Attributes
+              entityNameToIdMap = new Map();
+              entityNameToTypeMap = new Map(); // 1. Process Entities and their Attributes
               if (!facts.entities) {
                 _context5.n = 16;
                 break;
@@ -132136,6 +132137,7 @@ var MemoryManager = /*#__PURE__*/function () {
             case 8:
               entityId = _context5.v;
               entityNameToIdMap.set(entity.name, entityId);
+              entityNameToTypeMap.set(entity.name, entity.type);
 
               // Process simple attributes
               if (!entity.attributes) {
@@ -132180,7 +132182,7 @@ var MemoryManager = /*#__PURE__*/function () {
               return _context5.f(15);
             case 16:
               if (!facts.relationships) {
-                _context5.n = 28;
+                _context5.n = 29;
                 break;
               }
               _iterator2 = _createForOfIteratorHelper(facts.relationships);
@@ -132188,72 +132190,82 @@ var MemoryManager = /*#__PURE__*/function () {
               _iterator2.s();
             case 18:
               if ((_step2 = _iterator2.n()).done) {
-                _context5.n = 25;
+                _context5.n = 26;
                 break;
               }
               rel = _step2.value;
-              if (!(!rel.source || !rel.source_type || !rel.target || !rel.target_type || !rel.type)) {
+              if (!(!rel.source || !rel.target || !rel.type)) {
                 _context5.n = 19;
                 break;
               }
               console.warn("MemoryManager: Skipping relationship with missing fields.", rel);
-              return _context5.a(3, 24);
+              return _context5.a(3, 25);
             case 19:
-              _context5.n = 20;
-              return this._getOrCreateEntityId(rel.source, rel.source_type);
+              // --- FIX: Look up entity types from the context of this transaction ---
+              sourceType = entityNameToTypeMap.get(rel.source);
+              targetType = entityNameToTypeMap.get(rel.target);
+              if (!(!sourceType || !targetType)) {
+                _context5.n = 20;
+                break;
+              }
+              console.warn("MemoryManager: Skipping relationship due to missing entity definition for source or target. Source: '".concat(rel.source, "', Target: '").concat(rel.target, "'"));
+              return _context5.a(3, 25);
             case 20:
-              sourceId = _context5.v;
               _context5.n = 21;
-              return this._getOrCreateEntityId(rel.target, rel.target_type);
+              return this._getOrCreateEntityId(rel.source, sourceType);
             case 21:
+              sourceId = _context5.v;
+              _context5.n = 22;
+              return this._getOrCreateEntityId(rel.target, targetType);
+            case 22:
               targetId = _context5.v;
               if (!(sourceId && targetId)) {
-                _context5.n = 23;
+                _context5.n = 24;
                 break;
               }
               relQuery = "\n              INSERT INTO relationships (relationship_id, source_entity_id, target_entity_id, relationship_type)\n              VALUES (uuid(), ?, ?, ?)\n              ON CONFLICT (source_entity_id, target_entity_id, relationship_type)\n              DO NOTHING;\n            ";
-              _context5.n = 22;
+              _context5.n = 23;
               return this.db.query(relQuery, [sourceId, targetId, rel.type]);
-            case 22:
-              _context5.n = 24;
-              break;
             case 23:
+              _context5.n = 25;
+              break;
+            case 24:
               // This case should be less frequent now, but kept for safety.
               console.warn("MemoryManager: Could not create relationship due to missing entity ID. Source: '".concat(rel.source, "', Target: '").concat(rel.target, "'"));
-            case 24:
+            case 25:
               _context5.n = 18;
               break;
-            case 25:
-              _context5.n = 27;
-              break;
             case 26:
-              _context5.p = 26;
-              _t5 = _context5.v;
-              _iterator2.e(_t5);
+              _context5.n = 28;
+              break;
             case 27:
               _context5.p = 27;
-              _iterator2.f();
-              return _context5.f(27);
+              _t5 = _context5.v;
+              _iterator2.e(_t5);
             case 28:
-              _context5.n = 29;
-              return this.db.query("COMMIT;");
+              _context5.p = 28;
+              _iterator2.f();
+              return _context5.f(28);
             case 29:
-              console.log("MemoryManager: Semantic facts successfully consolidated.");
-              _context5.n = 31;
-              break;
+              _context5.n = 30;
+              return this.db.query("COMMIT;");
             case 30:
-              _context5.p = 30;
+              console.log("MemoryManager: Semantic facts successfully consolidated.");
+              _context5.n = 32;
+              break;
+            case 31:
+              _context5.p = 31;
               _t6 = _context5.v;
               console.error("MemoryManager: Failed to add semantic facts. Rolling back transaction.", {
                 facts: facts,
                 error: _t6
               });
-              _context5.n = 31;
+              _context5.n = 32;
               return this.db.query("ROLLBACK;");
-            case 31:
+            case 32:
               return _context5.a(2);
           }
-        }, _callee5, this, [[17, 26, 27, 28], [5, 14, 15, 16], [3, 30]]);
+        }, _callee5, this, [[17, 27, 28, 29], [5, 14, 15, 16], [3, 31]]);
       }));
       function addSemanticFacts(_x6) {
         return _addSemanticFacts.apply(this, arguments);
