@@ -131931,13 +131931,13 @@ var MemoryManager = /*#__PURE__*/function () {
               return this.embeddingManager.generateEmbedding(content);
             case 3:
               embedding = _context2.v;
-              query = "\n        INSERT INTO conversation_chunks (chunk_id, session_id, turn, speaker, content, embedding)\n        VALUES (uuid(), ?, ?, ?, ?, ?);\n      ";
+              query = "\n        INSERT INTO conversation_chunks (chunk_id, session_id, turn, speaker, content, embedding)\n        VALUES (uuid(), ?, ?, ?, ?, ?::FLOAT[384]);\n      ";
               _context2.n = 4;
               return this.db.prepare(query);
             case 4:
               stmt = _context2.v;
               _context2.n = 5;
-              return stmt.query(session_id, turn, speaker, content, new Float32Array(embedding));
+              return stmt.query(session_id, turn, speaker, content, embedding);
             case 5:
               console.log("MemoryManager: Added episodic memory for turn ".concat(turn, " by ").concat(speaker, "."));
               _context2.n = 7;
@@ -132010,13 +132010,13 @@ var MemoryManager = /*#__PURE__*/function () {
               return this.embeddingManager.generateEmbedding(queryText);
             case 4:
               queryEmbedding = _context3.v;
-              query = "\n        SELECT content, speaker, turn, array_cosine_distance(embedding, ?) AS distance\n        FROM conversation_chunks\n        WHERE session_id = ?\n        ORDER BY distance ASC\n        LIMIT ?;\n      ";
+              query = "\n        SELECT content, speaker, turn, array_cosine_distance(embedding, ?::FLOAT[384]) AS distance\n        FROM conversation_chunks\n        WHERE session_id = ?\n        ORDER BY distance ASC\n        LIMIT ?;\n      ";
               _context3.n = 5;
               return this.db.prepare(query);
             case 5:
               stmt = _context3.v;
               _context3.n = 6;
-              return stmt.query(new Float32Array(queryEmbedding), sessionId, topK);
+              return stmt.query(queryEmbedding, sessionId, topK);
             case 6:
               results = _context3.v;
               console.log("MemoryManager: Retrieved ".concat(results.numRows, " relevant episodic memories for query: \"").concat(queryText, "\""));
