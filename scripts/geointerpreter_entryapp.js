@@ -131940,9 +131940,9 @@ var MemoryManager = /*#__PURE__*/function () {
             case 3:
               embedding = _context2.v;
               // 2. Use a parameterized query to prevent SQL injection.
-              query = "\n        INSERT INTO conversation_chunks (chunk_id, session_id, turn, speaker, content, embedding)\n        VALUES (uuid(), ?, ?, ?, ?, ?);\n      "; // The DuckDB-WASM driver can handle various data types as parameters.
+              query = "\n        INSERT INTO conversation_chunks (chunk_id, session_id, turn, speaker, content, embedding)\n        VALUES (uuid(), ?, ?, ?, ?, ?);\n      "; // The DuckDB-WASM driver expects parameters as an array.
               _context2.n = 4;
-              return this.db.query(query, session_id, turn, speaker, content, embedding);
+              return this.db.query(query, [session_id, turn, speaker, content, embedding]);
             case 4:
               console.log("MemoryManager: Added episodic memory for turn ".concat(turn, " by ").concat(speaker, "."));
               _context2.n = 6;
@@ -132008,7 +132008,7 @@ var MemoryManager = /*#__PURE__*/function () {
               // 2. Prepare the SQL query for vector similarity search.
               query = "\n        SELECT\n            content,\n            speaker,\n            turn,\n            array_cosine_distance(embedding, ?) AS distance\n        FROM\n            conversation_chunks\n        WHERE\n            session_id = ?\n        ORDER BY\n            distance ASC\n        LIMIT ?;\n      "; // 3. Execute the query with parameters.
               _context3.n = 5;
-              return this.db.query(query, queryEmbedding, sessionId, topK);
+              return this.db.query(query, [queryEmbedding, sessionId, topK]);
             case 5:
               results = _context3.v;
               console.log("MemoryManager: Retrieved ".concat(results.numRows, " relevant episodic memories for query: \"").concat(queryText, "\""));
@@ -132054,7 +132054,7 @@ var MemoryManager = /*#__PURE__*/function () {
               // First, try to select the existing entity.
               selectQuery = "SELECT entity_id FROM entities WHERE entity_name = ? AND entity_type = ?";
               _context4.n = 1;
-              return this.db.query(selectQuery, name, type);
+              return this.db.query(selectQuery, [name, type]);
             case 1:
               selectResult = _context4.v;
               if (!(selectResult.numRows > 0)) {
@@ -132066,7 +132066,7 @@ var MemoryManager = /*#__PURE__*/function () {
               // Entity does not exist, insert it and return the new ID.
               insertQuery = "\n    INSERT INTO entities (entity_id, entity_name, entity_type)\n    VALUES (uuid(), ?, ?)\n    RETURNING entity_id\n  ";
               _context4.n = 3;
-              return this.db.query(insertQuery, name, type);
+              return this.db.query(insertQuery, [name, type]);
             case 3:
               insertResult = _context4.v;
               return _context4.a(2, insertResult.get(0).toJSON().entity_id);
@@ -132153,7 +132153,7 @@ var MemoryManager = /*#__PURE__*/function () {
               _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2), key = _Object$entries$_i[0], value = _Object$entries$_i[1];
               attrQuery = "\n                INSERT INTO entity_attributes (attribute_id, entity_id, attribute_key, attribute_value)\n                VALUES (uuid(), ?, ?, ?)\n                ON CONFLICT (entity_id, attribute_key)\n                DO UPDATE SET attribute_value = excluded.attribute_value;\n              ";
               _context5.n = 10;
-              return this.db.query(attrQuery, entityId, key, String(value));
+              return this.db.query(attrQuery, [entityId, key, String(value)]);
             case 10:
               _i++;
               _context5.n = 9;
@@ -132165,7 +132165,7 @@ var MemoryManager = /*#__PURE__*/function () {
               }
               geoQuery = "\n              INSERT INTO geospatial_attributes (geo_id, entity_id, geometry)\n              VALUES (uuid(), ?, ST_GeomFromText(?))\n              ON CONFLICT (entity_id)\n              DO UPDATE SET geometry = excluded.geometry;\n            ";
               _context5.n = 12;
-              return this.db.query(geoQuery, entityId, entity.geometry);
+              return this.db.query(geoQuery, [entityId, entity.geometry]);
             case 12:
               _context5.n = 6;
               break;
@@ -132225,7 +132225,7 @@ var MemoryManager = /*#__PURE__*/function () {
               }
               relQuery = "\n              INSERT INTO relationships (relationship_id, source_entity_id, target_entity_id, relationship_type)\n              VALUES (uuid(), ?, ?, ?)\n              ON CONFLICT (source_entity_id, target_entity_id, relationship_type)\n              DO NOTHING;\n            ";
               _context5.n = 23;
-              return this.db.query(relQuery, sourceId, targetId, rel.type);
+              return this.db.query(relQuery, [sourceId, targetId, rel.type]);
             case 23:
               _context5.n = 25;
               break;
@@ -132305,7 +132305,7 @@ var MemoryManager = /*#__PURE__*/function () {
               // Query 1: Get entities, their attributes, and geometries
               entityDetailsQuery = "\n        SELECT\n          e.entity_name,\n          e.entity_type,\n          a.attribute_key,\n          a.attribute_value,\n          ST_AsText(g.geometry) AS geometry_wkt\n        FROM entities e\n        LEFT JOIN entity_attributes a ON e.entity_id = a.entity_id\n        LEFT JOIN geospatial_attributes g ON e.entity_id = g.entity_id\n        WHERE e.entity_name IN (SELECT unnest(?) AS name);\n    "; // DuckDB's `unnest` function can turn an array parameter into a list for the IN clause.
               _context6.n = 4;
-              return this.db.query(entityDetailsQuery, entityNames);
+              return this.db.query(entityDetailsQuery, [entityNames]);
             case 4:
               entityDetailsResult = _context6.v;
               entityRows = entityDetailsResult.toArray().map(function (row) {
@@ -132346,7 +132346,7 @@ var MemoryManager = /*#__PURE__*/function () {
               }
               relationshipsQuery = "\n        SELECT\n          r.relationship_type,\n          source.entity_name as source_name,\n          target.entity_name as target_name\n        FROM relationships r\n        JOIN entities source ON r.source_entity_id = source.entity_id\n        JOIN entities target ON r.target_entity_id = target.entity_id\n        WHERE\n          source.entity_name IN (SELECT unnest(?) AS name) OR\n          target.entity_name IN (SELECT unnest(?) AS name);\n      ";
               _context6.n = 6;
-              return this.db.query(relationshipsQuery, entityNames, entityNames);
+              return this.db.query(relationshipsQuery, [entityNames, entityNames]);
             case 6:
               relationshipsResult = _context6.v;
               relationshipRows = relationshipsResult.toArray().map(function (row) {
