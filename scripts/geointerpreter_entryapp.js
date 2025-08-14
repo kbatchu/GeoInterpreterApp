@@ -131854,19 +131854,19 @@ var MemoryManager = /*#__PURE__*/function () {
 
               // Layer 2: Semantic/Factual Layer (Geospatial Knowledge Graph)
               _context.n = 1;
-              return this.db.query("\n        CREATE TABLE IF NOT EXISTS entities (\n            entity_id UUID PRIMARY KEY,\n            entity_name VARCHAR,\n            entity_type VARCHAR, -- e.g., 'Restaurant', 'Address', 'User', 'GeographicRegion',\n            UNIQUE(entity_name, entity_type),\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
+              return this.db.query("\n        CREATE TABLE IF NOT EXISTS entities (\n            entity_id UUID PRIMARY KEY,\n            entity_name VARCHAR,\n            entity_type VARCHAR, -- e.g., 'Restaurant', 'Address', 'User', 'GeographicRegion',\n            UNIQUE(entity_name, entity_type),\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );\n      ");
             case 1:
               _context.n = 2;
-              return this.db.query("\n        CREATE TABLE IF NOT EXISTS entity_attributes (\n            attribute_id UUID PRIMARY KEY,\n            entity_id UUID REFERENCES entities(entity_id),\n            attribute_key VARCHAR,\n            attribute_value VARCHAR,\n            UNIQUE(entity_id, attribute_key),\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
+              return this.db.query("\n        CREATE TABLE IF NOT EXISTS entity_attributes (\n            attribute_id UUID PRIMARY KEY,\n            entity_id UUID REFERENCES entities(entity_id),\n            attribute_key VARCHAR,\n            attribute_value VARCHAR,\n            UNIQUE(entity_id, attribute_key),\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );\n      ");
             case 2:
               _context.n = 3;
-              return this.db.query("\n        CREATE TABLE IF NOT EXISTS geospatial_attributes (\n            geo_id UUID PRIMARY KEY,\n            entity_id UUID REFERENCES entities(entity_id) UNIQUE,\n            geometry GEOMETRY, -- Uses the GEOMETRY type from the spatial extension\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
+              return this.db.query("\n        CREATE TABLE IF NOT EXISTS geospatial_attributes (\n            geo_id UUID PRIMARY KEY,\n            entity_id UUID REFERENCES entities(entity_id) UNIQUE,\n            geometry GEOMETRY, -- Uses the GEOMETRY type from the spatial extension\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );\n      ");
             case 3:
               _context.n = 4;
-              return this.db.query("\n        CREATE TABLE IF NOT EXISTS relationships (\n            relationship_id UUID PRIMARY KEY,\n            source_entity_id UUID REFERENCES entities(entity_id),\n            target_entity_id UUID REFERENCES entities(entity_id),\n            relationship_type VARCHAR, -- e.g., 'has_location', 'near', 'serves_cuisine',\n            UNIQUE(source_entity_id, target_entity_id, relationship_type),\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
+              return this.db.query("\n        CREATE TABLE IF NOT EXISTS relationships (\n            relationship_id UUID PRIMARY KEY,\n            source_entity_id UUID REFERENCES entities(entity_id),\n            target_entity_id UUID REFERENCES entities(entity_id),\n            relationship_type VARCHAR, -- e.g., 'has_location', 'near', 'serves_cuisine',\n            UNIQUE(source_entity_id, target_entity_id, relationship_type),\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );\n      ");
             case 4:
               _context.n = 5;
-              return this.db.query("\n        CREATE TABLE IF NOT EXISTS conversation_chunks (\n            chunk_id UUID PRIMARY KEY,\n            session_id VARCHAR,\n            turn INTEGER,\n            speaker VARCHAR, -- 'user' or 'agent'\n            content TEXT,\n            embedding FLOAT[384], -- DuckDB requires vector dimensions\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );");
+              return this.db.query("\n        CREATE TABLE IF NOT EXISTS conversation_chunks (\n            chunk_id UUID PRIMARY KEY,\n            session_id VARCHAR,\n            turn INTEGER,\n            speaker VARCHAR, -- 'user' or 'agent'\n            content TEXT,\n            embedding FLOAT[384], -- DuckDB requires vector dimensions\n            created_at TIMESTAMP DEFAULT current_timestamp\n        );\n      ");
             case 5:
               // --- PERFORMANCE FIX: Add indexes to memory tables ---
               // These indexes are crucial for fast retrieval as the memory grows.
@@ -132052,7 +132052,7 @@ var MemoryManager = /*#__PURE__*/function () {
           while (1) switch (_context4.n) {
             case 0:
               // First, try to select the existing entity.
-              selectQuery = "SELECT entity_id FROM entities WHERE entity_name = ? AND entity_type = ?;";
+              selectQuery = "SELECT entity_id FROM entities WHERE entity_name = ? AND entity_type = ?";
               _context4.n = 1;
               return this.db.query(selectQuery, [name, type]);
             case 1:
@@ -132064,7 +132064,7 @@ var MemoryManager = /*#__PURE__*/function () {
               return _context4.a(2, selectResult.get(0).toJSON().entity_id);
             case 2:
               // Entity does not exist, insert it and return the new ID.
-              insertQuery = "\n      INSERT INTO entities (entity_id, entity_name, entity_type)\n      VALUES (uuid(), ?, ?)\n      RETURNING entity_id;\n    ";
+              insertQuery = "\n    INSERT INTO entities (entity_id, entity_name, entity_type)\n    VALUES (uuid(), ?, ?)\n    RETURNING entity_id\n  ";
               _context4.n = 3;
               return this.db.query(insertQuery, [name, type]);
             case 3:
@@ -132108,7 +132108,7 @@ var MemoryManager = /*#__PURE__*/function () {
               console.log("MemoryManager: Consolidating semantic facts into knowledge graph...", facts);
               _context5.p = 3;
               _context5.n = 4;
-              return this.db.query('BEGIN TRANSACTION;');
+              return this.db.query("BEGIN TRANSACTION;");
             case 4:
               entityNameToIdMap = new Map(); // 1. Process Entities and their Attributes
               if (!facts.entities) {
@@ -132180,7 +132180,7 @@ var MemoryManager = /*#__PURE__*/function () {
               return _context5.f(15);
             case 16:
               if (!facts.relationships) {
-                _context5.n = 25;
+                _context5.n = 28;
                 break;
               }
               _iterator2 = _createForOfIteratorHelper(facts.relationships);
@@ -132188,58 +132188,72 @@ var MemoryManager = /*#__PURE__*/function () {
               _iterator2.s();
             case 18:
               if ((_step2 = _iterator2.n()).done) {
-                _context5.n = 22;
+                _context5.n = 25;
                 break;
               }
               rel = _step2.value;
-              sourceId = entityNameToIdMap.get(rel.source);
-              targetId = entityNameToIdMap.get(rel.target);
+              if (!(!rel.source || !rel.source_type || !rel.target || !rel.target_type || !rel.type)) {
+                _context5.n = 19;
+                break;
+              }
+              console.warn("MemoryManager: Skipping relationship with missing fields.", rel);
+              return _context5.a(3, 24);
+            case 19:
+              _context5.n = 20;
+              return this._getOrCreateEntityId(rel.source, rel.source_type);
+            case 20:
+              sourceId = _context5.v;
+              _context5.n = 21;
+              return this._getOrCreateEntityId(rel.target, rel.target_type);
+            case 21:
+              targetId = _context5.v;
               if (!(sourceId && targetId)) {
-                _context5.n = 20;
+                _context5.n = 23;
                 break;
               }
               relQuery = "\n              INSERT INTO relationships (relationship_id, source_entity_id, target_entity_id, relationship_type)\n              VALUES (uuid(), ?, ?, ?)\n              ON CONFLICT (source_entity_id, target_entity_id, relationship_type)\n              DO NOTHING;\n            ";
-              _context5.n = 19;
+              _context5.n = 22;
               return this.db.query(relQuery, [sourceId, targetId, rel.type]);
-            case 19:
-              _context5.n = 21;
-              break;
-            case 20:
-              console.warn("MemoryManager: Could not create relationship due to missing entity. Source: '".concat(rel.source, "', Target: '").concat(rel.target, "'"));
-            case 21:
-              _context5.n = 18;
-              break;
             case 22:
               _context5.n = 24;
               break;
             case 23:
-              _context5.p = 23;
+              // This case should be less frequent now, but kept for safety.
+              console.warn("MemoryManager: Could not create relationship due to missing entity ID. Source: '".concat(rel.source, "', Target: '").concat(rel.target, "'"));
+            case 24:
+              _context5.n = 18;
+              break;
+            case 25:
+              _context5.n = 27;
+              break;
+            case 26:
+              _context5.p = 26;
               _t5 = _context5.v;
               _iterator2.e(_t5);
-            case 24:
-              _context5.p = 24;
-              _iterator2.f();
-              return _context5.f(24);
-            case 25:
-              _context5.n = 26;
-              return this.db.query('COMMIT;');
-            case 26:
-              console.log("MemoryManager: Semantic facts successfully consolidated.");
-              _context5.n = 28;
-              break;
             case 27:
               _context5.p = 27;
+              _iterator2.f();
+              return _context5.f(27);
+            case 28:
+              _context5.n = 29;
+              return this.db.query("COMMIT;");
+            case 29:
+              console.log("MemoryManager: Semantic facts successfully consolidated.");
+              _context5.n = 31;
+              break;
+            case 30:
+              _context5.p = 30;
               _t6 = _context5.v;
               console.error("MemoryManager: Failed to add semantic facts. Rolling back transaction.", {
                 facts: facts,
                 error: _t6
               });
-              _context5.n = 28;
-              return this.db.query('ROLLBACK;');
-            case 28:
+              _context5.n = 31;
+              return this.db.query("ROLLBACK;");
+            case 31:
               return _context5.a(2);
           }
-        }, _callee5, this, [[17, 23, 24, 25], [5, 14, 15, 16], [3, 27]]);
+        }, _callee5, this, [[17, 26, 27, 28], [5, 14, 15, 16], [3, 30]]);
       }));
       function addSemanticFacts(_x6) {
         return _addSemanticFacts.apply(this, arguments);
