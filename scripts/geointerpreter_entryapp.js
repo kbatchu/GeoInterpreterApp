@@ -83806,13 +83806,27 @@ var ReActController = /*#__PURE__*/function () {
         }
         var actionString = cleanResponse.substring(actionIndex + actionPrefix.length).trim();
         try {
-          var jsonStart = actionString.indexOf('{');
-          var jsonEnd = actionString.lastIndexOf('}');
-          if (jsonStart === -1 || jsonEnd === -1 || jsonEnd < jsonStart) {
-            throw new Error("No valid JSON object found in the action part.");
+          var parsedAction;
+          try {
+            // First, try to parse the string as-is. This works for well-formed JSON.
+            parsedAction = JSON.parse(actionString);
+          } catch (e) {
+            // If that fails, it might be because the JSON is embedded in a larger string
+            // with extra text at the end. Let's try to extract it.
+            var jsonStart = actionString.indexOf('{');
+            var jsonEnd = actionString.lastIndexOf('}');
+            if (jsonStart === -1 || jsonEnd === -1 || jsonEnd < jsonStart) {
+              throw new Error("No valid JSON object found in the action part.");
+            }
+            var jsonSubstring = actionString.substring(jsonStart, jsonEnd + 1);
+            parsedAction = JSON.parse(jsonSubstring);
           }
-          var jsonString = actionString.substring(jsonStart, jsonEnd + 1);
-          var parsedAction = JSON.parse(jsonString);
+
+          // The AI sometimes double-encodes the JSON by wrapping it in a string.
+          // If the parsed result is a string, we need to parse it again.
+          if (typeof parsedAction === 'string') {
+            parsedAction = JSON.parse(parsedAction);
+          }
           if (parsedAction && typeof parsedAction.name === 'string') {
             action = {
               name: parsedAction.name,
