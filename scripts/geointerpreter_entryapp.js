@@ -83868,6 +83868,8 @@ var ReActController = /*#__PURE__*/function () {
               throw new Error("Failed to double-parse action JSON: ".concat(e.message));
             }
           }
+          console.log("ReActController: Parsed action object:", parsedAction); // Added logging
+
           if (parsedAction && typeof parsedAction.name === 'string') {
             // Remap 'geocode' to 'geocode_address' as a temporary workaround for AI hallucination
             if (parsedAction.name === "geocode") {
