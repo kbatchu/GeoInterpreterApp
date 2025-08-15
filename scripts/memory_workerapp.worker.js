@@ -44388,7 +44388,7 @@ async function initializeDatabase() {
   }
 
   try {
-    const response = await fetch("./data/toolregistry.duckdb");
+    const response = await fetch("/data/toolregistry.duckdb");
     if (!response.ok)
       throw new Error(
         `Failed to fetch toolregistry.duckdb: ${response.statusText}`
