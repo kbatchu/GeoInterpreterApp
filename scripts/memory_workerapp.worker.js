@@ -44384,7 +44384,7 @@ async function initializeDatabase() {
     }
 
     try {
-        const response = await fetch("../../data/tool_registry.duckdb");
+        const response = await fetch("/data/tool_registry.duckdb");
         if (!response.ok) throw new Error(`Failed to fetch tool_registry.duckdb: ${response.statusText}`);
         const buffer = await response.arrayBuffer();
         await db.registerFileBuffer("tool_registry.duckdb", new Uint8Array(buffer));
