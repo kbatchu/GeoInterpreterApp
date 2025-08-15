@@ -83618,7 +83618,7 @@ var ReActController = /*#__PURE__*/function () {
                 systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your primary goal is to help the user by breaking down complex requests into a logical, step-by-step plan.\n\n## CRITICAL: YOU ARE IN PLANNING MODE\nYou MUST create a plan using the create_plan tool. Do NOT attempt to execute any other actions.\n\n## RESPONSE FORMAT\nYou MUST respond in the following format, with no other text before or after. Your entire response must start with \"Thought:\".\n\nThought: [Your reasoning for the plan you are about to create.]\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"...\", \"step_type\": \"...\" }, ... ] } }\n\n## PLAN REQUIREMENTS\n- Each step in the plan should be a discrete, self-contained analytical task.\n- For each step, you must provide a 'step_type' from this exact list: [geospatial, aggregation, filter, data_retrieval, calculation, visualization].\n\n## CRITICAL PLANNING INSTRUCTIONS\n- **Prioritize User-Provided Information:** If the user's query contains specific details like a street address, a location name, or a dataset, your plan MUST start by using that information.\n- **Entity Integrity:** Do not invent information. If you need the address of a place you found, your plan must include a step to find that address. Do not assume it's the same as another address mentioned in the conversation.\n- **Example:** If a street address is given, the first step of your plan MUST be to convert this address into geographic coordinates. After getting the coordinates, I can search for the restaurants.\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"Geocode the address '1600 Pennsylvania Avenue NW, Washington, DC'\", \"step_type\": \"geospatial\" }, { \"step\": 2, \"description\": \"Search for Indian restaurants near the geocoded location\", \"step_type\": \"data_retrieval\" } ] } }";
                 userPrompt = "You have access to a single tool to help you. Use this tool to output your plan as a JSON array of steps.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(planningTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is the full conversation history for context:\n<CONVERSATION_HISTORY>\n").concat(formattedHistory || "No previous conversation history.", "\n</CONVERSATION_HISTORY>\n\nHere is the user's request:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
                   return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
-                }).join("\n"), "\n\nThought:");
+                }).join("\n"), " \n\nThought:");
                 messages.push({
                   role: "system",
                   content: systemPrompt
@@ -83631,7 +83631,7 @@ var ReActController = /*#__PURE__*/function () {
                 _systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by executing a pre-defined plan ONE STEP AT A TIME.\n\n## CRITICAL: RESPONSE FORMAT\nYou MUST respond with EXACTLY ONE Thought and ONE Action. Your entire response must follow this exact format:\n\nThought: [Your reasoning about the current step, what tool to use, and why. Be concise.]\nAction: { \"name\": \"tool_name\", \"parameters\": { \"param1\": \"value1\" } }\n\n## CRITICAL THINKING & ADAPTATION\n1.  **Analyze the last Observation:** Before deciding your next action, you MUST carefully analyze the most recent Observation in the scratchpad.\n2.  **Entity-Attribute Integrity:** When you identify an entity (e.g., a restaurant name) from an 'Observation', you MUST use other attributes (like its address) from that *same* 'Observation'. Do NOT combine an entity from an 'Observation' with an address from the user's original query in '<CONVERSATION_HISTORY>'. If an attribute like an address is missing for a found entity, your action should be to use a tool to find it.\n3.  **Assess Success:** Did the last action succeed? Did it return the expected information? For example, if you searched for something, did the observation indicate that items were found?\n4.  **Adapt Your Plan:**\n    - If the observation is unexpected (e.g., \"Found 0 places\", an error message, or \"Tool not implemented\"), DO NOT blindly proceed with the original plan.\n    - Your 'Thought' must explain how you are adapting to the new information.\n    - Your next 'Action' should be a direct attempt to recover.\n        - **If you get \"Found 0 places\":** Your primary strategy is to expand the search. The system will track your attempts. If the observation says you MUST try again, then you must call the *same tool* but with a *larger search radius*. Look at the previous action in the scratchpad to see what the last radius was and increase it significantly (e.g., double it).\n        - **If a tool is not implemented:** Your thought must be to try a different, more suitable tool from the available list to achieve the same goal.\n        - **If you need to geocode an address that appears incomplete:** Do not immediately use 'ask_user'. First, attempt to use the 'find_places_nearby' tool with the partial address in the 'amenity' parameter. The results may contain a complete, geocodable address. If so, use that address in a subsequent 'geocode_address' action. Only ask the user for clarification if this approach fails.\n        - **If you are truly stuck on a step for other reasons:** Use the 'ask_user' tool for clarification.\n    - Only if the last observation was successful and expected should you proceed to the next step of the plan.\n\n## FINISHING THE TASK\nWhen all steps are complete and you have gathered all necessary information, you MUST use the 'finish' tool.\n- **Thought:** Your thought should summarize the key findings from the scratchpad.\n- **Action:** The 'answer' parameter in the 'finish' tool MUST contain the complete, final answer for the user, synthesized from the observations.\n- **Example:**\n  Thought: The scratchpad shows that the geocoding was successful and the subsequent search found three restaurants. I will now format these results into a final answer for the user.\n  Action: { \"name\": \"finish\", \"parameters\": { \"answer\": \"I found 3 Indian restaurants near your location: [List of restaurants and their details].\" } }\n\n## AVAILABLE ACTIONS\n- Use one of the provided tools.\n- Use the 'finish(answer=...)' tool when you have the final answer.\n- Use the 'escalate_tool_level' tool if the current tools are insufficient.\n- Use the 'ask_user' tool if you need clarification from the user.";
                 _userPrompt = "You have access to the following tools to help you. Select ONE tool to achieve the current goal.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(availableTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is the full conversation history for context:\n<CONVERSATION_HISTORY>\n").concat(formattedHistory || "No previous conversation history.", "\n</CONVERSATION_HISTORY>\n\nHere is the user's original request for context:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the current goal for this step:\n<CURRENT_GOAL>\n").concat(currentGoal, "\n</CURRENT_GOAL>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
                   return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
-                }).join("\n"), "\n\nThought:");
+                }).join("\n"), " \n\nThought:");
                 messages.push({
                   role: "system",
                   content: _systemPrompt
@@ -83722,9 +83722,9 @@ var ReActController = /*#__PURE__*/function () {
                         },
                         required: ["step", "description", "step_type"]
                       }
-                    },
-                    required: ["plan"]
-                  }
+                    }
+                  },
+                  required: ["plan"]
                 }
               });
               internalTools.push({
@@ -83856,7 +83856,7 @@ var ReActController = /*#__PURE__*/function () {
                 if (potentialJsonString.startsWith('"') && potentialJsonString.endsWith('"')) {
                   try {
                     // Remove outer quotes and unescape inner quotes
-                    var unescapedString = potentialJsonString.substring(1, potentialJsonString.length - 1).replace(/\\\"/g, '"');
+                    var unescapedString = potentialJsonString.substring(1, potentialJsonString.length - 1).replace(/\\"/g, '"');
                     parsedAction = JSON.parse(unescapedString);
                     parseError = null; // Successfully unescaped and parsed
                   } catch (e4) {
@@ -83896,26 +83896,34 @@ var ReActController = /*#__PURE__*/function () {
                 response: actionString
               }
             };
-          } else if (parsedAction && _typeof(parsedAction) === 'object' && typeof parsedAction.name === 'string') {
-            // Remap 'geocode' to 'geocode_address' as a temporary workaround for AI hallucination
-            if (parsedAction.name === "geocode") {
-              console.warn("ReActController: Remapping 'geocode' tool to 'geocode_address'. AI hallucinated tool name.");
-              parsedAction.name = "geocode_address";
-            }
-            action = {
-              name: parsedAction.name,
-              params: parsedAction.parameters || parsedAction.params || {}
-            };
           } else {
-            var errorMessage = "Parsed JSON is not a valid action object or missing 'name'.";
-            console.error("ReActController: ".concat(errorMessage, " Parsed object:"), parsedAction);
-            action = {
-              name: "parse_error",
-              params: {
-                error: errorMessage,
-                response: actionString
+            console.log("ReActController: Debug - parsedAction:", parsedAction);
+            console.log("ReActController: Debug - typeof parsedAction:", _typeof(parsedAction));
+            if (parsedAction) {
+              console.log("ReActController: Debug - parsedAction.name:", parsedAction.name);
+              console.log("ReActController: Debug - typeof parsedAction.name:", _typeof(parsedAction.name));
+            }
+            if (parsedAction && _typeof(parsedAction) === 'object' && typeof parsedAction.name === 'string') {
+              // Remap 'geocode' to 'geocode_address' as a temporary workaround for AI hallucination
+              if (parsedAction.name === "geocode") {
+                console.warn("ReActController: Remapping 'geocode' tool to 'geocode_address'. AI hallucinated tool name.");
+                parsedAction.name = "geocode_address";
               }
-            };
+              action = {
+                name: parsedAction.name,
+                params: parsedAction.parameters || parsedAction.params || {}
+              };
+            } else {
+              var errorMessage = "Parsed JSON is not a valid action object or missing 'name'.";
+              console.error("ReActController: ".concat(errorMessage, " Parsed object:"), parsedAction);
+              action = {
+                name: "parse_error",
+                params: {
+                  error: errorMessage,
+                  response: actionString
+                }
+              };
+            }
           }
         }
       } else {
