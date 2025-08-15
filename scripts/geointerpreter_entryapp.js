@@ -83832,7 +83832,24 @@ var ReActController = /*#__PURE__*/function () {
             var lastBraceIndex = actionString.lastIndexOf('}');
             if (firstBraceIndex !== -1 && lastBraceIndex !== -1 && lastBraceIndex > firstBraceIndex) {
               var potentialJsonString = actionString.substring(firstBraceIndex, lastBraceIndex + 1);
-              _parsedAction = JSON.parse(potentialJsonString);
+              try {
+                _parsedAction = JSON.parse(potentialJsonString);
+              } catch (e) {
+                // If parsing fails, and the string looks like a double-escaped JSON string, try unescaping it
+                if (potentialJsonString.startsWith('"') && potentialJsonString.endsWith('"')) {
+                  try {
+                    // Remove outer quotes and unescape inner quotes
+                    var unescapedString = potentialJsonString.substring(1, potentialJsonString.length - 1).replace(/\\"/g, '"');
+                    _parsedAction = JSON.parse(unescapedString);
+                  } catch (e2) {
+                    console.error("ReActController: Failed to unescape and parse action JSON. Error: ".concat(e2.message, ". Raw string: \"").concat(potentialJsonString, "\""));
+                    throw new Error("Failed to unescape and parse action JSON: ".concat(e2.message));
+                  }
+                } else {
+                  console.error("ReActController: Failed to parse action JSON. Error: ".concat(e.message, ". Raw string: \"").concat(potentialJsonString, "\""));
+                  throw new Error("Failed to parse action JSON: ".concat(e.message));
+                }
+              }
             } else {
               throw new Error("No valid JSON object found in the action part.");
             }
