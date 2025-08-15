@@ -44360,96 +44360,118 @@ const worker = new Worker(worker_url);
 const logger = new _duckdb_duckdb_wasm__WEBPACK_IMPORTED_MODULE_1__.ConsoleLogger();
 
 async function initializeDatabase() {
-    if (db) return;
-    db = new _duckdb_duckdb_wasm__WEBPACK_IMPORTED_MODULE_1__.AsyncDuckDB(logger, worker);
-    await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
-    URL.revokeObjectURL(worker_url);
-    dbConn = await db.connect();
+  if (db) return;
+  db = new _duckdb_duckdb_wasm__WEBPACK_IMPORTED_MODULE_1__.AsyncDuckDB(logger, worker);
+  await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+  URL.revokeObjectURL(worker_url);
+  dbConn = await db.connect();
 
-    try {
-        await dbConn.query("INSTALL spatial;");
-        await dbConn.query("LOAD spatial;");
-        self.postMessage({ progress: { type: 'status', message: 'Spatial extension loaded.' } });
-    } catch (e) {
-        console.warn("Could not load DuckDB Spatial extension:", e);
-    }
+  try {
+    await dbConn.query("INSTALL spatial;");
+    await dbConn.query("LOAD spatial;");
+    self.postMessage({
+      progress: { type: "status", message: "Spatial extension loaded." },
+    });
+  } catch (e) {
+    console.warn("Could not load DuckDB Spatial extension:", e);
+  }
 
-    try {
-        await dbConn.query("INSTALL vss;");
-        await dbConn.query("LOAD vss;");
-        self.postMessage({ progress: { type: 'status', message: 'VSS extension loaded.' } });
-    } catch (e) {
-        console.error("CRITICAL: Could not load DuckDB VSS extension.", e);
-        throw e;
-    }
+  try {
+    await dbConn.query("INSTALL vss;");
+    await dbConn.query("LOAD vss;");
+    self.postMessage({
+      progress: { type: "status", message: "VSS extension loaded." },
+    });
+  } catch (e) {
+    console.error("CRITICAL: Could not load DuckDB VSS extension.", e);
+    throw e;
+  }
 
-    try {
-        const response = await fetch("/data/tool_registry.duckdb");
-        if (!response.ok) throw new Error(`Failed to fetch tool_registry.duckdb: ${response.statusText}`);
-        const buffer = await response.arrayBuffer();
-        await db.registerFileBuffer("tool_registry.duckdb", new Uint8Array(buffer));
-        await dbConn.query("ATTACH 'tool_registry.duckdb' AS tool_registry_db;");
-        self.postMessage({ progress: { type: 'status', message: 'Tool registry loaded.' } });
-    } catch (e) {
-        console.error("Could not load tool_registry.duckdb database:", e);
-        throw e;
-    }
+  try {
+    const response = await fetch("../../data/toolregistry.duckdb");
+    if (!response.ok)
+      throw new Error(
+        `Failed to fetch toolregistry.duckdb: ${response.statusText}`
+      );
+    const buffer = await response.arrayBuffer();
+    await db.registerFileBuffer("tool_registry.duckdb", new Uint8Array(buffer));
+    await dbConn.query("ATTACH 'tool_registry.duckdb' AS tool_registry_db;");
+    self.postMessage({
+      progress: { type: "status", message: "Tool registry loaded." },
+    });
+  } catch (e) {
+    console.error("Could not load tool_registry.duckdb database:", e);
+    throw e;
+  }
 }
 
 async function generateEmbedding(text) {
-    if (!embedding_pipe) {
-        embedding_pipe = await (0,_xenova_transformers__WEBPACK_IMPORTED_MODULE_0__.pipeline)('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
-    }
-    const embedding = await embedding_pipe(text, { pooling: 'mean', normalize: true });
-    return embedding.data;
+  if (!embedding_pipe) {
+    embedding_pipe = await (0,_xenova_transformers__WEBPACK_IMPORTED_MODULE_0__.pipeline)(
+      "feature-extraction",
+      "Xenova/all-MiniLM-L6-v2"
+    );
+  }
+  const embedding = await embedding_pipe(text, {
+    pooling: "mean",
+    normalize: true,
+  });
+  return embedding.data;
 }
 
 async function getRelevantTools(query, topN, levels) {
-    const queryEmbedding = await generateEmbedding(query);
-    const queryEmbeddingString = JSON.stringify(Array.from(queryEmbedding));
+  const queryEmbedding = await generateEmbedding(query);
+  const queryEmbeddingString = JSON.stringify(Array.from(queryEmbedding));
 
-    const sql = `
+  const sql = `
         SELECT name, description, parameters, category, level
         FROM tool_registry_db.tools
-        WHERE level IN (${levels.join(',')})
+        WHERE level IN (${levels.join(",")})
         ORDER BY array_cosine_distance(embedding, CAST(? AS DOUBLE[384]))
         LIMIT ?;
     `;
 
-    const results = await dbConn.query(sql, [queryEmbeddingString, topN]);
-    return results.toArray().map(row => row.toJSON());
+  const results = await dbConn.query(sql, [queryEmbeddingString, topN]);
+  return results.toArray().map((row) => row.toJSON());
 }
 
 self.onmessage = async (event) => {
   const { messageId, command, args } = event.data;
-  
+
   try {
     switch (command) {
-      case 'initialize':
+      case "initialize":
         await initializeDatabase();
-        self.postMessage({ messageId, payload: 'initialized' });
+        self.postMessage({ messageId, payload: "initialized" });
         break;
-      
-      case 'generateEmbedding':
+
+      case "generateEmbedding":
         const embedding = await generateEmbedding(args.text);
         self.postMessage({ messageId, payload: embedding });
         break;
-        
-      case 'query':
+
+      case "query":
         const results = await dbConn.query(args.sql);
-        self.postMessage({ messageId, payload: results.toArray().map(row => row.toJSON()) });
+        self.postMessage({
+          messageId,
+          payload: results.toArray().map((row) => row.toJSON()),
+        });
         break;
-        
-      case 'getRelevantTools':
-        const tools = await getRelevantTools(args.query, args.topN, args.levels);
+
+      case "getRelevantTools":
+        const tools = await getRelevantTools(
+          args.query,
+          args.topN,
+          args.levels
+        );
         self.postMessage({ messageId, payload: tools });
         break;
-        
-      case 'addConversationTurn':
+
+      case "addConversationTurn":
         // This can be implemented to store conversation history in the database if needed
-        self.postMessage({ messageId, payload: 'turn added' });
+        self.postMessage({ messageId, payload: "turn added" });
         break;
-      
+
       default:
         self.postMessage({ messageId, error: `Unknown command: ${command}` });
     }
