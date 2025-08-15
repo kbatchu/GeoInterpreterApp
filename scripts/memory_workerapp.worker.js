@@ -44348,8 +44348,6 @@ let db;
 let dbConn;
 let embedding_pipe;
 
-console.log(`Memory Worker: My location is ${self.location.href}`);
-
 const JSDELIVR_BUNDLES = _duckdb_duckdb_wasm__WEBPACK_IMPORTED_MODULE_1__.getJsDelivrBundles();
 const bundle = await _duckdb_duckdb_wasm__WEBPACK_IMPORTED_MODULE_1__.selectBundle(JSDELIVR_BUNDLES);
 const worker_url = URL.createObjectURL(
@@ -44427,7 +44425,7 @@ async function getRelevantTools(query, topN, levels) {
 
   const sql = `
         SELECT name, description, parameters, category, level
-        FROM tool_registry_db.tools
+        FROM tool_registry_db.duckdb_tools
         WHERE level IN (${levels.join(",")})
         ORDER BY array_cosine_distance(embedding, CAST(? AS DOUBLE[384]))
         LIMIT ?;
