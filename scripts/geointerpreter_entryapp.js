@@ -83970,10 +83970,14 @@ var ReActController = /*#__PURE__*/function () {
             }
           };
         } else {
-          // Original behavior for non-planning mode or if no action is strictly required
+          // If not in planning mode, and no action was found, it's also a parse error
+          // as an action is expected for plan execution.
           action = {
-            name: "continue",
-            params: {}
+            name: "parse_error",
+            params: {
+              error: "AI did not provide an 'Action:' as expected for plan execution.",
+              response: cleanResponse
+            }
           };
         }
       }
