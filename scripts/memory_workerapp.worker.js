@@ -1891,7 +1891,7 @@ const PATH_AVAILABLE = !isEmpty((path__WEBPACK_IMPORTED_MODULE_1___default())); 
 const RUNNING_LOCALLY = FS_AVAILABLE && PATH_AVAILABLE;
 
 const __dirname = RUNNING_LOCALLY
-    ? path__WEBPACK_IMPORTED_MODULE_1___default().dirname(path__WEBPACK_IMPORTED_MODULE_1___default().dirname(url__WEBPACK_IMPORTED_MODULE_2___default().fileURLToPath("file:///C:/Kiran/Work/GIS/DATAVIZ/GeoInterpreter/node_modules/@xenova/transformers/src/env.js")))
+    ? path__WEBPACK_IMPORTED_MODULE_1___default().dirname(path__WEBPACK_IMPORTED_MODULE_1___default().dirname(url__WEBPACK_IMPORTED_MODULE_2___default().fileURLToPath("file:///c:/Kiran/Work/GIS/DATAVIZ/GeoInterpreter/node_modules/@xenova/transformers/src/env.js")))
     : './';
 
 // Only used for environments with access to file system

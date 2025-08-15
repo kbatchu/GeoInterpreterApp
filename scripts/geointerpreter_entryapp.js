@@ -83009,7 +83009,7 @@ var ReActController = /*#__PURE__*/function () {
               REPETITION_LIMIT = 3;
               lastActionHistory = [];
               _loop = /*#__PURE__*/_regenerator().m(function _loop() {
-                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, correctedPlan, _errorMsg, _currentState2, conversationHistory, observation, questionText, _errorMsg2, standardizedAction, _currentState3, _observation, chosenTool, currentStepType, _observation2, _observation3, finalObservation, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
+                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, correctedPlan, _errorMsg, _currentState2, conversationHistory, observation, questionText, _errorMsg2, standardizedAction, _currentState3, _observation, chosenTool, currentStepType, _observation2, executionParams, _observation3, finalObservation, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
                 return _regenerator().w(function (_context2) {
                   while (1) switch (_context2.n) {
                     case 0:
@@ -83353,8 +83353,20 @@ var ReActController = /*#__PURE__*/function () {
                         toolName: action.name,
                         params: action.params
                       });
+                      executionParams = action.params;
+                      if (action.name === "find_places_nearby") {
+                        console.log("ReActController: Remapping parameters for find_places_nearby");
+                        executionParams = {
+                          latitude: action.params.lat || action.params.latitude,
+                          longitude: action.params.lng || action.params.longitude,
+                          amenity: action.params.categories || action.params.amenity,
+                          cuisine: action.params.keywords || action.params.cuisine,
+                          radius_meters: action.params.radius || action.params.radius_meters
+                        };
+                        console.log("ReActController: Remapped parameters:", executionParams);
+                      }
                       _context2.n = 26;
-                      return _this.toolExecutor.execute(action.name, action.params, _this.stateManager.getState());
+                      return _this.toolExecutor.execute(action.name, executionParams, _this.stateManager.getState());
                     case 26:
                       _observation3 = _context2.v;
                       finalObservation = _observation3;
