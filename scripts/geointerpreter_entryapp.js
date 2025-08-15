@@ -83981,6 +83981,8 @@ var ReActController = /*#__PURE__*/function () {
           };
         }
       }
+
+      // Log the parsed thought and action for debugging
       console.log("ReActController: Successfully parsed - Thought:", thought);
       console.log("ReActController: Successfully parsed - Action:", action);
       return {
