@@ -83009,7 +83009,7 @@ var ReActController = /*#__PURE__*/function () {
               REPETITION_LIMIT = 3;
               lastActionHistory = [];
               _loop = /*#__PURE__*/_regenerator().m(function _loop() {
-                var currentGoal, currentStep, _activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, correctedPlan, _errorMsg, _currentState2, conversationHistory, observation, questionText, _errorMsg2, standardizedAction, _currentState3, _observation, chosenTool, currentStepType, _observation2, _observation3, finalObservation, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
+                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, correctedPlan, _errorMsg, _currentState2, conversationHistory, observation, questionText, _errorMsg2, standardizedAction, _currentState3, _observation, chosenTool, currentStepType, _observation2, _observation3, finalObservation, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
                 return _regenerator().w(function (_context2) {
                   while (1) switch (_context2.n) {
                     case 0:
@@ -83036,12 +83036,12 @@ var ReActController = /*#__PURE__*/function () {
                       currentGoal = _this.userQuery;
                       currentStep = null;
                       if (!_this.isPlanningMode && _this.stateManager.getState().activePlan) {
-                        _activePlan = _this.stateManager.getState().activePlan;
-                        if (_this.currentPlanStepIndex < _activePlan.steps.length) {
-                          currentStep = _activePlan.steps[_this.currentPlanStepIndex];
-                          currentGoal = _activePlan.steps[_this.currentPlanStepIndex].description;
+                        activePlan = _this.stateManager.getState().activePlan;
+                        if (_this.currentPlanStepIndex < activePlan.steps.length) {
+                          currentStep = activePlan.steps[_this.currentPlanStepIndex];
+                          currentGoal = activePlan.steps[_this.currentPlanStepIndex].description;
                           _this.stateManager.updateState({
-                            activePlan: _objectSpread(_objectSpread({}, _activePlan), {}, {
+                            activePlan: _objectSpread(_objectSpread({}, activePlan), {}, {
                               currentStepIndex: _this.currentPlanStepIndex
                             })
                           });
@@ -83157,9 +83157,10 @@ var ReActController = /*#__PURE__*/function () {
                     case 14:
                       correctedPlan = _context2.v;
                       _this.stateManager.updateState({
-                        activePlan: _objectSpread(_objectSpread({}, activePlan), {}, {
+                        activePlan: {
+                          steps: correctedPlan,
                           currentStepIndex: 0
-                        })
+                        }
                       });
                       _this.isPlanningMode = false;
                       _this.scratchpad.push({
