@@ -83607,7 +83607,7 @@ var ReActController = /*#__PURE__*/function () {
                 return t.name;
               });
               console.log("ReActController: Retrieved available tools: [".concat(toolNames.join(", "), "]"));
-              formattedHistory = state.conversationHistory.slice(0, -1).map(function (msg) {
+              formattedHistory = state.conversationHistory.map(function (msg) {
                 return "".concat(msg.role.charAt(0).toUpperCase() + msg.role.slice(1), ": ").concat(msg.content);
               }).join("\n");
               messages = [];
