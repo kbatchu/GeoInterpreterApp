@@ -44431,7 +44431,8 @@ async function getRelevantTools(query, topN, levels) {
         LIMIT ?;
     `;
 
-  const results = await dbConn.query(sql, [queryEmbeddingString, topN]);
+  const stmt = await dbConn.prepare(sql);
+  const results = await stmt.query(queryEmbeddingString, topN);
   return results.toArray().map((row) => row.toJSON());
 }
 
