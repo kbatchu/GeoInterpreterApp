@@ -83641,6 +83641,7 @@ var ReActController = /*#__PURE__*/function () {
       var _getRelevantTools2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(query) {
         var topN,
           levels,
+          dbToolsRaw,
           dbTools,
           internalTools,
           uniqueTools,
@@ -83659,8 +83660,17 @@ var ReActController = /*#__PURE__*/function () {
               _context6.n = 1;
               return this.memoryManager.getRelevantTools(query, topN, levels);
             case 1:
-              dbTools = _context6.v;
-              console.log('ReActController: Tools from DB:', JSON.stringify(dbTools, null, 2));
+              dbToolsRaw = _context6.v;
+              console.log('ReActController: Tools from DB:', JSON.stringify(dbToolsRaw, null, 2));
+              dbTools = dbToolsRaw.map(function (tool) {
+                return {
+                  name: tool.tool_id,
+                  description: tool.description,
+                  parameters: JSON.parse(tool.parameters_json),
+                  category: tool.category,
+                  level: tool.level
+                };
+              });
               if (dbTools.length > 0) {
                 console.log("ReActController: Tools retrieved from Worker: [".concat(dbTools.map(function (t) {
                   return t.name;
