@@ -83809,7 +83809,7 @@ var ReActController = /*#__PURE__*/function () {
           var parsedAction;
           try {
             // Attempt to find and parse the JSON object more robustly
-            var jsonMatch = actionString.match(/\{[\s\S]*\}/);
+            var jsonMatch = actionString.match(/\{.*?\}/);
             if (jsonMatch) {
               parsedAction = JSON.parse(jsonMatch[0]);
             } else {
