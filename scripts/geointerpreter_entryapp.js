@@ -83823,41 +83823,60 @@ var ReActController = /*#__PURE__*/function () {
           thought = rawThought;
         }
         var actionString = cleanResponse.substring(actionIndex + actionPrefix.length).trim();
+        var parsedAction;
+        var parseError = null;
         try {
-          var parsedAction;
-          try {
-            var _parsedAction;
-            // Find the first '{' and the last '}' to extract the potential JSON string
+          // Attempt 1: Try parsing the actionString directly
+          parsedAction = JSON.parse(actionString);
+        } catch (e1) {
+          parseError = e1;
+          // Attempt 2: Check for JSON wrapped in markdown code block
+          var jsonBlockMatch = actionString.match(/```json\s*([\s\S]*?)\s*```/);
+          if (jsonBlockMatch && jsonBlockMatch[1]) {
+            try {
+              parsedAction = JSON.parse(jsonBlockMatch[1]);
+              parseError = null; // Successfully parsed from markdown
+            } catch (e2) {
+              parseError = e2;
+            }
+          }
+
+          // Attempt 3: Fallback to finding first '{' and last '}'
+          if (parseError) {
             var firstBraceIndex = actionString.indexOf('{');
             var lastBraceIndex = actionString.lastIndexOf('}');
             if (firstBraceIndex !== -1 && lastBraceIndex !== -1 && lastBraceIndex > firstBraceIndex) {
               var potentialJsonString = actionString.substring(firstBraceIndex, lastBraceIndex + 1);
               try {
-                _parsedAction = JSON.parse(potentialJsonString);
-              } catch (e) {
+                parsedAction = JSON.parse(potentialJsonString);
+                parseError = null; // Successfully parsed from substring
+              } catch (e3) {
+                parseError = e3;
                 // If parsing fails, and the string looks like a double-escaped JSON string, try unescaping it
                 if (potentialJsonString.startsWith('"') && potentialJsonString.endsWith('"')) {
                   try {
                     // Remove outer quotes and unescape inner quotes
-                    var unescapedString = potentialJsonString.substring(1, potentialJsonString.length - 1).replace(/\\"/g, '"');
-                    _parsedAction = JSON.parse(unescapedString);
-                  } catch (e2) {
-                    console.error("ReActController: Failed to unescape and parse action JSON. Error: ".concat(e2.message, ". Raw string: \"").concat(potentialJsonString, "\""));
-                    throw new Error("Failed to unescape and parse action JSON: ".concat(e2.message));
+                    var unescapedString = potentialJsonString.substring(1, potentialJsonString.length - 1).replace(/\\\"/g, '"');
+                    parsedAction = JSON.parse(unescapedString);
+                    parseError = null; // Successfully unescaped and parsed
+                  } catch (e4) {
+                    parseError = e4;
                   }
-                } else {
-                  console.error("ReActController: Failed to parse action JSON. Error: ".concat(e.message, ". Raw string: \"").concat(potentialJsonString, "\""));
-                  throw new Error("Failed to parse action JSON: ".concat(e.message));
                 }
               }
-            } else {
-              throw new Error("No valid JSON object found in the action part.");
             }
-          } catch (e) {
-            console.error("ReActController: Failed to parse action JSON. Error: ".concat(e.message, ". Raw string: \"").concat(actionString, "\""));
-            throw new Error("Failed to parse action JSON: ".concat(e.message));
           }
-
+        }
+        if (parseError) {
+          console.error("ReActController: Failed to parse action JSON. Error: ".concat(parseError.message, ". Raw string: \"").concat(actionString, "\""));
+          action = {
+            name: "parse_error",
+            params: {
+              error: parseError.message,
+              response: actionString
+            }
+          };
+        } else {
           // The AI sometimes double-encodes the JSON by wrapping it in a string.
           // If the parsed result is a string, we need to parse it again.
           if (typeof parsedAction === 'string') {
@@ -83865,12 +83884,19 @@ var ReActController = /*#__PURE__*/function () {
               parsedAction = JSON.parse(parsedAction);
             } catch (e) {
               console.error("ReActController: Failed to double-parse action JSON. Error: ".concat(e.message, ". Raw string: \"").concat(parsedAction, "\""));
-              throw new Error("Failed to double-parse action JSON: ".concat(e.message));
+              parseError = e; // Set parseError for this case too
             }
           }
-          console.log("ReActController: Parsed action object:", parsedAction); // Added logging
-
-          if (parsedAction && typeof parsedAction.name === 'string') {
+          if (parseError) {
+            // Check again if double-parsing failed
+            action = {
+              name: "parse_error",
+              params: {
+                error: parseError.message,
+                response: actionString
+              }
+            };
+          } else if (parsedAction && _typeof(parsedAction) === 'object' && typeof parsedAction.name === 'string') {
             // Remap 'geocode' to 'geocode_address' as a temporary workaround for AI hallucination
             if (parsedAction.name === "geocode") {
               console.warn("ReActController: Remapping 'geocode' tool to 'geocode_address'. AI hallucinated tool name.");
@@ -83881,17 +83907,16 @@ var ReActController = /*#__PURE__*/function () {
               params: parsedAction.parameters || parsedAction.params || {}
             };
           } else {
-            throw new Error("Parsed JSON is not a valid action object or missing 'name'.");
+            var errorMessage = "Parsed JSON is not a valid action object or missing 'name'.";
+            console.error("ReActController: ".concat(errorMessage, " Parsed object:"), parsedAction);
+            action = {
+              name: "parse_error",
+              params: {
+                error: errorMessage,
+                response: actionString
+              }
+            };
           }
-        } catch (e) {
-          console.error("ReActController: Failed to parse action JSON. Error: ".concat(e.message, "."));
-          action = {
-            name: "parse_error",
-            params: {
-              error: e.message,
-              response: actionString
-            }
-          };
         }
       } else {
         // actionIndex === -1, meaning "Action:" prefix was not found
