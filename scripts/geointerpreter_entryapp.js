@@ -83826,10 +83826,13 @@ var ReActController = /*#__PURE__*/function () {
         try {
           var parsedAction;
           try {
-            // Attempt to find and parse the JSON object more robustly
-            var jsonMatch = actionString.match(/\{.*?\}/);
-            if (jsonMatch) {
-              parsedAction = JSON.parse(jsonMatch[0]);
+            var _parsedAction;
+            // Find the first '{' and the last '}' to extract the potential JSON string
+            var firstBraceIndex = actionString.indexOf('{');
+            var lastBraceIndex = actionString.lastIndexOf('}');
+            if (firstBraceIndex !== -1 && lastBraceIndex !== -1 && lastBraceIndex > firstBraceIndex) {
+              var potentialJsonString = actionString.substring(firstBraceIndex, lastBraceIndex + 1);
+              _parsedAction = JSON.parse(potentialJsonString);
             } else {
               throw new Error("No valid JSON object found in the action part.");
             }
