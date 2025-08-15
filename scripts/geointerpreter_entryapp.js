@@ -83808,32 +83808,40 @@ var ReActController = /*#__PURE__*/function () {
         try {
           var parsedAction;
           try {
-            // First, try to parse the string as-is. This works for well-formed JSON.
-            parsedAction = JSON.parse(actionString);
-          } catch (e) {
-            // If that fails, it might be because the JSON is embedded in a larger string
-            // with extra text at the end. Let's try to extract it.
-            var jsonStart = actionString.indexOf('{');
-            var jsonEnd = actionString.lastIndexOf('}');
-            if (jsonStart === -1 || jsonEnd === -1 || jsonEnd < jsonStart) {
+            // Attempt to find and parse the JSON object more robustly
+            var jsonMatch = actionString.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+              parsedAction = JSON.parse(jsonMatch[0]);
+            } else {
               throw new Error("No valid JSON object found in the action part.");
             }
-            var jsonSubstring = actionString.substring(jsonStart, jsonEnd + 1);
-            parsedAction = JSON.parse(jsonSubstring);
+          } catch (e) {
+            console.error("ReActController: Failed to parse action JSON. Error: ".concat(e.message, ". Raw string: \"").concat(actionString, "\""));
+            throw new Error("Failed to parse action JSON: ".concat(e.message));
           }
 
           // The AI sometimes double-encodes the JSON by wrapping it in a string.
           // If the parsed result is a string, we need to parse it again.
           if (typeof parsedAction === 'string') {
-            parsedAction = JSON.parse(parsedAction);
+            try {
+              parsedAction = JSON.parse(parsedAction);
+            } catch (e) {
+              console.error("ReActController: Failed to double-parse action JSON. Error: ".concat(e.message, ". Raw string: \"").concat(parsedAction, "\""));
+              throw new Error("Failed to double-parse action JSON: ".concat(e.message));
+            }
           }
           if (parsedAction && typeof parsedAction.name === 'string') {
+            // Remap 'geocode' to 'geocode_address' as a temporary workaround for AI hallucination
+            if (parsedAction.name === "geocode") {
+              console.warn("ReActController: Remapping 'geocode' tool to 'geocode_address'. AI hallucinated tool name.");
+              parsedAction.name = "geocode_address";
+            }
             action = {
               name: parsedAction.name,
               params: parsedAction.parameters || parsedAction.params || {}
             };
           } else {
-            throw new Error("Parsed JSON is not a valid action object.");
+            throw new Error("Parsed JSON is not a valid action object or missing 'name'.");
           }
         } catch (e) {
           console.error("ReActController: Failed to parse action JSON. Error: ".concat(e.message, "."));
