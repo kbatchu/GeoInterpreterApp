@@ -83648,6 +83648,7 @@ var ReActController = /*#__PURE__*/function () {
               return this.memoryManager.getRelevantTools(query, topN, levels);
             case 1:
               dbTools = _context6.v;
+              console.log('ReActController: Tools from DB:', JSON.stringify(dbTools, null, 2));
               if (dbTools.length > 0) {
                 console.log("ReActController: Tools retrieved from Worker: [".concat(dbTools.map(function (t) {
                   return t.name;
