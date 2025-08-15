@@ -83854,11 +83854,29 @@ var ReActController = /*#__PURE__*/function () {
           };
         }
       } else {
+        // actionIndex === -1, meaning "Action:" prefix was not found
         var _thoughtPrefix = "Thought:";
         if (cleanResponse.startsWith(_thoughtPrefix)) {
           thought = cleanResponse.substring(_thoughtPrefix.length).trim();
         } else {
           thought = cleanResponse;
+        }
+
+        // If we are in planning mode and no action was found, it's a parse error
+        if (this.isPlanningMode) {
+          action = {
+            name: "parse_error",
+            params: {
+              error: "AI did not provide an 'Action:' in planning mode.",
+              response: cleanResponse
+            }
+          };
+        } else {
+          // Original behavior for non-planning mode or if no action is strictly required
+          action = {
+            name: "continue",
+            params: {}
+          };
         }
       }
       console.log("ReActController: Successfully parsed - Thought:", thought);
