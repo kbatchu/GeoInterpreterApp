@@ -44388,19 +44388,19 @@ async function initializeDatabase() {
   }
 
   try {
-    const response = await fetch("/data/toolregistry.duckdb");
+    const response = await fetch("./data/toolregistry.duckdb");
     if (!response.ok)
       throw new Error(
         `Failed to fetch toolregistry.duckdb: ${response.statusText}`
       );
     const buffer = await response.arrayBuffer();
-    await db.registerFileBuffer("tool_registry.duckdb", new Uint8Array(buffer));
-    await dbConn.query("ATTACH 'tool_registry.duckdb' AS tool_registry_db;");
+    await db.registerFileBuffer("toolregistry.duckdb", new Uint8Array(buffer));
+    await dbConn.query("ATTACH 'toolregistry.duckdb' AS tool_registry_db;");
     self.postMessage({
       progress: { type: "status", message: "Tool registry loaded." },
     });
   } catch (e) {
-    console.error("Could not load tool_registry.duckdb database:", e);
+    console.error("Could not load toolregistry.duckdb database:", e);
     throw e;
   }
 }
