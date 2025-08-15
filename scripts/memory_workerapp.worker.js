@@ -44424,10 +44424,10 @@ async function getRelevantTools(query, topN, levels) {
   const queryEmbeddingString = JSON.stringify(Array.from(queryEmbedding));
 
   const sql = `
-        SELECT name, description, parameters, category, level
+        SELECT tool_id, description, parameters_json, category, level
         FROM tool_registry_db.duckdb_tools
         WHERE level IN (${levels.join(",")})
-        ORDER BY array_cosine_distance(embedding, CAST(? AS DOUBLE[384]))
+        ORDER BY array_cosine_distance(semantic_description_embedding, CAST(? AS DOUBLE[384]))
         LIMIT ?;
     `;
 
