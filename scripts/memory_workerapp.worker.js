@@ -44348,6 +44348,8 @@ let db;
 let dbConn;
 let embedding_pipe;
 
+console.log(`Memory Worker: My location is ${self.location.href}`);
+
 const JSDELIVR_BUNDLES = _duckdb_duckdb_wasm__WEBPACK_IMPORTED_MODULE_1__.getJsDelivrBundles();
 const bundle = await _duckdb_duckdb_wasm__WEBPACK_IMPORTED_MODULE_1__.selectBundle(JSDELIVR_BUNDLES);
 const worker_url = URL.createObjectURL(
