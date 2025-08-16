@@ -44395,7 +44395,7 @@ async function initializeDatabase() {
       const response = await fetch("../data/toolregistry.duckdb");
       if (!response.ok) throw new Error(`Failed to fetch toolregistry.duckdb: ${response.statusText}`);
       const buffer = await response.arrayBuffer();
-      await registerFileBuffer("toolregistry.duckdb", new Uint8Array(buffer));
+      await db.registerFileBuffer("toolregistry.duckdb", new Uint8Array(buffer));
       await dbConn.query("ATTACH 'toolregistry.duckdb' AS tool_registry_db;");
       self.postMessage({ progress: { type: "status", message: "Tool registry loaded." } });
     } catch (e) {
@@ -44448,7 +44448,7 @@ async function initializeDatabase() {
 async function saveDatabaseToIndexedDB() {
     if (!dbDirty) return;
 
-        const buffer = await db.copyFileToBuffer("main.db");
+    const buffer = await db.exportFileBuffer("main");
     const request = indexedDB.open("GeoInterpreterDB", 1);
 
     request.onupgradeneeded = (event) => {
@@ -44468,14 +44468,6 @@ async function saveDatabaseToIndexedDB() {
     };
 }
 
-async function registerFileBuffer(fileName, buffer) {
-    await db.open({
-        path: fileName,
-        buffer: buffer,
-        protocol: _duckdb_duckdb_wasm__WEBPACK_IMPORTED_MODULE_1__.DuckDBDataProtocol.BUFFER,
-    });
-}
-
 async function loadDatabaseFromIndexedDB() {
     const request = indexedDB.open("GeoInterpreterDB", 1);
 
@@ -44493,7 +44485,7 @@ async function loadDatabaseFromIndexedDB() {
         getRequest.onsuccess = async (event) => {
             if (event.target.result) {
                 const buffer = event.target.result.buffer;
-                await registerFileBuffer("main.db", new Uint8Array(buffer));
+                await db.registerFileBuffer("main.db", new Uint8Array(buffer));
                 await dbConn.query("ATTACH 'main.db' AS main;");
                 console.log("Database loaded from IndexedDB");
             }
