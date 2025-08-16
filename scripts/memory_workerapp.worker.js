@@ -44430,6 +44430,7 @@ async function initializeDatabase() {
       await dbConn.query(`CREATE TABLE IF NOT EXISTS entities (entity_id UUID PRIMARY KEY, entity_name VARCHAR, entity_type VARCHAR, created_at TIMESTAMP DEFAULT current_timestamp);`);
       await dbConn.query(`CREATE TABLE IF NOT EXISTS entity_attributes (attribute_id UUID PRIMARY KEY, entity_id UUID REFERENCES entities(entity_id), attribute_key VARCHAR, attribute_value VARCHAR, created_at TIMESTAMP DEFAULT current_timestamp);`);
       await dbConn.query(`CREATE TABLE IF NOT EXISTS geospatial_attributes (geo_id UUID PRIMARY KEY, entity_id UUID REFERENCES entities(entity_id), geometry GEOMETRY, created_at TIMESTAMP DEFAULT current_timestamp);`);
+      await dbConn.query(`CREATE INDEX IF NOT EXISTS rtree_idx ON geospatial_attributes USING RTREE (geometry);`);
       await dbConn.query(`CREATE TABLE IF NOT EXISTS relationships (relationship_id UUID PRIMARY KEY, source_entity_id UUID REFERENCES entities(entity_id), target_entity_id UUID REFERENCES entities(entity_id), relationship_type VARCHAR, created_at TIMESTAMP DEFAULT current_timestamp);`);
       self.postMessage({ progress: { type: "status", message: "Knowledge graph tables created." } });
     } catch (e) {
