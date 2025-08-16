@@ -83149,7 +83149,7 @@ var ReActController = /*#__PURE__*/function () {
                       console.log("ReActController: AI Action:", action);
 
                       // --- NEW LOGIC START ---
-                      if (!(action.name === "ai_thinking")) {
+                      if (!(action.name === "ai_thinking" || action.name === "ai_thinking_only_thought")) {
                         _context2.n = 10;
                         break;
                       }
@@ -84158,12 +84158,12 @@ var ReActController = /*#__PURE__*/function () {
             }
           };
         } else if (cleanResponse.startsWith(_thoughtPrefix)) {
-          // Existing logic for when only "Thought:" is present
+          // If only "Thought:" is present, treat it as an AI thinking state
           thought = cleanResponse.substring(_thoughtPrefix.length).trim();
           action = {
-            name: "continue",
+            name: "ai_thinking_only_thought",
             params: {
-              error: "AI provided only a Thought, no Action. Continuing to allow self-correction."
+              message: thought
             }
           };
         } else {
