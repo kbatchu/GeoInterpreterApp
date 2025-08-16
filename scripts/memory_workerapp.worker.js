@@ -44347,6 +44347,7 @@ __webpack_require__.r(__webpack_exports__);
 let db;
 let dbConn;
 let embedding_pipe;
+let dbDirty = false;
 
 const JSDELIVR_BUNDLES = _duckdb_duckdb_wasm__WEBPACK_IMPORTED_MODULE_1__.getJsDelivrBundles();
 const bundle = await _duckdb_duckdb_wasm__WEBPACK_IMPORTED_MODULE_1__.selectBundle(JSDELIVR_BUNDLES);
@@ -44366,43 +44367,163 @@ async function initializeDatabase() {
   URL.revokeObjectURL(worker_url);
   dbConn = await db.connect();
 
-  try {
-    await dbConn.query("INSTALL spatial;");
-    await dbConn.query("LOAD spatial;");
-    self.postMessage({
-      progress: { type: "status", message: "Spatial extension loaded." },
-    });
-  } catch (e) {
-    console.warn("Could not load DuckDB Spatial extension:", e);
-  }
+  await loadDatabaseFromIndexedDB();
 
-  try {
-    await dbConn.query("INSTALL vss;");
-    await dbConn.query("LOAD vss;");
-    self.postMessage({
-      progress: { type: "status", message: "VSS extension loaded." },
-    });
-  } catch (e) {
-    console.error("CRITICAL: Could not load DuckDB VSS extension.", e);
-    throw e;
-  }
+  const initializationPromises = [];
 
-  try {
-            const response = await fetch("../data/toolregistry.duckdb");
-    if (!response.ok)
-      throw new Error(
-        `Failed to fetch toolregistry.duckdb: ${response.statusText}`
-      );
-    const buffer = await response.arrayBuffer();
-    await db.registerFileBuffer("toolregistry.duckdb", new Uint8Array(buffer));
-    await dbConn.query("ATTACH 'toolregistry.duckdb' AS tool_registry_db;");
-    self.postMessage({
-      progress: { type: "status", message: "Tool registry loaded." },
-    });
-  } catch (e) {
-    console.error("Could not load toolregistry.duckdb database:", e);
-    throw e;
-  }
+  initializationPromises.push((async () => {
+    try {
+      await dbConn.query("INSTALL spatial; LOAD spatial;");
+      self.postMessage({ progress: { type: "status", message: "Spatial extension loaded." } });
+    } catch (e) {
+      console.warn("Could not load DuckDB Spatial extension:", e);
+    }
+  })());
+
+  initializationPromises.push((async () => {
+    try {
+      await dbConn.query("INSTALL vss; LOAD vss;");
+      self.postMessage({ progress: { type: "status", message: "VSS extension loaded." } });
+    } catch (e) {
+      console.error("CRITICAL: Could not load DuckDB VSS extension.", e);
+      throw e;
+    }
+  })());
+
+  initializationPromises.push((async () => {
+    try {
+      const response = await fetch("../data/toolregistry.duckdb");
+      if (!response.ok) throw new Error(`Failed to fetch toolregistry.duckdb: ${response.statusText}`);
+      const buffer = await response.arrayBuffer();
+      await db.registerFileBuffer("toolregistry.duckdb", new Uint8Array(buffer));
+      await dbConn.query("ATTACH 'toolregistry.duckdb' AS tool_registry_db;");
+      self.postMessage({ progress: { type: "status", message: "Tool registry loaded." } });
+    } catch (e) {
+      console.error("Could not load toolregistry.duckdb database:", e);
+      throw e;
+    }
+  })());
+
+  initializationPromises.push((async () => {
+    try {
+      await dbConn.query(`
+        CREATE TABLE IF NOT EXISTS conversation_chunks (
+          chunk_id UUID PRIMARY KEY,
+          session_id VARCHAR,
+          turn INTEGER,
+          speaker VARCHAR,
+          content TEXT,
+          embedding FLOAT[384],
+          created_at TIMESTAMP DEFAULT current_timestamp
+        );
+        CREATE INDEX IF NOT EXISTS hnsw_index ON conversation_chunks USING HNSW (embedding);
+      `);
+      self.postMessage({ progress: { type: "status", message: "Conversation history table created." } });
+    } catch (e) {
+      console.error("Could not create conversation_chunks table:", e);
+      throw e;
+    }
+  })());
+
+  initializationPromises.push((async () => {
+    try {
+      await dbConn.query(`CREATE TABLE IF NOT EXISTS entities (entity_id UUID PRIMARY KEY, entity_name VARCHAR, entity_type VARCHAR, created_at TIMESTAMP DEFAULT current_timestamp);`);
+      await dbConn.query(`CREATE TABLE IF NOT EXISTS entity_attributes (attribute_id UUID PRIMARY KEY, entity_id UUID REFERENCES entities(entity_id), attribute_key VARCHAR, attribute_value VARCHAR, created_at TIMESTAMP DEFAULT current_timestamp);`);
+      await dbConn.query(`CREATE TABLE IF NOT EXISTS geospatial_attributes (geo_id UUID PRIMARY KEY, entity_id UUID REFERENCES entities(entity_id), geometry GEOMETRY, created_at TIMESTAMP DEFAULT current_timestamp);`);
+      await dbConn.query(`CREATE TABLE IF NOT EXISTS relationships (relationship_id UUID PRIMARY KEY, source_entity_id UUID REFERENCES entities(entity_id), target_entity_id UUID REFERENCES entities(entity_id), relationship_type VARCHAR, created_at TIMESTAMP DEFAULT current_timestamp);`);
+      self.postMessage({ progress: { type: "status", message: "Knowledge graph tables created." } });
+    } catch (e) {
+      console.error("Could not create knowledge graph tables:", e);
+      throw e;
+    }
+  })());
+
+  await Promise.all(initializationPromises);
+
+  setInterval(manageConversationHistory, 60000); // Check every minute
+  setInterval(saveDatabaseToIndexedDB, 300000); // Save every 5 minutes
+}
+
+async function saveDatabaseToIndexedDB() {
+    if (!dbDirty) return;
+
+    const buffer = await db.exportFileBuffer("main");
+    const request = indexedDB.open("GeoInterpreterDB", 1);
+
+    request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        db.createObjectStore("files", { keyPath: "name" });
+    };
+
+    request.onsuccess = (event) => {
+        const db = event.target.result;
+        const transaction = db.transaction(["files"], "readwrite");
+        const store = transaction.objectStore("files");
+        store.put({ name: "main.db", buffer });
+        transaction.oncomplete = () => {
+            console.log("Database saved to IndexedDB");
+            dbDirty = false;
+        };
+    };
+}
+
+async function loadDatabaseFromIndexedDB() {
+    const request = indexedDB.open("GeoInterpreterDB", 1);
+
+    request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        db.createObjectStore("files", { keyPath: "name" });
+    };
+
+    request.onsuccess = (event) => {
+        const db = event.target.result;
+        const transaction = db.transaction(["files"], "readonly");
+        const store = transaction.objectStore("files");
+        const getRequest = store.get("main.db");
+
+        getRequest.onsuccess = async (event) => {
+            if (event.target.result) {
+                const buffer = event.target.result.buffer;
+                await db.registerFileBuffer("main.db", new Uint8Array(buffer));
+                await dbConn.query("ATTACH 'main.db' AS main;");
+                console.log("Database loaded from IndexedDB");
+            }
+        };
+    };
+}
+
+async function manageConversationHistory() {
+    const CONVERSATION_LIMIT = 100;
+    const SUMMARY_SIZE = 20;
+
+    const turnCountResult = await dbConn.query(`SELECT COUNT(*) as count FROM conversation_chunks`);
+    const turnCount = turnCountResult.toArray()[0].count;
+
+    if (turnCount > CONVERSATION_LIMIT) {
+        const oldestTurnsResult = await dbConn.query(`
+            SELECT * FROM conversation_chunks
+            ORDER BY created_at ASC
+            LIMIT ${SUMMARY_SIZE};
+        `);
+        const oldestTurns = oldestTurnsResult.toArray().map(row => row.toJSON());
+
+        const summaryContent = oldestTurns.map(turn => `${turn.speaker}: ${turn.content}`).join('\n');
+        
+        // This is a placeholder for a call to an LLM to summarize the content.
+        const summary = `Summary of old conversation: ${summaryContent}`;
+
+        const summaryEmbedding = await generateEmbedding(summary);
+        const summaryEmbeddingString = JSON.stringify(Array.from(summaryEmbedding));
+
+        await dbConn.query(`DELETE FROM conversation_chunks WHERE chunk_id IN (${oldestTurns.map(t => `'${t.chunk_id}'`).join(',')})`);
+        
+        const stmt = await dbConn.prepare(`
+            INSERT INTO conversation_chunks (chunk_id, session_id, turn, speaker, content, embedding)
+            VALUES (uuid(), ?, ?, ?, ?, CAST(? AS FLOAT[384]));
+        `);
+        await stmt.query(oldestTurns[0].session_id, oldestTurns[0].turn, 'summary', summary, summaryEmbeddingString);
+        dbDirty = true;
+    }
 }
 
 async function generateEmbedding(text) {
@@ -44434,6 +44555,114 @@ async function getRelevantTools(query, topN, levels) {
   const stmt = await dbConn.prepare(sql);
   const results = await stmt.query(queryEmbeddingString, topN);
   return results.toArray().map((row) => row.toJSON());
+}
+
+async function addConversationTurn(turn) {
+    const { sessionId, turnIndex, speaker, content } = turn;
+    const embedding = await generateEmbedding(content);
+    const embeddingString = JSON.stringify(Array.from(embedding));
+
+    const sql = `
+        INSERT INTO conversation_chunks (chunk_id, session_id, turn, speaker, content, embedding)
+        VALUES (uuid(), ?, ?, ?, ?, CAST(? AS FLOAT[384]));
+    `;
+
+    const stmt = await dbConn.prepare(sql);
+    await stmt.query(sessionId, turnIndex, speaker, content, embeddingString);
+    dbDirty = true;
+}
+
+async function getRelevantConversation(query, topN = 3) {
+    const queryEmbedding = await generateEmbedding(query);
+    const queryEmbeddingString = JSON.stringify(Array.from(queryEmbedding));
+
+    const sql = `
+        SELECT content, (embedding <-> CAST(? AS FLOAT[384])) AS distance
+        FROM conversation_chunks
+        ORDER BY distance
+        LIMIT ?;
+    `;
+
+    const stmt = await dbConn.prepare(sql);
+    const results = await stmt.query(queryEmbeddingString, topN);
+    return results.toArray().map((row) => row.toJSON());
+}
+
+async function addEntity(entity) {
+    const { entityName, entityType } = entity;
+    const sql = `
+        INSERT INTO entities (entity_id, entity_name, entity_type)
+        VALUES (uuid(), ?, ?)
+        RETURNING entity_id;
+    `;
+    const stmt = await dbConn.prepare(sql);
+    const result = await stmt.query(entityName, entityType);
+    dbDirty = true;
+    return result.toArray().map((row) => row.toJSON())[0];
+}
+
+async function addAttribute(attribute) {
+    const { entityId, attributeKey, attributeValue } = attribute;
+    const sql = `
+        INSERT INTO entity_attributes (attribute_id, entity_id, attribute_key, attribute_value)
+        VALUES (uuid(), ?, ?, ?);
+    `;
+    const stmt = await dbConn.prepare(sql);
+    await stmt.query(entityId, attributeKey, attributeValue);
+    dbDirty = true;
+}
+
+async function addGeospatialAttribute(attribute) {
+    const { entityId, geometry } = attribute;
+    const sql = `
+        INSERT INTO geospatial_attributes (geo_id, entity_id, geometry)
+        VALUES (uuid(), ?, ST_GeomFromText(?));
+    `;
+    const stmt = await dbConn.prepare(sql);
+    await stmt.query(entityId, geometry);
+    dbDirty = true;
+}
+
+async function addRelationship(relationship) {
+    const { sourceEntityId, targetEntityId, relationshipType } = relationship;
+    const sql = `
+        INSERT INTO relationships (relationship_id, source_entity_id, target_entity_id, relationship_type)
+        VALUES (uuid(), ?, ?, ?);
+    `;
+    const stmt = await dbConn.prepare(sql);
+    await stmt.query(sourceEntityId, targetEntityId, relationshipType);
+    dbDirty = true;
+}
+
+async function getEntity(entityId) {
+    const sql = `
+        SELECT
+            e.entity_id,
+            e.entity_name,
+            e.entity_type,
+            (SELECT json_group_array(json_object('attribute_key', ea.attribute_key, 'attribute_value', ea.attribute_value)) FROM entity_attributes ea WHERE ea.entity_id = e.entity_id) as attributes,
+            (SELECT json_group_array(json_object('geometry', ST_AsText(ga.geometry))) FROM geospatial_attributes ga WHERE ga.entity_id = e.entity_id) as geospatial_attributes,
+            (SELECT json_group_array(json_object('target_entity_id', r.target_entity_id, 'relationship_type', r.relationship_type)) FROM relationships r WHERE r.source_entity_id = e.entity_id) as relationships
+        FROM
+            entities e
+        WHERE
+            e.entity_id = ?;
+    `;
+
+    const stmt = await dbConn.prepare(sql);
+    const result = await stmt.query(entityId);
+    const raw = result.toArray().map((row) => row.toJSON())[0];
+
+    return {
+        entity: {
+            entity_id: raw.entity_id,
+            entity_name: raw.entity_name,
+            entity_type: raw.entity_type,
+        },
+        attributes: JSON.parse(raw.attributes || '[]'),
+        geospatial_attributes: JSON.parse(raw.geospatial_attributes || '[]'),
+        relationships: JSON.parse(raw.relationships || '[]'),
+    };
 }
 
 self.onmessage = async (event) => {
@@ -44469,8 +44698,38 @@ self.onmessage = async (event) => {
         break;
 
       case "addConversationTurn":
-        // This can be implemented to store conversation history in the database if needed
+        await addConversationTurn(args.turn);
         self.postMessage({ messageId, payload: "turn added" });
+        break;
+
+      case "getRelevantConversation":
+        const conversation = await getRelevantConversation(args.query, args.topN);
+        self.postMessage({ messageId, payload: conversation });
+        break;
+
+      case "addEntity":
+        const entity = await addEntity(args.entity);
+        self.postMessage({ messageId, payload: entity });
+        break;
+
+      case "addAttribute":
+        await addAttribute(args.attribute);
+        self.postMessage({ messageId, payload: "attribute added" });
+        break;
+
+      case "addGeospatialAttribute":
+        await addGeospatialAttribute(args.attribute);
+        self.postMessage({ messageId, payload: "geospatial attribute added" });
+        break;
+
+      case "addRelationship":
+        await addRelationship(args.relationship);
+        self.postMessage({ messageId, payload: "relationship added" });
+        break;
+
+      case "getEntity":
+        const entityInfo = await getEntity(args.entityId);
+        self.postMessage({ messageId, payload: entityInfo });
         break;
 
       default:
@@ -44481,7 +44740,6 @@ self.onmessage = async (event) => {
     self.postMessage({ messageId, error: error.message });
   }
 };
-
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } }, 1);
 

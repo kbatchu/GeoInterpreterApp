@@ -82727,7 +82727,7 @@ var MemoryManager = /*#__PURE__*/function () {
 
                 // Fallback to inline worker
                 console.log("MemoryManager: Falling back to inline worker");
-                workerCode = "\n        console.log(\"Memory Worker: Hello from the worker!\");\n\n        self.onmessage = (event) => {\n          const { messageId, command, args } = event.data;\n          \n          try {\n            switch (command) {\n              case 'initialize':\n                self.postMessage({ messageId, payload: 'initialized' });\n                break;\n              \n              case 'generateEmbedding':\n                self.postMessage({ messageId, payload: [] });\n                break;\n                \n              case 'query':\n                self.postMessage({ messageId, payload: [] });\n                break;\n                \n              case 'getRelevantTools':\n                self.postMessage({ messageId, payload: [] });\n                break;\n                \n              case 'addConversationTurn':\n                self.postMessage({ messageId, payload: 'turn added' });\n                break;\n              \n              default:\n                self.postMessage({ \n                  messageId, \n                  error: `Unknown command: ${command}` \n                });\n            }\n          } catch (error) {\n            self.postMessage({ \n              messageId, \n              error: error.message \n            });\n          }\n        };\n      ";
+                workerCode = "\n        console.log(\"Memory Worker: Hello from the worker!\");\n\n        self.onmessage = (event) => {\n          const { messageId, command, args } = event.data;\n          \n          try {\n            switch (command) {\n              case 'initialize':\n                self.postMessage({ messageId, payload: 'initialized' });\n                break;\n              \n              case 'generateEmbedding':\n                self.postMessage({ messageId, payload: [] });\n                break;\n                \n              case 'query':\n                self.postMessage({ messageId, payload: [] });\n                break;\n                \n              case 'getRelevantTools':\n                self.postMessage({ messageId, payload: [] });\n                break;\n                \n              case 'addConversationTurn':\n                self.postMessage({ messageId, payload: 'turn added' });\n                break;\n              \n              default:\n                self.postMessage({\n                  messageId,\n                  error: `Unknown command: ${command}`,\n                });\n            }\n          } catch (error) {\n            self.postMessage({\n              messageId,\n              error: error.message\n            });\n          }\n        };\n      ";
                 blob = new Blob([workerCode], {
                   type: 'application/javascript'
                 });
@@ -82883,6 +82883,56 @@ var MemoryManager = /*#__PURE__*/function () {
         turn: turn
       });
     }
+
+    /**
+     * Retrieves relevant conversation turns for a given query.
+     * @param {string} query The query to find relevant conversation for.
+     * @param {number} topN The number of conversation turns to retrieve.
+     * @returns {Promise<Array<object>>}
+     */
+  }, {
+    key: "getRelevantConversation",
+    value: function getRelevantConversation(query, topN) {
+      return this._postMessageAsync("getRelevantConversation", {
+        query: query,
+        topN: topN
+      });
+    }
+  }, {
+    key: "addEntity",
+    value: function addEntity(entity) {
+      return this._postMessageAsync("addEntity", {
+        entity: entity
+      });
+    }
+  }, {
+    key: "addAttribute",
+    value: function addAttribute(attribute) {
+      return this._postMessageAsync("addAttribute", {
+        attribute: attribute
+      });
+    }
+  }, {
+    key: "addGeospatialAttribute",
+    value: function addGeospatialAttribute(attribute) {
+      return this._postMessageAsync("addGeospatialAttribute", {
+        attribute: attribute
+      });
+    }
+  }, {
+    key: "addRelationship",
+    value: function addRelationship(relationship) {
+      return this._postMessageAsync("addRelationship", {
+        relationship: relationship
+      });
+    }
+  }, {
+    key: "getEntity",
+    value: function getEntity(entityId) {
+      return this._postMessageAsync("getEntity", {
+        entityId: entityId
+      });
+    }
   }]);
 }();
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (MemoryManager);
@@ -82901,8 +82951,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _memory_manager_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./memory_manager.js */ "./scripts/modules/orchestration/memory_manager.js");
-function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 function _regeneratorValues(e) { if (null != e) { var t = e["function" == typeof Symbol && Symbol.iterator || "@@iterator"], r = 0; if (t) return t.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) return { next: function next() { return e && r >= e.length && (e = void 0), { value: e && e[r++], done: !e }; } }; } throw new TypeError(_typeof(e) + " is not iterable"); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
@@ -83195,7 +83245,7 @@ var ReActController = /*#__PURE__*/function () {
                     case 16:
                       throw new Error("AI did not return a valid plan in planning mode.");
                     case 17:
-                      _context2.n = 28;
+                      _context2.n = 31;
                       break;
                     case 18:
                       if (!(action.name === "finish")) {
@@ -83246,7 +83296,7 @@ var ReActController = /*#__PURE__*/function () {
                         answer: action.params.answer
                       });
                       console.log("ReActController: AI finished with answer:", action.params.answer);
-                      _context2.n = 28;
+                      _context2.n = 31;
                       break;
                     case 21:
                       if (!(action.name === "escalate_tool_level")) {
@@ -83407,27 +83457,35 @@ var ReActController = /*#__PURE__*/function () {
                       } else if (action.name === "find_places_nearby") {
                         _this._findPlacesRetryCount = 0;
                       }
-                      if (typeof _observation4 === "string" && _observation4.startsWith("Tool '") && _observation4.endsWith("' not implemented in ToolExecutor.")) {
-                        console.log("ReActController: Tool not found, re-evaluating current step.");
-                        _this.scratchpad.push({
-                          type: "observation",
-                          content: _observation4
-                        });
-                        console.log("ReActController: Tool Observation:", _observation4);
-                      } else {
-                        _this.scratchpad.push({
-                          type: "observation",
-                          content: finalObservation
-                        });
-                        console.log("ReActController: Tool Observation:", finalObservation);
-                        _this.currentPlanStepIndex++;
+                      if (!(typeof _observation4 === "string" && _observation4.startsWith("Tool '") && _observation4.endsWith("' not implemented in ToolExecutor."))) {
+                        _context2.n = 28;
+                        break;
                       }
-                      _this._dispatchScratchpadUpdate();
-                    case 28:
+                      console.log("ReActController: Tool not found, re-evaluating current step.");
+                      _this.scratchpad.push({
+                        type: "observation",
+                        content: _observation4
+                      });
+                      console.log("ReActController: Tool Observation:", _observation4);
                       _context2.n = 30;
                       break;
+                    case 28:
+                      _this.scratchpad.push({
+                        type: "observation",
+                        content: finalObservation
+                      });
+                      console.log("ReActController: Tool Observation:", finalObservation);
+                      _context2.n = 29;
+                      return _this._extractAndStoreEntities(action, finalObservation);
                     case 29:
-                      _context2.p = 29;
+                      _this.currentPlanStepIndex++;
+                    case 30:
+                      _this._dispatchScratchpadUpdate();
+                    case 31:
+                      _context2.n = 33;
+                      break;
+                    case 32:
+                      _context2.p = 32;
                       _t2 = _context2.v;
                       console.error("ReActController: Error during ReAct cycle:", _t2);
                       _this.scratchpad.push({
@@ -83453,10 +83511,10 @@ var ReActController = /*#__PURE__*/function () {
                         });
                         finished = true;
                       }
-                    case 30:
+                    case 33:
                       return _context2.a(2);
                   }
-                }, _loop, null, [[4, 8], [2, 29]]);
+                }, _loop, null, [[4, 8], [2, 32]]);
               });
             case 1:
               if (!(!finished && loopCount < MAX_LOOP_ITERATIONS)) {
@@ -83508,12 +83566,116 @@ var ReActController = /*#__PURE__*/function () {
       return run;
     }()
   }, {
-    key: "_handleUserInput",
+    key: "_extractAndStoreEntities",
     value: function () {
-      var _handleUserInput2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(event) {
-        var userResponse, currentState, conversationHistory;
+      var _extractAndStoreEntities2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(action, observation) {
+        var _iterator, _step, place, entity, _entity, _entity2, _t3;
         return _regenerator().w(function (_context4) {
           while (1) switch (_context4.n) {
+            case 0:
+              if (!(action.name === 'find_places_nearby' && Array.isArray(observation))) {
+                _context4.n = 10;
+                break;
+              }
+              _iterator = _createForOfIteratorHelper(observation);
+              _context4.p = 1;
+              _iterator.s();
+            case 2:
+              if ((_step = _iterator.n()).done) {
+                _context4.n = 6;
+                break;
+              }
+              place = _step.value;
+              _context4.n = 3;
+              return this.memoryManager.addEntity({
+                entityName: place.name,
+                entityType: 'Restaurant'
+              });
+            case 3:
+              entity = _context4.v;
+              _context4.n = 4;
+              return this.memoryManager.addAttribute({
+                entityId: entity.entity_id,
+                attributeKey: 'address',
+                attributeValue: place.address
+              });
+            case 4:
+              _context4.n = 5;
+              return this.memoryManager.addGeospatialAttribute({
+                entityId: entity.entity_id,
+                geometry: "POINT(".concat(place.lon, " ").concat(place.lat, ")")
+              });
+            case 5:
+              _context4.n = 2;
+              break;
+            case 6:
+              _context4.n = 8;
+              break;
+            case 7:
+              _context4.p = 7;
+              _t3 = _context4.v;
+              _iterator.e(_t3);
+            case 8:
+              _context4.p = 8;
+              _iterator.f();
+              return _context4.f(8);
+            case 9:
+              _context4.n = 15;
+              break;
+            case 10:
+              if (!(action.name === 'geocode_address' && observation.lat && observation.lon)) {
+                _context4.n = 13;
+                break;
+              }
+              _context4.n = 11;
+              return this.memoryManager.addEntity({
+                entityName: action.params.address,
+                entityType: 'Address'
+              });
+            case 11:
+              _entity = _context4.v;
+              _context4.n = 12;
+              return this.memoryManager.addGeospatialAttribute({
+                entityId: _entity.entity_id,
+                geometry: "POINT(".concat(observation.lon, " ").concat(observation.lat, ")")
+              });
+            case 12:
+              _context4.n = 15;
+              break;
+            case 13:
+              if (!(action.name === 'reverse_geocode' && observation.address)) {
+                _context4.n = 15;
+                break;
+              }
+              _context4.n = 14;
+              return this.memoryManager.addEntity({
+                entityName: observation.address,
+                entityType: 'Address'
+              });
+            case 14:
+              _entity2 = _context4.v;
+              _context4.n = 15;
+              return this.memoryManager.addGeospatialAttribute({
+                entityId: _entity2.entity_id,
+                geometry: "POINT(".concat(action.params.longitude, " ").concat(action.params.latitude, ")")
+              });
+            case 15:
+              return _context4.a(2);
+          }
+        }, _callee3, this, [[1, 7, 8, 9]]);
+      }));
+      function _extractAndStoreEntities(_x2, _x3) {
+        return _extractAndStoreEntities2.apply(this, arguments);
+      }
+      return _extractAndStoreEntities;
+    }()
+  }, {
+    key: "_handleUserInput",
+    value: function () {
+      var _handleUserInput2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(event) {
+        var userResponse, currentState, conversationHistory;
+        return _regenerator().w(function (_context5) {
+          while (1) switch (_context5.n) {
             case 0:
               userResponse = event.detail.response;
               console.log("ReActController: Received user input:", userResponse);
@@ -83531,7 +83693,7 @@ var ReActController = /*#__PURE__*/function () {
                 agentStatus: "thinking",
                 conversationHistory: conversationHistory
               });
-              _context4.n = 1;
+              _context5.n = 1;
               return this.memoryManager.addConversationTurn({
                 speaker: "user",
                 content: userResponse,
@@ -83539,14 +83701,14 @@ var ReActController = /*#__PURE__*/function () {
                 sessionId: this.sessionId
               });
             case 1:
-              _context4.n = 2;
+              _context5.n = 2;
               return this.run();
             case 2:
-              return _context4.a(2);
+              return _context5.a(2);
           }
-        }, _callee3, this);
+        }, _callee4, this);
       }));
-      function _handleUserInput(_x2) {
+      function _handleUserInput(_x4) {
         return _handleUserInput2.apply(this, arguments);
       }
       return _handleUserInput;
@@ -83582,34 +83744,36 @@ var ReActController = /*#__PURE__*/function () {
   }, {
     key: "_assembleContext",
     value: function () {
-      var _assembleContext2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(currentGoal) {
+      var _assembleContext2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(currentGoal) {
         var currentStep,
           state,
           toolQuery,
           availableTools,
           toolNames,
           formattedHistory,
+          conversationalContext,
+          factualContext,
           messages,
           planningTools,
           systemPrompt,
           userPrompt,
           _systemPrompt,
           _userPrompt,
-          _args5 = arguments;
-        return _regenerator().w(function (_context5) {
-          while (1) switch (_context5.n) {
+          _args6 = arguments;
+        return _regenerator().w(function (_context6) {
+          while (1) switch (_context6.n) {
             case 0:
-              currentStep = _args5.length > 1 && _args5[1] !== undefined ? _args5[1] : null;
+              currentStep = _args6.length > 1 && _args6[1] !== undefined ? _args6[1] : null;
               state = this.stateManager.getState();
               toolQuery = currentGoal;
               if (currentStep && currentStep.step_type) {
                 toolQuery = "".concat(currentStep.step_type, ": ").concat(currentGoal);
               }
               console.log("Getting tools for the query:", toolQuery);
-              _context5.n = 1;
+              _context6.n = 1;
               return this._getRelevantTools(toolQuery, 15, this.currentToolLevels);
             case 1:
-              availableTools = _context5.v;
+              availableTools = _context6.v;
               toolNames = availableTools.map(function (t) {
                 return t.name;
               });
@@ -83617,6 +83781,11 @@ var ReActController = /*#__PURE__*/function () {
               formattedHistory = state.conversationHistory.map(function (msg) {
                 return "".concat(msg.role.charAt(0).toUpperCase() + msg.role.slice(1), ": ").concat(msg.content);
               }).join("\n");
+              _context6.n = 2;
+              return this.memoryManager.getRelevantConversation(this.userQuery, 3);
+            case 2:
+              conversationalContext = _context6.v;
+              factualContext = []; // In a real implementation, we would extract entities and get their facts
               messages = [];
               if (this.isPlanningMode) {
                 planningTools = availableTools.filter(function (t) {
@@ -83636,7 +83805,9 @@ var ReActController = /*#__PURE__*/function () {
                 });
               } else {
                 _systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by executing a pre-defined plan ONE STEP AT A TIME.\n\n## CRITICAL: RESPONSE FORMAT\nYou MUST respond with EXACTLY ONE Thought and ONE Action. Your entire response must follow this exact format:\n\nThought: [Your reasoning about the current step, what tool to use, and why. Be concise.]\nAction: { \"name\": \"tool_name\", \"parameters\": { \"param1\": \"value1\" } }\n\n## CRITICAL THINKING & ADAPTATION\n1.  **Analyze the last Observation:** Before deciding your next action, you MUST carefully analyze the most recent Observation in the scratchpad.\n2.  **Entity-Attribute Integrity:** When you identify an entity (e.g., a restaurant name) from an 'Observation', you MUST use other attributes (like its address) from that *same* 'Observation'. Do NOT combine an entity from an 'Observation' with an address from the user's original query in '<CONVERSATION_HISTORY>'. If an attribute like an address is missing for a found entity, your action should be to use a tool to find it.\n3.  **Assess Success:** Did the last action succeed? Did it return the expected information? For example, if you searched for something, did the observation indicate that items were found?\n4.  **Geocoding vs. Reverse Geocoding:**\n    - Use 'geocode_address' ONLY when you have a street address (text) and need its latitude and longitude.\n    - Use 'reverse_geocode' ONLY when you have latitude and longitude (numbers) and need the corresponding street address (text).\n    - NEVER pass coordinates to 'geocode_address'.\n    - NEVER pass a text address to 'reverse_geocode'.\n5.  **Adapt Your Plan:**\n    - If the observation is unexpected (e.g., \"Found 0 places\", an error message, or \"Tool not implemented\"), DO NOT blindly proceed with the original plan.\n    - Your 'Thought' must explain how you are adapting to the new information.\n    - Your next 'Action' should be a direct attempt to recover.\n        - **If you get \"Found 0 places\":** Your primary strategy is to expand the search. The system will track your attempts. If the observation says you MUST try again, then you must call the *same tool* but with a *larger search radius*. Look at the previous action in the scratchpad to see what the last radius was and increase it significantly (e.g., double it).\n        - **If a tool is not implemented:** Your thought must be to try a different, more suitable tool from the available list to achieve the same goal.\n        - **If you need to geocode an address that appears incomplete:** Do not immediately use 'ask_user'. First, attempt to use the 'find_places_nearby' tool with the partial address in the 'amenity' parameter. The results may contain a complete, geocodable address. If so, use that address in a subsequent 'geocode_address' action. Only ask the user for clarification if this approach fails.\n        - **If you are truly stuck on a step for other reasons:** Use the 'ask_user' tool for clarification.\n    - Only if the last observation was successful and expected should you proceed to the next step of the plan.\n\n## FINISHING THE TASK\nWhen all steps are complete and you have gathered all necessary information, you MUST use the 'finish' tool.\n- **Thought:** Your thought should summarize the key findings from the scratchpad.\n- **Action:** The 'answer' parameter in the 'finish' tool MUST contain the complete, final answer for the user, synthesized from the observations.\n- **Example:**\n  Thought: The scratchpad shows that the geocoding was successful and the subsequent search found three restaurants. I will now format these results into a final answer for the user.\n  Action: { \"name\": \"finish\", \"parameters\": { \"answer\": \"I found 3 Indian restaurants near your location: [List of restaurants and their details].\" } }\n\n## AVAILABLE ACTIONS\n- Use one of the provided tools.\n- Use the 'finish(answer=...)' tool when you have the final answer.\n- Use the 'escalate_tool_level' tool if the current tools are insufficient.\n- Use the 'ask_user' tool if you need clarification from the user.";
-                _userPrompt = "You have access to the following tools to help you. Select ONE tool to achieve the current goal.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(availableTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is the full conversation history for context:\n<CONVERSATION_HISTORY>\n").concat(formattedHistory || "No previous conversation history.", " \n</CONVERSATION_HISTORY>\n\nHere is the user's original request for context:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the current goal for this step:\n<CURRENT_GOAL>\n").concat(currentGoal, "\n</CURRENT_GOAL>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
+                _userPrompt = "You have access to the following tools to help you. Select ONE tool to achieve the current goal.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(availableTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\n### Conversation History\n").concat(conversationalContext.map(function (c) {
+                  return c.content;
+                }).join('\n') || "No relevant conversation history.", " \n\n### Known Facts from Knowledge Base\n").concat(factualContext.length > 0 ? JSON.stringify(factualContext, null, 2) : "No relevant facts found in knowledge base.", " \n\nHere is the full conversation history for context:\n<CONVERSATION_HISTORY>\n").concat(formattedHistory || "No previous conversation history.", " \n</CONVERSATION_HISTORY>\n\nHere is the user's original request for context:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the current goal for this step:\n<CURRENT_GOAL>\n").concat(currentGoal, "\n</CURRENT_GOAL>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
                   return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
                 }).join("\n"), "\n\nThought:");
                 messages.push({
@@ -83648,14 +83819,14 @@ var ReActController = /*#__PURE__*/function () {
                   content: _userPrompt
                 });
               }
-              return _context5.a(2, {
+              return _context6.a(2, {
                 messages: messages,
                 availableTools: availableTools
               });
           }
-        }, _callee4, this);
+        }, _callee5, this);
       }));
-      function _assembleContext(_x3) {
+      function _assembleContext(_x5) {
         return _assembleContext2.apply(this, arguments);
       }
       return _assembleContext;
@@ -83663,29 +83834,29 @@ var ReActController = /*#__PURE__*/function () {
   }, {
     key: "_getRelevantTools",
     value: function () {
-      var _getRelevantTools2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(query) {
+      var _getRelevantTools2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(query) {
         var topN,
           levels,
           dbToolsRaw,
           dbTools,
           internalTools,
           uniqueTools,
-          _iterator,
-          _step,
+          _iterator2,
+          _step2,
           _tool,
           _i,
           _internalTools,
           tool,
-          _args6 = arguments;
-        return _regenerator().w(function (_context6) {
-          while (1) switch (_context6.n) {
+          _args7 = arguments;
+        return _regenerator().w(function (_context7) {
+          while (1) switch (_context7.n) {
             case 0:
-              topN = _args6.length > 1 && _args6[1] !== undefined ? _args6[1] : 15;
-              levels = _args6.length > 2 && _args6[2] !== undefined ? _args6[2] : [1, 2, 3];
-              _context6.n = 1;
+              topN = _args7.length > 1 && _args7[1] !== undefined ? _args7[1] : 15;
+              levels = _args7.length > 2 && _args7[2] !== undefined ? _args7[2] : [1, 2, 3];
+              _context7.n = 1;
               return this.memoryManager.getRelevantTools(query, topN, levels);
             case 1:
-              dbToolsRaw = _context6.v;
+              dbToolsRaw = _context7.v;
               console.log("ReActController: Tools from DB:", JSON.stringify(dbToolsRaw, null, 2));
               dbTools = dbToolsRaw.map(function (tool) {
                 return {
@@ -83784,26 +83955,26 @@ var ReActController = /*#__PURE__*/function () {
                 }
               });
               uniqueTools = new Map();
-              _iterator = _createForOfIteratorHelper(dbTools);
+              _iterator2 = _createForOfIteratorHelper(dbTools);
               try {
-                for (_iterator.s(); !(_step = _iterator.n()).done;) {
-                  _tool = _step.value;
+                for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+                  _tool = _step2.value;
                   uniqueTools.set(_tool.name, _tool);
                 }
               } catch (err) {
-                _iterator.e(err);
+                _iterator2.e(err);
               } finally {
-                _iterator.f();
+                _iterator2.f();
               }
               for (_i = 0, _internalTools = internalTools; _i < _internalTools.length; _i++) {
                 tool = _internalTools[_i];
                 uniqueTools.set(tool.name, tool);
               }
-              return _context6.a(2, Array.from(uniqueTools.values()));
+              return _context7.a(2, Array.from(uniqueTools.values()));
           }
-        }, _callee5, this);
+        }, _callee6, this);
       }));
-      function _getRelevantTools(_x4) {
+      function _getRelevantTools(_x6) {
         return _getRelevantTools2.apply(this, arguments);
       }
       return _getRelevantTools;
@@ -84000,73 +84171,73 @@ var ReActController = /*#__PURE__*/function () {
   }, {
     key: "_correctPlanStepTypes",
     value: function () {
-      var _correctPlanStepTypes2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7(plan) {
+      var _correctPlanStepTypes2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8(plan) {
         var _this2 = this;
         var SIMILARITY_THRESHOLD, correctedPlanPromises;
-        return _regenerator().w(function (_context8) {
-          while (1) switch (_context8.n) {
+        return _regenerator().w(function (_context9) {
+          while (1) switch (_context9.n) {
             case 0:
               SIMILARITY_THRESHOLD = 0.6;
               correctedPlanPromises = plan.map(/*#__PURE__*/function () {
-                var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(step) {
-                  var descriptionEmbedding, descriptionEmbeddingString, querySql, result, similarity, _t3;
-                  return _regenerator().w(function (_context7) {
-                    while (1) switch (_context7.n) {
+                var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7(step) {
+                  var descriptionEmbedding, descriptionEmbeddingString, querySql, result, similarity, _t4;
+                  return _regenerator().w(function (_context8) {
+                    while (1) switch (_context8.n) {
                       case 0:
                         if (["data_retrieval", "calculation", "filter", "aggregation"].includes(step.step_type)) {
-                          _context7.n = 1;
+                          _context8.n = 1;
                           break;
                         }
-                        return _context7.a(2, step);
+                        return _context8.a(2, step);
                       case 1:
                         console.log("ReActController: Evaluating step ".concat(step.step, " for geospatial correction."));
-                        _context7.p = 2;
-                        _context7.n = 3;
+                        _context8.p = 2;
+                        _context8.n = 3;
                         return _this2.memoryManager.generateEmbedding(step.description);
                       case 3:
-                        descriptionEmbedding = _context7.v;
+                        descriptionEmbedding = _context8.v;
                         descriptionEmbeddingString = JSON.stringify(Array.from(descriptionEmbedding));
                         querySql = "\n        SELECT\n          array_cosine_distance(\n              embedding,\n              CAST('".concat(descriptionEmbeddingString, "' AS DOUBLE[384])\n          ) AS distance\n        FROM\n          tool_registry_db.geospatial_term_embeddings\n        ORDER BY\n          distance ASC\n        LIMIT 1;\n      ");
-                        _context7.n = 4;
+                        _context8.n = 4;
                         return _this2.memoryManager.query(querySql);
                       case 4:
-                        result = _context7.v;
+                        result = _context8.v;
                         if (!(result && result.length > 0)) {
-                          _context7.n = 5;
+                          _context8.n = 5;
                           break;
                         }
                         similarity = 1 - result[0].distance;
                         console.log("ReActController: Step ".concat(step.step, " similarity to geospatial terms: ").concat(similarity.toFixed(4)));
                         if (!(similarity >= SIMILARITY_THRESHOLD)) {
-                          _context7.n = 5;
+                          _context8.n = 5;
                           break;
                         }
                         console.log("ReActController: Correcting step ".concat(step.step, " to 'geospatial'."));
-                        return _context7.a(2, _objectSpread(_objectSpread({}, step), {}, {
+                        return _context8.a(2, _objectSpread(_objectSpread({}, step), {}, {
                           step_type: "geospatial"
                         }));
                       case 5:
-                        _context7.n = 7;
+                        _context8.n = 7;
                         break;
                       case 6:
-                        _context7.p = 6;
-                        _t3 = _context7.v;
-                        console.error("ReActController: Could not query geospatial term embeddings. Error: ".concat(_t3.message));
-                        return _context7.a(2, step);
+                        _context8.p = 6;
+                        _t4 = _context8.v;
+                        console.error("ReActController: Could not query geospatial term embeddings. Error: ".concat(_t4.message));
+                        return _context8.a(2, step);
                       case 7:
-                        return _context7.a(2, step);
+                        return _context8.a(2, step);
                     }
-                  }, _callee6, null, [[2, 6]]);
+                  }, _callee7, null, [[2, 6]]);
                 }));
-                return function (_x6) {
+                return function (_x8) {
                   return _ref.apply(this, arguments);
                 };
               }());
-              return _context8.a(2, Promise.all(correctedPlanPromises));
+              return _context9.a(2, Promise.all(correctedPlanPromises));
           }
-        }, _callee7);
+        }, _callee8);
       }));
-      function _correctPlanStepTypes(_x5) {
+      function _correctPlanStepTypes(_x7) {
         return _correctPlanStepTypes2.apply(this, arguments);
       }
       return _correctPlanStepTypes;
