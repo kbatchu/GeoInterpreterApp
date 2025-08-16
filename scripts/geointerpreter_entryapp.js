@@ -84148,31 +84148,27 @@ var ReActController = /*#__PURE__*/function () {
           thought = cleanResponse;
         }
         var thinkingPrefix = "THINKING:"; // New prefix for AI's internal thoughts
+
         if (cleanResponse.startsWith(thinkingPrefix)) {
           thought = cleanResponse.substring(thinkingPrefix.length).trim();
-          // Set a special action to indicate the AI is still thinking
           action = {
             name: "ai_thinking",
             params: {
               message: thought
             }
           };
-        } else if (cleanResponse.startsWith(_thoughtPrefix)) {
-          // If only "Thought:" is present, treat it as an AI thinking state
-          thought = cleanResponse.substring(_thoughtPrefix.length).trim();
+        } else {
+          // If "Action:" is not found and it's not a "THINKING:" response,
+          // assume the entire response is a thought.
+          if (cleanResponse.startsWith(_thoughtPrefix)) {
+            thought = cleanResponse.substring(_thoughtPrefix.length).trim();
+          } else {
+            thought = cleanResponse; // Assume the entire response is the thought
+          }
           action = {
             name: "ai_thinking_only_thought",
             params: {
               message: thought
-            }
-          };
-        } else {
-          // If neither Thought nor Action is clearly present, it's a parse error.
-          action = {
-            name: "parse_error",
-            params: {
-              error: "AI response did not contain a recognizable Thought or Action.",
-              response: cleanResponse
             }
           };
         }
