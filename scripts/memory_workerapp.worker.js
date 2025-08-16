@@ -44448,7 +44448,7 @@ async function initializeDatabase() {
 async function saveDatabaseToIndexedDB() {
     if (!dbDirty) return;
 
-    const buffer = await db.exportFileBuffer("main");
+        const buffer = await db.copyFileToBuffer("main.db");
     const request = indexedDB.open("GeoInterpreterDB", 1);
 
     request.onupgradeneeded = (event) => {
