@@ -83059,7 +83059,7 @@ var ReActController = /*#__PURE__*/function () {
               REPETITION_LIMIT = 3;
               lastActionHistory = [];
               _loop = /*#__PURE__*/_regenerator().m(function _loop() {
-                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, observation, correctedPlan, _errorMsg, _currentState2, conversationHistory, _observation, questionText, _errorMsg2, standardizedAction, _currentState3, _observation2, chosenTool, currentStepType, _observation3, executionParams, _observation4, finalObservation, geocodeCoordErrorRegex, match, lat, lon, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
+                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, observation, correctedPlan, _errorMsg, _errorMsg2, _currentState2, conversationHistory, _observation, questionText, _errorMsg3, standardizedAction, _currentState3, _observation2, chosenTool, currentStepType, _observation3, executionParams, _observation4, finalObservation, geocodeCoordErrorRegex, match, lat, lon, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
                 return _regenerator().w(function (_context2) {
                   while (1) switch (_context2.n) {
                     case 0:
@@ -83245,11 +83245,11 @@ var ReActController = /*#__PURE__*/function () {
                     case 16:
                       throw new Error("AI did not return a valid plan in planning mode.");
                     case 17:
-                      _context2.n = 31;
+                      _context2.n = 32;
                       break;
                     case 18:
                       if (!(action.name === "finish")) {
-                        _context2.n = 21;
+                        _context2.n = 22;
                         break;
                       }
                       if (!(!action.params.answer || typeof action.params.answer !== "string" || action.params.answer.trim() === "")) {
@@ -83269,6 +83269,23 @@ var ReActController = /*#__PURE__*/function () {
                       _this._dispatchScratchpadUpdate();
                       return _context2.a(2, 0);
                     case 19:
+                      if (!action.params.answer.includes("[Insert")) {
+                        _context2.n = 20;
+                        break;
+                      }
+                      _errorMsg2 = "Self-correction: The generated answer is incomplete and contains placeholder text. I must regenerate the answer with the complete information.";
+                      console.error("ReActController: ".concat(_errorMsg2));
+                      _this.scratchpad.push({
+                        type: "action",
+                        content: action
+                      });
+                      _this.scratchpad.push({
+                        type: "observation",
+                        content: _errorMsg2
+                      });
+                      _this._dispatchScratchpadUpdate();
+                      return _context2.a(2, 0);
+                    case 20:
                       finished = true;
                       _this.scratchpad.push({
                         type: "action",
@@ -83284,23 +83301,23 @@ var ReActController = /*#__PURE__*/function () {
                         agentStatus: "idle",
                         conversationHistory: conversationHistory
                       });
-                      _context2.n = 20;
+                      _context2.n = 21;
                       return _this.memoryManager.addConversationTurn({
                         speaker: "assistant",
                         content: action.params.answer,
                         turn: conversationHistory.length,
                         sessionId: _this.sessionId
                       });
-                    case 20:
+                    case 21:
                       _this.communicationBus.dispatchEvent("finalAnswerReady", {
                         answer: action.params.answer
                       });
                       console.log("ReActController: AI finished with answer:", action.params.answer);
-                      _context2.n = 31;
+                      _context2.n = 32;
                       break;
-                    case 21:
+                    case 22:
                       if (!(action.name === "escalate_tool_level")) {
-                        _context2.n = 22;
+                        _context2.n = 23;
                         break;
                       }
                       _this.currentToolLevels = [2, 3];
@@ -83316,29 +83333,29 @@ var ReActController = /*#__PURE__*/function () {
                       _this._dispatchScratchpadUpdate();
                       console.log("ReActController: Escalating to lower-level tools.");
                       return _context2.a(2, 0);
-                    case 22:
+                    case 23:
                       if (!(action.name === "ask_user")) {
-                        _context2.n = 24;
+                        _context2.n = 25;
                         break;
                       }
                       questionText = action.params.question || action.params.prompt;
                       if (!(!questionText || typeof questionText !== "string" || questionText.trim() === "")) {
-                        _context2.n = 23;
+                        _context2.n = 24;
                         break;
                       }
-                      _errorMsg2 = "Invalid action: 'ask_user' tool was called without a valid 'question' or 'prompt' parameter.";
-                      console.error("ReActController: ".concat(_errorMsg2));
+                      _errorMsg3 = "Invalid action: 'ask_user' tool was called without a valid 'question' or 'prompt' parameter.";
+                      console.error("ReActController: ".concat(_errorMsg3));
                       _this.scratchpad.push({
                         type: "action",
                         content: action
                       });
                       _this.scratchpad.push({
                         type: "observation",
-                        content: _errorMsg2
+                        content: _errorMsg3
                       });
                       _this._dispatchScratchpadUpdate();
                       return _context2.a(2, 0);
-                    case 23:
+                    case 24:
                       standardizedAction = {
                         name: "ask_user",
                         params: {
@@ -83366,9 +83383,9 @@ var ReActController = /*#__PURE__*/function () {
                       return _context2.a(2, {
                         v: void 0
                       });
-                    case 24:
+                    case 25:
                       if (!(action.name === "parse_error")) {
-                        _context2.n = 25;
+                        _context2.n = 26;
                         break;
                       }
                       _observation2 = "Parse error occurred. The AI response format was incorrect. Error: ".concat(action.params.error);
@@ -83383,13 +83400,13 @@ var ReActController = /*#__PURE__*/function () {
                       _this._dispatchScratchpadUpdate();
                       console.log("ReActController: Parse error, prompting AI to correct format.");
                       return _context2.a(2, 0);
-                    case 25:
+                    case 26:
                       chosenTool = availableTools.find(function (t) {
                         return t.name === action.name;
                       });
                       currentStepType = currentStep ? currentStep.step_type : null;
                       if (!(currentStepType === "geospatial" && chosenTool && !["geospatial", "data_retrieval"].includes(chosenTool.category.toLowerCase()))) {
-                        _context2.n = 26;
+                        _context2.n = 27;
                         break;
                       }
                       console.warn("ReActController: Mismatch detected! Step type is 'geospatial' but chosen tool '".concat(action.name, "' is category '").concat(chosenTool.category, "'."));
@@ -83408,7 +83425,7 @@ var ReActController = /*#__PURE__*/function () {
                       });
                       _this._dispatchScratchpadUpdate();
                       return _context2.a(2, 0);
-                    case 26:
+                    case 27:
                       _this.scratchpad.push({
                         type: "action",
                         content: action
@@ -83433,9 +83450,9 @@ var ReActController = /*#__PURE__*/function () {
                         };
                         console.log("ReActController: Remapped parameters:", executionParams);
                       }
-                      _context2.n = 27;
+                      _context2.n = 28;
                       return _this.toolExecutor.execute(action.name, executionParams, _this.stateManager.getState());
-                    case 27:
+                    case 28:
                       _observation4 = _context2.v;
                       finalObservation = _observation4; // Regex to match the specific error message from geocodeAddress for coordinates
                       geocodeCoordErrorRegex = /^Invalid input: "(-?\d+\.\d+),\s*(-?\d+\.\d+)" looks like coordinates\. To convert coordinates to a text address, you MUST use the 'reverse_geocode' tool\.$/;
@@ -83458,7 +83475,7 @@ var ReActController = /*#__PURE__*/function () {
                         _this._findPlacesRetryCount = 0;
                       }
                       if (!(typeof _observation4 === "string" && _observation4.startsWith("Tool '") && _observation4.endsWith("' not implemented in ToolExecutor."))) {
-                        _context2.n = 28;
+                        _context2.n = 29;
                         break;
                       }
                       console.log("ReActController: Tool not found, re-evaluating current step.");
@@ -83467,25 +83484,25 @@ var ReActController = /*#__PURE__*/function () {
                         content: _observation4
                       });
                       console.log("ReActController: Tool Observation:", _observation4);
-                      _context2.n = 30;
+                      _context2.n = 31;
                       break;
-                    case 28:
+                    case 29:
                       _this.scratchpad.push({
                         type: "observation",
                         content: finalObservation
                       });
                       console.log("ReActController: Tool Observation:", finalObservation);
-                      _context2.n = 29;
+                      _context2.n = 30;
                       return _this._extractAndStoreEntities(action, finalObservation);
-                    case 29:
-                      _this.currentPlanStepIndex++;
                     case 30:
-                      _this._dispatchScratchpadUpdate();
+                      _this.currentPlanStepIndex++;
                     case 31:
-                      _context2.n = 33;
-                      break;
+                      _this._dispatchScratchpadUpdate();
                     case 32:
-                      _context2.p = 32;
+                      _context2.n = 34;
+                      break;
+                    case 33:
+                      _context2.p = 33;
                       _t2 = _context2.v;
                       console.error("ReActController: Error during ReAct cycle:", _t2);
                       _this.scratchpad.push({
@@ -83511,10 +83528,10 @@ var ReActController = /*#__PURE__*/function () {
                         });
                         finished = true;
                       }
-                    case 33:
+                    case 34:
                       return _context2.a(2);
                   }
-                }, _loop, null, [[4, 8], [2, 32]]);
+                }, _loop, null, [[4, 8], [2, 33]]);
               });
             case 1:
               if (!(!finished && loopCount < MAX_LOOP_ITERATIONS)) {
