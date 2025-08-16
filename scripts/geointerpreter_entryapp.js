@@ -83967,22 +83967,22 @@ var ReActController = /*#__PURE__*/function () {
           thought = cleanResponse;
         }
 
-        // If we are in planning mode and no action was found, it's a parse error
-        if (this.isPlanningMode) {
+        // If no action was found, but a thought was provided, treat it as a thought-only response
+        // and default to a 'continue' action to allow the AI to self-correct.
+        if (cleanResponse.startsWith(_thoughtPrefix)) {
+          thought = cleanResponse.substring(_thoughtPrefix.length).trim();
           action = {
-            name: "parse_error",
+            name: "continue",
             params: {
-              error: "AI did not provide an 'Action:' in planning mode.",
-              response: cleanResponse
+              error: "AI provided only a Thought, no Action. Continuing to allow self-correction."
             }
           };
         } else {
-          // If not in planning mode, and no action was found, it's also a parse error
-          // as an action is expected for plan execution.
+          // If neither Thought nor Action is clearly present, it's a parse error.
           action = {
             name: "parse_error",
             params: {
-              error: "AI did not provide an 'Action:' as expected for plan execution.",
+              error: "AI response did not contain a recognizable Thought or Action.",
               response: cleanResponse
             }
           };
