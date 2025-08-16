@@ -83857,7 +83857,6 @@ var ReActController = /*#__PURE__*/function () {
               return this.memoryManager.getRelevantTools(query, topN, levels);
             case 1:
               dbToolsRaw = _context7.v;
-              console.log("ReActController: Tools from DB:", JSON.stringify(dbToolsRaw, null, 2));
               dbTools = dbToolsRaw.map(function (tool) {
                 return {
                   name: tool.tool_id,
