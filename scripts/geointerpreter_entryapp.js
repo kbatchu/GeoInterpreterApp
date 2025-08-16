@@ -84284,7 +84284,8 @@ function geocodeAddress(_x2) {
 }
 
 /**
- * Reverse geocodes geographic coordinates to a street address using the Nominatim API.
+ * Converts geographic coordinates (latitude and longitude) into a precise street address.
+ * This tool is ideal for obtaining the exact address of a known location when its coordinates are available.
  * @param {number} latitude The latitude to reverse geocode.
  * @param {number} longitude The longitude to reverse geocode.
  * @returns {Promise<object>} A promise that resolves to an object containing the address string.
@@ -84455,7 +84456,8 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
 // c:\Kiran\Work\GIS\DATAVIZ\GeoInterpreter\scripts\modules\tools\overpass_tools.js
 
 /**
- * Finds places of interest near a given geographic point using the Overpass API.
+ * Discovers and lists points of interest (e.g., restaurants, hospitals) near a specified geographic location.
+ * This tool is designed for finding places based on categories and proximity, not for retrieving the precise street address of a known set of coordinates.
  * @param {object} params - The parameters for the search.
  * @param {number} params.latitude - The latitude of the center point.
  * @param {number} params.longitude - The longitude of the center point.
