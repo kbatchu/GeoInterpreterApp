@@ -44468,6 +44468,24 @@ async function saveDatabaseToIndexedDB() {
     };
 }
 
+async function deleteDatabaseFromIndexedDB() {
+    const request = indexedDB.open("GeoInterpreterDB", 1);
+
+    request.onsuccess = (event) => {
+        const indexedDB_db = event.target.result;
+        const transaction = indexedDB_db.transaction(["files"], "readwrite");
+        const store = transaction.objectStore("files");
+        store.delete("main.db");
+        transaction.oncomplete = () => {
+            console.log("Corrupted database deleted from IndexedDB");
+        };
+    };
+
+    request.onerror = (event) => {
+        console.error("Error deleting database from IndexedDB:", event.target.error);
+    };
+}
+
 async function loadDatabaseFromIndexedDB() {
     const request = indexedDB.open("GeoInterpreterDB", 1);
 
@@ -44485,9 +44503,15 @@ async function loadDatabaseFromIndexedDB() {
         getRequest.onsuccess = async (event) => {
             if (event.target.result) {
                 const buffer = event.target.result.buffer;
-                                await db.registerFileBuffer("main.db", new Uint8Array(buffer));
-                await dbConn.query("ATTACH 'main.db' AS persisted_db;");
-                console.log("Database loaded from IndexedDB");
+                try {
+                    await db.registerFileBuffer("main.db", new Uint8Array(buffer));
+                    await dbConn.query("ATTACH 'main.db' AS persisted_db;");
+                    console.log("Database loaded from IndexedDB");
+                } catch (e) {
+                    console.error("Error loading database from IndexedDB, likely corrupted:", e);
+                    await deleteDatabaseFromIndexedDB();
+                    console.log("Attempting to re-initialize database without loading from IndexedDB.");
+                }
             }
         };
     };
@@ -44741,6 +44765,7 @@ self.onmessage = async (event) => {
     self.postMessage({ messageId, error: error.message });
   }
 };
+
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } }, 1);
 
