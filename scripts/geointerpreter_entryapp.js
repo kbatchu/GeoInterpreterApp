@@ -82974,8 +82974,7 @@ function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" 
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 
 
-var MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT = 10;
-var MAX_ENTRY_LENGTH = 200; // New constant for truncating long entries
+var MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT = 30;
 var ReActController = /*#__PURE__*/function () {
   function ReActController(stateManager, communicationBus, aiCore, toolExecutor, memoryManager) {
     _classCallCheck(this, ReActController);
@@ -83148,8 +83147,19 @@ var ReActController = /*#__PURE__*/function () {
                       console.log("ReActController: AI Thought:", thought);
                       _this._dispatchScratchpadUpdate();
                       console.log("ReActController: AI Action:", action);
+
+                      // --- NEW LOGIC START ---
+                      if (!(action.name === "ai_thinking")) {
+                        _context2.n = 10;
+                        break;
+                      }
+                      console.log("ReActController: AI is still thinking. Continuing loop.");
+                      // No observation is added for 'ai_thinking' as it's not an action that produces an observable outcome.
+                      // The loop will simply continue, allowing the AI to generate a proper action next.
+                      return _context2.a(2, 0);
+                    case 10:
                       if (!(action.name !== "continue" && action.name !== "parse_error")) {
-                        _context2.n = 11;
+                        _context2.n = 12;
                         break;
                       }
                       actionSignature = JSON.stringify({
@@ -83161,7 +83171,7 @@ var ReActController = /*#__PURE__*/function () {
                         lastActionHistory.shift();
                       }
                       if (!(lastActionHistory.length === REPETITION_LIMIT && new Set(lastActionHistory).size === 1)) {
-                        _context2.n = 10;
+                        _context2.n = 11;
                         break;
                       }
                       errorMsg = "Error: The agent appears to be stuck in a loop, repeating the action '".concat(action.name, "'. Halting execution.");
@@ -83179,14 +83189,14 @@ var ReActController = /*#__PURE__*/function () {
                       });
                       finished = true;
                       return _context2.a(2, 0);
-                    case 10:
-                      _context2.n = 12;
-                      break;
                     case 11:
-                      lastActionHistory = [];
+                      _context2.n = 13;
+                      break;
                     case 12:
+                      lastActionHistory = [];
+                    case 13:
                       if (!(action.name === "continue")) {
-                        _context2.n = 13;
+                        _context2.n = 14;
                         break;
                       }
                       _this.scratchpad.push({
@@ -83194,13 +83204,13 @@ var ReActController = /*#__PURE__*/function () {
                         content: "No valid action was taken. Please provide an action in the correct format."
                       });
                       return _context2.a(2, 0);
-                    case 13:
+                    case 14:
                       if (!_this.isPlanningMode) {
-                        _context2.n = 18;
+                        _context2.n = 19;
                         break;
                       }
                       if (!(action.name === "parse_error")) {
-                        _context2.n = 14;
+                        _context2.n = 15;
                         break;
                       }
                       // Handle parse_error specifically in planning mode
@@ -83216,14 +83226,14 @@ var ReActController = /*#__PURE__*/function () {
                       _this._dispatchScratchpadUpdate();
                       console.log("ReActController: Parse error in planning mode, prompting AI to correct format.");
                       return _context2.a(2, 0);
-                    case 14:
+                    case 15:
                       if (!(action.name === "create_plan" && action.params.plan)) {
-                        _context2.n = 16;
+                        _context2.n = 17;
                         break;
                       }
-                      _context2.n = 15;
+                      _context2.n = 16;
                       return _this._correctPlanStepTypes(action.params.plan);
-                    case 15:
+                    case 16:
                       correctedPlan = _context2.v;
                       _this.stateManager.updateState({
                         activePlan: {
@@ -83241,20 +83251,20 @@ var ReActController = /*#__PURE__*/function () {
                       });
                       _this._dispatchScratchpadUpdate();
                       console.log("ReActController: Plan created and stored.");
-                      _context2.n = 17;
+                      _context2.n = 18;
                       break;
-                    case 16:
-                      throw new Error("AI did not return a valid plan in planning mode.");
                     case 17:
-                      _context2.n = 31;
-                      break;
+                      throw new Error("AI did not return a valid plan in planning mode.");
                     case 18:
+                      _context2.n = 32;
+                      break;
+                    case 19:
                       if (!(action.name === "finish")) {
-                        _context2.n = 21;
+                        _context2.n = 22;
                         break;
                       }
                       if (!(!action.params.answer || typeof action.params.answer !== "string" || action.params.answer.trim() === "")) {
-                        _context2.n = 19;
+                        _context2.n = 20;
                         break;
                       }
                       _errorMsg = "Invalid action: 'finish' tool was called without a valid 'answer' parameter.";
@@ -83269,7 +83279,7 @@ var ReActController = /*#__PURE__*/function () {
                       });
                       _this._dispatchScratchpadUpdate();
                       return _context2.a(2, 0);
-                    case 19:
+                    case 20:
                       finished = true;
                       _this.scratchpad.push({
                         type: "action",
@@ -83285,23 +83295,23 @@ var ReActController = /*#__PURE__*/function () {
                         agentStatus: "idle",
                         conversationHistory: conversationHistory
                       });
-                      _context2.n = 20;
+                      _context2.n = 21;
                       return _this.memoryManager.addConversationTurn({
                         speaker: "assistant",
                         content: action.params.answer,
                         turn: conversationHistory.length,
                         sessionId: _this.sessionId
                       });
-                    case 20:
+                    case 21:
                       _this.communicationBus.dispatchEvent("finalAnswerReady", {
                         answer: action.params.answer
                       });
                       console.log("ReActController: AI finished with answer:", action.params.answer);
-                      _context2.n = 31;
+                      _context2.n = 32;
                       break;
-                    case 21:
+                    case 22:
                       if (!(action.name === "escalate_tool_level")) {
-                        _context2.n = 22;
+                        _context2.n = 23;
                         break;
                       }
                       _this.currentToolLevels = [2, 3];
@@ -83317,14 +83327,14 @@ var ReActController = /*#__PURE__*/function () {
                       _this._dispatchScratchpadUpdate();
                       console.log("ReActController: Escalating to lower-level tools.");
                       return _context2.a(2, 0);
-                    case 22:
+                    case 23:
                       if (!(action.name === "ask_user")) {
-                        _context2.n = 24;
+                        _context2.n = 25;
                         break;
                       }
                       questionText = action.params.question || action.params.prompt;
                       if (!(!questionText || typeof questionText !== "string" || questionText.trim() === "")) {
-                        _context2.n = 23;
+                        _context2.n = 24;
                         break;
                       }
                       _errorMsg2 = "Invalid action: 'ask_user' tool was called without a valid 'question' or 'prompt' parameter.";
@@ -83339,7 +83349,7 @@ var ReActController = /*#__PURE__*/function () {
                       });
                       _this._dispatchScratchpadUpdate();
                       return _context2.a(2, 0);
-                    case 23:
+                    case 24:
                       standardizedAction = {
                         name: "ask_user",
                         params: {
@@ -83367,9 +83377,9 @@ var ReActController = /*#__PURE__*/function () {
                       return _context2.a(2, {
                         v: void 0
                       });
-                    case 24:
+                    case 25:
                       if (!(action.name === "parse_error")) {
-                        _context2.n = 25;
+                        _context2.n = 26;
                         break;
                       }
                       _observation2 = "Parse error occurred. The AI response format was incorrect. Error: ".concat(action.params.error);
@@ -83384,13 +83394,13 @@ var ReActController = /*#__PURE__*/function () {
                       _this._dispatchScratchpadUpdate();
                       console.log("ReActController: Parse error, prompting AI to correct format.");
                       return _context2.a(2, 0);
-                    case 25:
+                    case 26:
                       chosenTool = availableTools.find(function (t) {
                         return t.name === action.name;
                       });
                       currentStepType = currentStep ? currentStep.step_type : null;
                       if (!(currentStepType === "geospatial" && chosenTool && !["geospatial", "data_retrieval"].includes(chosenTool.category.toLowerCase()))) {
-                        _context2.n = 26;
+                        _context2.n = 27;
                         break;
                       }
                       console.warn("ReActController: Mismatch detected! Step type is 'geospatial' but chosen tool '".concat(action.name, "' is category '").concat(chosenTool.category, "'."));
@@ -83409,7 +83419,7 @@ var ReActController = /*#__PURE__*/function () {
                       });
                       _this._dispatchScratchpadUpdate();
                       return _context2.a(2, 0);
-                    case 26:
+                    case 27:
                       _this.scratchpad.push({
                         type: "action",
                         content: action
@@ -83434,9 +83444,9 @@ var ReActController = /*#__PURE__*/function () {
                         };
                         console.log("ReActController: Remapped parameters:", executionParams);
                       }
-                      _context2.n = 27;
+                      _context2.n = 28;
                       return _this.toolExecutor.execute(action.name, executionParams, _this.stateManager.getState());
-                    case 27:
+                    case 28:
                       _observation4 = _context2.v;
                       finalObservation = _observation4; // Regex to match the specific error message from geocodeAddress for coordinates
                       geocodeCoordErrorRegex = /^Invalid input: "(-?\d+\.\d+),\s*(-?\d+\.\d+)" looks like coordinates\. To convert coordinates to a text address, you MUST use the 'reverse_geocode' tool\.$/;
@@ -83459,7 +83469,7 @@ var ReActController = /*#__PURE__*/function () {
                         _this._findPlacesRetryCount = 0;
                       }
                       if (!(typeof _observation4 === "string" && _observation4.startsWith("Tool '") && _observation4.endsWith("' not implemented in ToolExecutor."))) {
-                        _context2.n = 28;
+                        _context2.n = 29;
                         break;
                       }
                       console.log("ReActController: Tool not found, re-evaluating current step.");
@@ -83468,25 +83478,25 @@ var ReActController = /*#__PURE__*/function () {
                         content: _observation4
                       });
                       console.log("ReActController: Tool Observation:", _observation4);
-                      _context2.n = 30;
+                      _context2.n = 31;
                       break;
-                    case 28:
+                    case 29:
                       _this.scratchpad.push({
                         type: "observation",
                         content: finalObservation
                       });
                       console.log("ReActController: Tool Observation:", finalObservation);
-                      _context2.n = 29;
+                      _context2.n = 30;
                       return _this._extractAndStoreEntities(action, finalObservation);
-                    case 29:
-                      _this.currentPlanStepIndex++;
                     case 30:
-                      _this._dispatchScratchpadUpdate();
+                      _this.currentPlanStepIndex++;
                     case 31:
-                      _context2.n = 33;
-                      break;
+                      _this._dispatchScratchpadUpdate();
                     case 32:
-                      _context2.p = 32;
+                      _context2.n = 34;
+                      break;
+                    case 33:
+                      _context2.p = 33;
                       _t2 = _context2.v;
                       console.error("ReActController: Error during ReAct cycle:", _t2);
                       _this.scratchpad.push({
@@ -83512,10 +83522,10 @@ var ReActController = /*#__PURE__*/function () {
                         });
                         finished = true;
                       }
-                    case 33:
+                    case 34:
                       return _context2.a(2);
                   }
-                }, _loop, null, [[4, 8], [2, 32]]);
+                }, _loop, null, [[4, 8], [2, 33]]);
               });
             case 1:
               if (!(!finished && loopCount < MAX_LOOP_ITERATIONS)) {
@@ -83779,11 +83789,8 @@ var ReActController = /*#__PURE__*/function () {
                 return t.name;
               });
               console.log("ReActController: Retrieved available tools: [".concat(toolNames.join(", "), "]"));
-              formattedHistory = state.conversationHistory.slice(-5) // Take only the last 5 entries
-              .map(function (msg) {
-                var content = typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content);
-                var truncatedContent = content.length > MAX_ENTRY_LENGTH ? content.substring(0, MAX_ENTRY_LENGTH) + "..." : content;
-                return "".concat(msg.role.charAt(0).toUpperCase() + msg.role.slice(1), ": ").concat(truncatedContent);
+              formattedHistory = state.conversationHistory.map(function (msg) {
+                return "".concat(msg.role.charAt(0).toUpperCase() + msg.role.slice(1), ": ").concat(msg.content);
               }).join("\n");
               _context6.n = 2;
               return this.memoryManager.getRelevantConversation(this.userQuery, 3);
@@ -83795,11 +83802,9 @@ var ReActController = /*#__PURE__*/function () {
                 planningTools = availableTools.filter(function (t) {
                   return t.name === "create_plan";
                 });
-                systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your primary goal is to help the user by breaking down complex requests into a logical, step-by-step plan.\n\n## CRITICAL: YOU ARE IN PLANNING MODE\nYou MUST create a plan using the create_plan tool. Do NOT attempt to execute any other actions.\n\n## RESPONSE FORMAT\nYou MUST respond in the following format, with no other text before or after. Your entire response must start with \"Thought:\".\n\nThought: [Your reasoning for the plan you are about to create.]\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"...\", \"step_type\": \"...\" }, ... ] } }\n\n## PLAN REQUIREMENTS\n- Each step in the plan should be a discrete, self-contained analytical task.\n- For each step, you must provide a 'step_type' from this exact list: [geospatial, aggregation, filter, data_retrieval, calculation, visualization].\n\n## CRITICAL PLANNING INSTRUCTIONS\n- **Prioritize User-Provided Information:** If the user's query contains specific details like a street address, a location name, or a dataset, your plan MUST start by using that information.\n- **Entity Integrity:** Do not invent information. If you need the address of a place you found, your plan must include a step to find that address. Do not assume it's the same as another address mentioned in the conversation.\n- **Leverage Existing Coordinates:** If the scratchpad or conversation history contains the latitude and longitude for an entity whose address is requested, your plan MUST use the 'reverse_geocode' tool with those existing coordinates. Do NOT re-geocode an address or re-search for the entity if its coordinates are already known.\n- **Example:** If a street address is given, the first step of your plan MUST be to convert this address into geographic coordinates. After getting the coordinates, I can search for the restaurants.";
+                systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your primary goal is to help the user by breaking down complex requests into a logical, step-by-step plan.\n\n## CRITICAL: YOU ARE IN PLANNING MODE\nYou MUST create a plan using the create_plan tool. Do NOT attempt to execute any other actions.\n\n## RESPONSE FORMAT\nYou MUST respond in the following format, with no other text before or after. Your entire response must start with \"Thought:\".\n\nThought: [Your reasoning for the plan you are about to create.]\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"...\", \"step_type\": \"...\" }, ... ] } }\n\n## PLAN REQUIREMENTS\n- Each step in the plan should be a discrete, self-contained analytical task.\n- For each step, you must provide a 'step_type' from this exact list: [geospatial, aggregation, filter, data_retrieval, calculation, visualization].\n\n## CRITICAL PLANNING INSTRUCTIONS\n- **Prioritize User-Provided Information:** If the user's query contains specific details like a street address, a location name, or a dataset, your plan MUST start by using that information.\n- **Entity Integrity:** Do not invent information. If you need the address of a place you found, your plan must include a step to find that address. Do not assume it's the same as another address mentioned in the conversation.\n- **Example:** If a street address is given, the first step of your plan MUST be to convert this address into geographic coordinates. After getting the coordinates, I can search for the restaurants.\n      - **Entity Integrity:** Do not invent information. If you need the address of a place you found, your plan must include a step to find that address. Do not assume it's the same as another address mentioned in the conversation.\n      - **Leverage Existing Coordinates:** If the scratchpad or conversation history contains the latitude and longitude for an entity whose address is requested, your plan MUST use the 'reverse_geocode' tool with those existing coordinates. Do NOT re-geocode an address or re-search for the entity if its coordinates are already known.\n      - **Example:** If a street address is given, the first step of your plan MUST be to convert this address into geographic coordinates. After getting the coordinates, I can search for the restaurants.\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"Geocode the address '1600 Pennsylvania Avenue NW, Washington, DC'\", \"step_type\": \"geospatial\" }, { \"step\": 2, \"description\": \"Search for Indian restaurants near the geocoded location\", \"step_type\": \"data_retrieval\" } ] } }";
                 userPrompt = "You have access to a single tool to help you. Use this tool to output your plan as a JSON array of steps.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(planningTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is the full conversation history for context:\n<CONVERSATION_HISTORY>\n").concat(formattedHistory || "No previous conversation history.", " \n</CONVERSATION_HISTORY>\n\nHere is the user's request:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
-                  var content = _typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content;
-                  var truncatedContent = content.length > MAX_ENTRY_LENGTH ? content.substring(0, MAX_ENTRY_LENGTH) + "..." : content;
-                  return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(truncatedContent);
+                  return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
                 }).join("\n"), "\n\nThought:");
                 messages.push({
                   role: "system",
@@ -83810,13 +83815,11 @@ var ReActController = /*#__PURE__*/function () {
                   content: userPrompt
                 });
               } else {
-                _systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by executing a pre-defined plan ONE STEP AT A TIME.\n\n## RESPONSE FORMAT\nYou MUST respond with EXACTLY ONE Thought and ONE Action. Your entire response must follow this exact format:\n\nThought: [Your reasoning about the current step, what tool to use, and why. Be concise.]\nAction: { \"name\": \"tool_name\", \"parameters\": { \"param1\": \"value1\" } }\n\n## CRITICAL THINKING & ADAPTATION\n1.  **Analyze the last Observation:** Before deciding your next action, you MUST carefully analyze the most recent Observation in the scratchpad.\n2.  **Entity-Attribute Integrity:** When you identify an entity (e.g., a restaurant name) from an 'Observation', you MUST use other attributes (like its address) from that *same* 'Observation'. Do NOT combine an entity from an 'Observation' with an address from the user's original query in '<CONVERSATION_HISTORY>'. If an attribute like an address is missing for a found entity, your action should be to use a tool to find it.\n3.  **Assess Success:** Did the last action succeed? Did it return the expected information? For example, if you searched for something, did the observation indicate that items were found?\n4.  **Geocoding vs. Reverse Geocoding:**\n    - Use 'geocode_address' ONLY when you have a street address (text) and need its latitude and longitude.\n    - Use 'reverse_geocode' ONLY when you have latitude and longitude (numbers) and need the corresponding street address (text).\n    - NEVER pass coordinates to 'geocode_address'.\n    - NEVER pass a text address to 'reverse_geocode'.\n5.  **Adapt Your Plan:**\n    - If the observation is unexpected (e.g., \"Found 0 places\", an error message, or \"Tool not implemented\"), DO NOT blindly proceed with the original plan.\n    - Your 'Thought' must explain how you are adapting to the new information.\n    - Your next 'Action' should be a direct attempt to recover.\n        - **If you get \"Found 0 places\":** Your primary strategy is to expand the search. The system will track your attempts. If the observation says you MUST try again, then you must call the *same tool* but with a *larger search radius*. Look at the previous action in the scratchpad to see what the last radius was and increase it significantly (e.g., double it).\n        - **If a tool is not implemented:** Your thought must be to try a different, more suitable tool from the available list to achieve the same goal.\n        - **If you need to geocode an address that appears incomplete:** Do not immediately use 'ask_user'. First, attempt to use the 'find_places_nearby' tool with the partial address in the 'amenity' parameter. The results may contain a complete, geocodable address. If so, use that address in a subsequent 'geocode_address' action. Only ask the user for clarification if this approach fails.\n        - **If you are truly stuck on a step for other reasons:** Use the 'ask_user' tool for clarification.\n    - Only if the last observation was successful and expected should you proceed to the next step of the plan.\n\n## FINISHING THE TASK\nWhen all steps are complete and you have gathered all necessary information, you MUST use the 'finish' tool.\n- **Thought:** Your thought should summarize the key findings from the scratchpad.\n- **Action:** The 'answer' parameter in the 'finish' tool MUST contain the complete, final answer for the user, synthesized from the observations.\n\n## AVAILABLE ACTIONS\n- Use one of the provided tools.\n- Use the 'finish(answer=...)' tool when you have the final answer.\n- Use the 'escalate_tool_level' tool if the current tools are insufficient.\n- Use the 'ask_user' tool if you need clarification from the user.";
+                _systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by executing a pre-defined plan ONE STEP AT A TIME.\n\n## CRITICAL: RESPONSE FORMAT\nYou MUST respond with EXACTLY ONE Thought and ONE Action. Your entire response must follow this exact format:\n\nThought: [Your reasoning about the current step, what tool to use, and why. Be concise.]\nAction: { \"name\": \"tool_name\", \"parameters\": { \"param1\": \"value1\" } }\n\n## CRITICAL THINKING & ADAPTATION\n1.  **Analyze the last Observation:** Before deciding your next action, you MUST carefully analyze the most recent Observation in the scratchpad.\n2.  **Entity-Attribute Integrity:** When you identify an entity (e.g., a restaurant name) from an 'Observation', you MUST use other attributes (like its address) from that *same* 'Observation'. Do NOT combine an entity from an 'Observation' with an address from the user's original query in '<CONVERSATION_HISTORY>'. If an attribute like an address is missing for a found entity, your action should be to use a tool to find it.\n3.  **Assess Success:** Did the last action succeed? Did it return the expected information? For example, if you searched for something, did the observation indicate that items were found?\n4.  **Geocoding vs. Reverse Geocoding:**\n    - Use 'geocode_address' ONLY when you have a street address (text) and need its latitude and longitude.\n    - Use 'reverse_geocode' ONLY when you have latitude and longitude (numbers) and need the corresponding street address (text).\n    - NEVER pass coordinates to 'geocode_address'.\n    - NEVER pass a text address to 'reverse_geocode'.\n5.  **Adapt Your Plan:**\n    - If the observation is unexpected (e.g., \"Found 0 places\", an error message, or \"Tool not implemented\"), DO NOT blindly proceed with the original plan.\n    - Your 'Thought' must explain how you are adapting to the new information.\n    - Your next 'Action' should be a direct attempt to recover.\n        - **If you get \"Found 0 places\":** Your primary strategy is to expand the search. The system will track your attempts. If the observation says you MUST try again, then you must call the *same tool* but with a *larger search radius*. Look at the previous action in the scratchpad to see what the last radius was and increase it significantly (e.g., double it).\n        - **If a tool is not implemented:** Your thought must be to try a different, more suitable tool from the available list to achieve the same goal.\n        - **If you need to geocode an address that appears incomplete:** Do not immediately use 'ask_user'. First, attempt to use the 'find_places_nearby' tool with the partial address in the 'amenity' parameter. The results may contain a complete, geocodable address. If so, use that address in a subsequent 'geocode_address' action. Only ask the user for clarification if this approach fails.\n        - **If you are truly stuck on a step for other reasons:** Use the 'ask_user' tool for clarification.\n    - Only if the last observation was successful and expected should you proceed to the next step of the plan.\n\n## FINISHING THE TASK\nWhen all steps are complete and you have gathered all necessary information, you MUST use the 'finish' tool.\n- **Thought:** Your thought should summarize the key findings from the scratchpad.\n- **Action:** The 'answer' parameter in the 'finish' tool MUST contain the complete, final answer for the user, synthesized from the observations.\n- **Example:**\n  Thought: The scratchpad shows that the geocoding was successful and the subsequent search found three restaurants. I will now format these results into a final answer for the user.\n  Action: { \"name\": \"finish\", \"parameters\": { \"answer\": \"I found 3 Indian restaurants near your location: [List of restaurants and their details].\" } }\n\n## AVAILABLE ACTIONS\n- Use one of the provided tools.\n- Use the 'finish(answer=...)' tool when you have the final answer.\n- Use the 'escalate_tool_level' tool if the current tools are insufficient.\n- Use the 'ask_user' tool if you need clarification from the user.";
                 _userPrompt = "You have access to the following tools to help you. Select ONE tool to achieve the current goal.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(availableTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\n### Conversation History\n").concat(conversationalContext.map(function (c) {
                   return c.content;
                 }).join('\n') || "No relevant conversation history.", " \n\n### Known Facts from Knowledge Base\n").concat(factualContext.length > 0 ? JSON.stringify(factualContext, null, 2) : "No relevant facts found in knowledge base.", " \n\nHere is the full conversation history for context:\n<CONVERSATION_HISTORY>\n").concat(formattedHistory || "No previous conversation history.", " \n</CONVERSATION_HISTORY>\n\nHere is the user's original request for context:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the current goal for this step:\n<CURRENT_GOAL>\n").concat(currentGoal, "\n</CURRENT_GOAL>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
-                  var content = _typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content;
-                  var truncatedContent = content.length > MAX_ENTRY_LENGTH ? content.substring(0, MAX_ENTRY_LENGTH) + "..." : content;
-                  return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(truncatedContent);
+                  return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
                 }).join("\n"), "\n\nThought:");
                 messages.push({
                   role: "system",
@@ -84144,10 +84147,18 @@ var ReActController = /*#__PURE__*/function () {
         } else {
           thought = cleanResponse;
         }
-
-        // If no action was found, but a thought was provided, treat it as a thought-only response
-        // and default to a 'continue' action to allow the AI to self-correct.
-        if (cleanResponse.startsWith(_thoughtPrefix)) {
+        var thinkingPrefix = "THINKING:"; // New prefix for AI's internal thoughts
+        if (cleanResponse.startsWith(thinkingPrefix)) {
+          thought = cleanResponse.substring(thinkingPrefix.length).trim();
+          // Set a special action to indicate the AI is still thinking
+          action = {
+            name: "ai_thinking",
+            params: {
+              message: thought
+            }
+          };
+        } else if (cleanResponse.startsWith(_thoughtPrefix)) {
+          // Existing logic for when only "Thought:" is present
           thought = cleanResponse.substring(_thoughtPrefix.length).trim();
           action = {
             name: "continue",
