@@ -44472,13 +44472,13 @@ async function loadDatabaseFromIndexedDB() {
     const request = indexedDB.open("GeoInterpreterDB", 1);
 
     request.onupgradeneeded = (event) => {
-        const db = event.target.result;
-        db.createObjectStore("files", { keyPath: "name" });
+        const indexedDB_db = event.target.result;
+        indexedDB_db.createObjectStore("files", { keyPath: "name" });
     };
 
     request.onsuccess = (event) => {
-        const db = event.target.result;
-        const transaction = db.transaction(["files"], "readonly");
+        const indexedDB_db = event.target.result;
+        const transaction = indexedDB_db.transaction(["files"], "readonly");
         const store = transaction.objectStore("files");
         const getRequest = store.get("main.db");
 
