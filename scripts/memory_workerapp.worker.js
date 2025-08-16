@@ -44367,7 +44367,13 @@ async function initializeDatabase() {
   URL.revokeObjectURL(worker_url);
   dbConn = await db.connect();
 
-  await loadDatabaseFromIndexedDB();
+  try {
+    await loadDatabaseFromIndexedDB();
+  } catch (e) {
+    console.warn("Failed to load database from IndexedDB, creating a new one:", e.message);
+    await deleteDatabaseFromIndexedDB(); // Delete the corrupted one
+    // The rest of the initialization will create the tables
+  }
 
   const initializationPromises = [];
 
@@ -44489,32 +44495,46 @@ async function deleteDatabaseFromIndexedDB() {
 async function loadDatabaseFromIndexedDB() {
     const request = indexedDB.open("GeoInterpreterDB", 1);
 
-    request.onupgradeneeded = (event) => {
-        const indexedDB_db = event.target.result;
-        indexedDB_db.createObjectStore("files", { keyPath: "name" });
-    };
-
-    request.onsuccess = (event) => {
-        const indexedDB_db = event.target.result;
-        const transaction = indexedDB_db.transaction(["files"], "readonly");
-        const store = transaction.objectStore("files");
-        const getRequest = store.get("main.db");
-
-        getRequest.onsuccess = async (event) => {
-            if (event.target.result) {
-                const buffer = event.target.result.buffer;
-                try {
-                    await db.registerFileBuffer("main.db", new Uint8Array(buffer));
-                    await dbConn.query("ATTACH 'main.db' AS persisted_db;");
-                    console.log("Database loaded from IndexedDB");
-                } catch (e) {
-                    console.error("Error loading database from IndexedDB, likely corrupted:", e);
-                    await deleteDatabaseFromIndexedDB();
-                    console.log("Attempting to re-initialize database without loading from IndexedDB.");
-                }
-            }
+    return new Promise((resolve, reject) => {
+        request.onupgradeneeded = (event) => {
+            const indexedDB_db = event.target.result;
+            indexedDB_db.createObjectStore("files", { keyPath: "name" });
         };
-    };
+
+        request.onsuccess = (event) => {
+            const indexedDB_db = event.target.result;
+            const transaction = indexedDB_db.transaction(["files"], "readonly");
+            const store = transaction.objectStore("files");
+            const getRequest = store.get("main.db");
+
+            getRequest.onsuccess = async (event) => {
+                if (event.target.result) {
+                    const buffer = event.target.result.buffer;
+                    try {
+                        await db.registerFileBuffer("main.db", new Uint8Array(buffer));
+                        await dbConn.query("ATTACH 'main.db' AS persisted_db;");
+                        console.log("Database loaded from IndexedDB");
+                        resolve();
+                    } catch (e) {
+                        console.error("Error loading database from IndexedDB, likely corrupted:", e);
+                        reject(new Error("Corrupted database in IndexedDB"));
+                    }
+                } else {
+                    resolve(); // No database found in IndexedDB, proceed with new
+                }
+            };
+
+            getRequest.onerror = (event) => {
+                console.error("Error getting database from IndexedDB:", event.target.error);
+                reject(event.target.error);
+            };
+        };
+
+        request.onerror = (event) => {
+            console.error("Error opening IndexedDB:", event.target.error);
+            reject(event.target.error);
+        };
+    });
 }
 
 async function manageConversationHistory() {
