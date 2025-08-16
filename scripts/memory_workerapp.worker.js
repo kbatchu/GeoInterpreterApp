@@ -44485,8 +44485,8 @@ async function loadDatabaseFromIndexedDB() {
         getRequest.onsuccess = async (event) => {
             if (event.target.result) {
                 const buffer = event.target.result.buffer;
-                await db.registerFileBuffer("main.db", new Uint8Array(buffer));
-                await dbConn.query("ATTACH 'main.db' AS main;");
+                                await db.registerFileBuffer("main.db", new Uint8Array(buffer));
+                await dbConn.query("ATTACH 'main.db' AS persisted_db;");
                 console.log("Database loaded from IndexedDB");
             }
         };
