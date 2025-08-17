@@ -83740,7 +83740,7 @@ var ReActController = /*#__PURE__*/function () {
                 entityType: 'Restaurant',
                 latitude: place.lat,
                 longitude: place.lon,
-                address: place.address,
+                address: place.address.replace(place.name + ', ', ''),
                 sessionId: this.sessionId
               });
             case 5:
