@@ -84698,6 +84698,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
 function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
 // c:\Kiran\Work\GIS\DATAVIZ\GeoInterpreter\scripts\modules\tools\overpass_tools.js
@@ -84716,77 +84722,236 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
 function findPlacesNearby(_x) {
   return _findPlacesNearby.apply(this, arguments);
 }
+
+/**
+ * Validates input parameters and extracts with defaults
+ * @param {object} params - Input parameters
+ * @returns {object} Validated parameters
+ * @throws {Error} If required parameters are missing or invalid
+ */
 function _findPlacesNearby() {
   _findPlacesNearby = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(params) {
-    var latitude, longitude, amenity, cuisine, _params$radius_meters, radius_meters, filters, query, response, data, places, _t;
+    var validatedParams, query, data, places, _t;
     return _regenerator().w(function (_context) {
       while (1) switch (_context.n) {
         case 0:
-          latitude = params.latitude, longitude = params.longitude, amenity = params.amenity, cuisine = params.cuisine, _params$radius_meters = params.radius_meters, radius_meters = _params$radius_meters === void 0 ? 1000 : _params$radius_meters;
-          if (!(!latitude || !longitude || !amenity)) {
-            _context.n = 1;
-            break;
-          }
-          return _context.a(2, "Error: Missing required parameters. 'latitude', 'longitude', and 'amenity' are required.");
+          _context.p = 0;
+          // Validate and extract parameters
+          validatedParams = validateAndExtractParams(params); // Build and execute query
+          query = buildOverpassQuery(validatedParams);
+          _context.n = 1;
+          return executeOverpassQuery(query);
         case 1:
-          // Build the Overpass QL query filters
-          filters = "[\"amenity\"=\"".concat(amenity, "\"]");
-          if (cuisine) {
-            filters += "[\"cuisine\"=\"".concat(cuisine, "\"]");
-          }
-          query = "\n    [out:json][timeout:25];\n    (\n      node".concat(filters, "(around:").concat(radius_meters, ",").concat(latitude, ",").concat(longitude, ");\n      way").concat(filters, "(around:").concat(radius_meters, ",").concat(latitude, ",").concat(longitude, ");\n      relation").concat(filters, "(around:").concat(radius_meters, ",").concat(latitude, ",").concat(longitude, ");\n    );\n    out center;\n  ");
-          _context.p = 2;
-          _context.n = 3;
-          return fetch("https://overpass-api.de/api/interpreter", {
-            method: "POST",
-            body: query
-          });
-        case 3:
-          response = _context.v;
-          if (response.ok) {
-            _context.n = 4;
-            break;
-          }
-          return _context.a(2, "Error: Overpass API request failed with status ".concat(response.status, "."));
-        case 4:
-          _context.n = 5;
-          return response.json();
-        case 5:
           data = _context.v;
-          places = data.elements.map(function (el) {
-            if (el.tags && el.tags.name) {
-              // For ways and relations, Overpass returns a 'center' object with lat/lon.
-              // For nodes, it's directly lat/lon properties.
-              var center = el.center || {
-                lat: el.lat,
-                lon: el.lon
-              };
-              if (center && typeof center.lat === 'number' && typeof center.lon === 'number') {
-                return {
-                  name: el.tags.name,
-                  latitude: center.lat,
-                  longitude: center.lon
-                };
-              }
-            }
-            return null;
-          }).filter(Boolean); // Filter out elements without a name or coordinates
-          if (!(places.length === 0)) {
-            _context.n = 6;
-            break;
-          }
-          return _context.a(2, "Found 0 places matching the criteria within a ".concat(radius_meters, " meter radius."));
-        case 6:
-          return _context.a(2, JSON.stringify(places, null, 2));
-        case 7:
-          _context.p = 7;
+          // Process results
+          places = processOverpassResults(data, validatedParams.radius_meters);
+          return _context.a(2, formatResults(places, validatedParams.radius_meters));
+        case 2:
+          _context.p = 2;
           _t = _context.v;
           console.error("Overpass API error:", _t);
           return _context.a(2, "Error executing Overpass query: ".concat(_t.message));
       }
-    }, _callee, null, [[2, 7]]);
+    }, _callee, null, [[0, 2]]);
   }));
   return _findPlacesNearby.apply(this, arguments);
+}
+function validateAndExtractParams(params) {
+  var _ref = params || {},
+    latitude = _ref.latitude,
+    longitude = _ref.longitude,
+    amenity = _ref.amenity,
+    cuisine = _ref.cuisine,
+    _ref$radius_meters = _ref.radius_meters,
+    radius_meters = _ref$radius_meters === void 0 ? 1000 : _ref$radius_meters;
+
+  // Validate required parameters
+  if (!latitude || !longitude || !amenity) {
+    throw new Error("Missing required parameters. 'latitude', 'longitude', and 'amenity' are required.");
+  }
+
+  // Validate parameter types
+  if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+    throw new Error("Latitude and longitude must be numbers.");
+  }
+  if (typeof amenity !== 'string' || amenity.trim() === '') {
+    throw new Error("Amenity must be a non-empty string.");
+  }
+  if (cuisine && typeof cuisine !== 'string') {
+    throw new Error("Cuisine must be a string if provided.");
+  }
+  if (typeof radius_meters !== 'number' || radius_meters <= 0) {
+    throw new Error("Radius must be a positive number.");
+  }
+  return {
+    latitude: latitude,
+    longitude: longitude,
+    amenity: amenity.trim(),
+    cuisine: cuisine === null || cuisine === void 0 ? void 0 : cuisine.trim(),
+    radius_meters: radius_meters
+  };
+}
+
+/**
+ * Builds the Overpass QL query string
+ * @param {object} params - Validated parameters
+ * @returns {string} Overpass QL query
+ */
+function buildOverpassQuery(_ref2) {
+  var latitude = _ref2.latitude,
+    longitude = _ref2.longitude,
+    amenity = _ref2.amenity,
+    cuisine = _ref2.cuisine,
+    radius_meters = _ref2.radius_meters;
+  var filters = "[\"amenity\"=\"".concat(amenity, "\"]");
+  if (cuisine) {
+    filters += "[\"cuisine\"=\"".concat(cuisine, "\"]");
+  }
+  return "\n    [out:json][timeout:25];\n    (\n      node".concat(filters, "(around:").concat(radius_meters, ",").concat(latitude, ",").concat(longitude, ");\n      way").concat(filters, "(around:").concat(radius_meters, ",").concat(latitude, ",").concat(longitude, ");\n      relation").concat(filters, "(around:").concat(radius_meters, ",").concat(latitude, ",").concat(longitude, ");\n    );\n    out center;\n  ");
+}
+
+/**
+ * Executes the Overpass API query
+ * @param {string} query - The Overpass QL query
+ * @returns {Promise<object>} The API response data
+ * @throws {Error} If the API request fails
+ */
+function executeOverpassQuery(_x2) {
+  return _executeOverpassQuery.apply(this, arguments);
+}
+/**
+ * Processes the Overpass API results into standardized place objects
+ * @param {object} data - The Overpass API response
+ * @param {number} radius_meters - Search radius for error messages
+ * @returns {Array<object>} Array of processed place objects
+ */
+function _executeOverpassQuery() {
+  _executeOverpassQuery = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(query) {
+    var OVERPASS_API_URL, response;
+    return _regenerator().w(function (_context2) {
+      while (1) switch (_context2.n) {
+        case 0:
+          OVERPASS_API_URL = "https://overpass-api.de/api/interpreter";
+          _context2.n = 1;
+          return fetch(OVERPASS_API_URL, {
+            method: "POST",
+            body: query,
+            headers: {
+              'Content-Type': 'text/plain'
+            }
+          });
+        case 1:
+          response = _context2.v;
+          if (response.ok) {
+            _context2.n = 2;
+            break;
+          }
+          throw new Error("Overpass API request failed with status ".concat(response.status, ": ").concat(response.statusText));
+        case 2:
+          _context2.n = 3;
+          return response.json();
+        case 3:
+          return _context2.a(2, _context2.v);
+      }
+    }, _callee2);
+  }));
+  return _executeOverpassQuery.apply(this, arguments);
+}
+function processOverpassResults(data) {
+  if (!(data !== null && data !== void 0 && data.elements) || !Array.isArray(data.elements)) {
+    return [];
+  }
+  return data.elements.filter(function (element) {
+    var _element$tags;
+    return element.type === "node" && ((_element$tags = element.tags) === null || _element$tags === void 0 ? void 0 : _element$tags.name);
+  }).map(function (element) {
+    return processOverpassElement(element);
+  }).filter(function (place) {
+    return place !== null;
+  });
+}
+
+/**
+ * Processes a single Overpass element into a standardized place object
+ * @param {object} element - The Overpass element to process
+ * @returns {object|null} Processed place object or null if invalid
+ */
+function processOverpassElement(element) {
+  var lat = element.lat,
+    lon = element.lon,
+    tags = element.tags;
+
+  // Validate coordinates
+  if (!isValidCoordinate(lat) || !isValidCoordinate(lon)) {
+    return null;
+  }
+
+  // Extract address components
+  var address = buildAddress(tags);
+
+  // Create base place object
+  var placeObject = {
+    name: tags.name.trim(),
+    latitude: lat,
+    longitude: lon,
+    address: address
+  };
+
+  // Add non-address tags
+  addNonAddressTags(placeObject, tags);
+  return placeObject;
+}
+
+/**
+ * Validates if a value is a valid coordinate
+ * @param {any} coordinate - The coordinate to validate
+ * @returns {boolean} True if valid coordinate
+ */
+function isValidCoordinate(coordinate) {
+  return typeof coordinate === "number" && !isNaN(coordinate) && isFinite(coordinate);
+}
+
+/**
+ * Builds an address string from OpenStreetMap address tags
+ * @param {object} tags - The tags object containing address information
+ * @returns {string} Formatted address string
+ */
+function buildAddress(tags) {
+  var addressComponents = [tags["addr:housenumber"], tags["addr:street"], tags["addr:city"], tags["addr:state"]].filter(function (component) {
+    return component && component.trim();
+  });
+  return addressComponents.join(", ");
+}
+
+/**
+ * Adds all non-address tags to the place object
+ * @param {object} placeObject - The place object to modify
+ * @param {object} tags - The tags object to process
+ */
+function addNonAddressTags(placeObject, tags) {
+  var excludedKeys = new Set(["name"]);
+  var addressKeyPrefix = "addr:";
+  Object.entries(tags).forEach(function (_ref3) {
+    var _ref4 = _slicedToArray(_ref3, 2),
+      key = _ref4[0],
+      value = _ref4[1];
+    if (!excludedKeys.has(key) && !key.startsWith(addressKeyPrefix)) {
+      placeObject[key] = value;
+    }
+  });
+}
+
+/**
+ * Formats the final results for return
+ * @param {Array<object>} places - Array of processed places
+ * @param {number} radius_meters - Search radius
+ * @returns {string} Formatted result string
+ */
+function formatResults(places, radius_meters) {
+  if (places.length === 0) {
+    return "Found 0 places matching the criteria within a ".concat(radius_meters, " meter radius.");
+  }
+  return JSON.stringify(places, null, 2);
 }
 
 /***/ }),
