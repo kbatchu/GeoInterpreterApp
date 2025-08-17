@@ -84048,8 +84048,12 @@ var ReActController = /*#__PURE__*/function () {
             try {
               var extractedJSON = extractValidJSON(jsonBlockMatch[1]);
               if (extractedJSON) {
-                parsedAction = JSON.parse(extractedJSON);
-                parseError = null;
+                try {
+                  parsedAction = JSON.parse(extractedJSON);
+                  parseError = null;
+                } catch (e2) {
+                  parseError = e2;
+                }
               }
             } catch (e2) {
               parseError = e2;
@@ -84069,7 +84073,7 @@ var ReActController = /*#__PURE__*/function () {
                 if (_extractedJSON.startsWith('"') && _extractedJSON.endsWith('"')) {
                   try {
                     // Remove outer quotes and unescape inner quotes
-                    var unescapedString = _extractedJSON.substring(1, _extractedJSON.length - 1).replace(/\\"/g, '"');
+                    var unescapedString = _extractedJSON.substring(1, _extractedJSON.length - 1).replace(/\"/g, '"');
                     parsedAction = JSON.parse(unescapedString);
                     parseError = null;
                   } catch (e4) {
@@ -84270,6 +84274,53 @@ var ReActController = /*#__PURE__*/function () {
         content: thinkingProcess
       });
     }
+
+    // When adding geospatial data, ensure coordinates are passed as numbers or strings
+  }, {
+    key: "addGeospatialData",
+    value: function () {
+      var _addGeospatialData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee9(entityId, entityType, latitude, longitude, address, sessionId) {
+        var lat, lon, _t5;
+        return _regenerator().w(function (_context0) {
+          while (1) switch (_context0.n) {
+            case 0:
+              _context0.p = 0;
+              // Ensure coordinates are valid numbers
+              lat = typeof latitude === 'string' ? parseFloat(latitude) : latitude;
+              lon = typeof longitude === 'string' ? parseFloat(longitude) : longitude;
+              if (!(isNaN(lat) || isNaN(lon))) {
+                _context0.n = 1;
+                break;
+              }
+              throw new Error("Invalid coordinates for ".concat(entityId, ": lat=").concat(latitude, ", lon=").concat(longitude));
+            case 1:
+              _context0.n = 2;
+              return this.memoryManager.addGeospatialAttribute({
+                entityId: entityId,
+                entityType: entityType,
+                latitude: lat,
+                longitude: lon,
+                address: address,
+                sessionId: this.sessionId
+              });
+            case 2:
+              _context0.n = 4;
+              break;
+            case 3:
+              _context0.p = 3;
+              _t5 = _context0.v;
+              console.error('ReActController: Error adding geospatial data:', _t5);
+              throw _t5;
+            case 4:
+              return _context0.a(2);
+          }
+        }, _callee9, this, [[0, 3]]);
+      }));
+      function addGeospatialData(_x9, _x0, _x1, _x10, _x11, _x12) {
+        return _addGeospatialData.apply(this, arguments);
+      }
+      return addGeospatialData;
+    }()
   }]);
 }();
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ReActController);

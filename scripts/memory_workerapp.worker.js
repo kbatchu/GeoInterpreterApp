@@ -44435,7 +44435,7 @@ async function initializeDatabase() {
     try {
       await dbConn.query(`CREATE TABLE IF NOT EXISTS entities (entity_id UUID PRIMARY KEY, entity_name VARCHAR, entity_type VARCHAR, created_at TIMESTAMP DEFAULT current_timestamp);`);
       await dbConn.query(`CREATE TABLE IF NOT EXISTS entity_attributes (attribute_id UUID PRIMARY KEY, entity_id UUID REFERENCES entities(entity_id), attribute_key VARCHAR, attribute_value VARCHAR, created_at TIMESTAMP DEFAULT current_timestamp);`);
-      await dbConn.query(`CREATE TABLE IF NOT EXISTS geospatial_attributes (geo_id UUID PRIMARY KEY, entity_id UUID REFERENCES entities(entity_id), geometry GEOMETRY, created_at TIMESTAMP DEFAULT current_timestamp);`);
+      await dbConn.query(`CREATE TABLE IF NOT EXISTS geospatial_attributes (geo_id UUID PRIMARY KEY, entity_id UUID REFERENCES entities(entity_id), geometry GEOMETRY, address VARCHAR, session_id VARCHAR, created_at TIMESTAMP DEFAULT current_timestamp);`);
       await dbConn.query(`CREATE INDEX IF NOT EXISTS rtree_idx ON geospatial_attributes USING RTREE (geometry);`);
       await dbConn.query(`CREATE TABLE IF NOT EXISTS relationships (relationship_id UUID PRIMARY KEY, source_entity_id UUID REFERENCES entities(entity_id), target_entity_id UUID REFERENCES entities(entity_id), relationship_type VARCHAR, created_at TIMESTAMP DEFAULT current_timestamp);`);
       self.postMessage({ progress: { type: "status", message: "Knowledge graph tables created." } });
@@ -44657,16 +44657,43 @@ async function addAttribute(attribute) {
     dbDirty = true;
 }
 
-async function addGeospatialAttribute(attribute) {
-    const { entityId, geometry } = attribute;
+async function addGeospatialAttribute(data) {
+  try {
+    const { entityId, entityType, latitude, longitude, address, sessionId } = data;
+    
+    // Validate and convert coordinates to numbers first, then to strings for ST_GeomFromText
+    const lat = parseFloat(latitude);
+    const lon = parseFloat(longitude);
+    
+    // Validate that we have valid numbers
+    if (isNaN(lat) || isNaN(lon)) {
+      throw new Error(`Invalid coordinates: latitude=${latitude}, longitude=${longitude}`);
+    }
+    
+    // Create WKT string - ST_GeomFromText expects a string in Well-Known Text format
+    const wktPoint = `POINT(${lon} ${lat})`;
+    
     const sql = `
-        INSERT INTO geospatial_attributes (geo_id, entity_id, geometry)
-        VALUES (uuid(), ?, ST_GeomFromText(?));
+      INSERT OR REPLACE INTO geospatial_attributes 
+      (entity_id, entity_type, geometry, address, session_id, created_at)
+      VALUES (?, ?, ST_GeomFromText(?), ?, ?, datetime('now'))
     `;
-    const stmt = await dbConn.prepare(sql);
-    console.log("DEBUG: addGeospatialAttribute - typeof geometry:", typeof geometry, "geometry:", geometry);
-    await stmt.query(entityId, String(geometry)); // Explicitly cast geometry to string
-    dbDirty = true;
+    
+    await dbConn.run(sql, [
+      entityId,
+      entityType,
+      wktPoint, // Pass the WKT string, not the coordinates directly
+      address || null,
+      sessionId
+    ]);
+    
+    console.log(`Memory Worker: Added geospatial attribute for entity ${entityId}`);
+    return { success: true };
+    
+  } catch (error) {
+    console.error('Memory Worker: Error adding geospatial attribute:', error);
+    throw error;
+  }
 }
 
 async function addRelationship(relationship) {
