@@ -81156,6 +81156,23 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./scripts/config.js":
+/*!***************************!*\
+  !*** ./scripts/config.js ***!
+  \***************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  USE_DYNAMIC_PROMPTS: true
+});
+
+/***/ }),
+
 /***/ "./scripts/geointerpreter.js":
 /*!***********************************!*\
   !*** ./scripts/geointerpreter.js ***!
@@ -82870,6 +82887,11 @@ var MemoryManager = /*#__PURE__*/function () {
         levels: levels
       });
     }
+  }, {
+    key: "getAllTools",
+    value: function getAllTools() {
+      return this._postMessageAsync("getAllTools");
+    }
 
     /**
      * Adds a conversation turn to the episodic memory.
@@ -82938,6 +82960,65 @@ var MemoryManager = /*#__PURE__*/function () {
 
 /***/ }),
 
+/***/ "./scripts/modules/orchestration/prompt_manager.js":
+/*!*********************************************************!*\
+  !*** ./scripts/modules/orchestration/prompt_manager.js ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+var PromptManager = /*#__PURE__*/function () {
+  function PromptManager(baseSystemPrompt, toolRegistry) {
+    _classCallCheck(this, PromptManager);
+    this.baseSystemPrompt = baseSystemPrompt;
+    this.toolRegistry = toolRegistry;
+    this.activeToolPrompts = new Map();
+  }
+  return _createClass(PromptManager, [{
+    key: "updatePrompts",
+    value: function updatePrompts(relevantToolNames) {
+      var newActiveToolPrompts = new Map();
+      var _iterator = _createForOfIteratorHelper(relevantToolNames),
+        _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var toolName = _step.value;
+          if (this.toolRegistry[toolName] && this.toolRegistry[toolName].system_prompt) {
+            newActiveToolPrompts.set(toolName, this.toolRegistry[toolName].system_prompt);
+          }
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+      this.activeToolPrompts = newActiveToolPrompts;
+    }
+  }, {
+    key: "getFinalPrompt",
+    value: function getFinalPrompt() {
+      var dynamicInstructions = Array.from(this.activeToolPrompts.values()).join('\n');
+      return this.baseSystemPrompt.replace('<!-- DYNAMIC_TOOL_INSTRUCTIONS -->', dynamicInstructions);
+    }
+  }]);
+}();
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (PromptManager);
+
+/***/ }),
+
 /***/ "./scripts/modules/orchestration/react_controller.js":
 /*!***********************************************************!*\
   !*** ./scripts/modules/orchestration/react_controller.js ***!
@@ -82950,6 +83031,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _memory_manager_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./memory_manager.js */ "./scripts/modules/orchestration/memory_manager.js");
+/* harmony import */ var _prompt_manager_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./prompt_manager.js */ "./scripts/modules/orchestration/prompt_manager.js");
+/* harmony import */ var _config_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../config.js */ "./scripts/config.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 function _regeneratorValues(e) { if (null != e) { var t = e["function" == typeof Symbol && Symbol.iterator || "@@iterator"], r = 0; if (t) return t.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) return { next: function next() { return e && r >= e.length && (e = void 0), { value: e && e[r++], done: !e }; } }; } throw new TypeError(_typeof(e) + " is not iterable"); }
@@ -82973,6 +83056,8 @@ function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" 
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 
 
+
+
 var MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT = 10;
 var ReActController = /*#__PURE__*/function () {
   function ReActController(stateManager, communicationBus, aiCore, toolExecutor, memoryManager) {
@@ -82994,6 +83079,8 @@ var ReActController = /*#__PURE__*/function () {
     this.communicationBus.addEventListener("userInputProvided", this._handleUserInput.bind(this));
     this.communicationBus.addEventListener("cancelProcessing", this._handleCancel.bind(this));
     this.communicationBus.addEventListener("newSessionRequested", this._handleNewSession.bind(this));
+    this.toolRegistry = null;
+    this.promptManager = null;
   }
   return _createClass(ReActController, [{
     key: "_handleUserQuery",
@@ -83013,6 +83100,16 @@ var ReActController = /*#__PURE__*/function () {
               _context.n = 1;
               return this.memoryManager.initialize();
             case 1:
+              if (!_config_js__WEBPACK_IMPORTED_MODULE_2__["default"].USE_DYNAMIC_PROMPTS) {
+                _context.n = 3;
+                break;
+              }
+              _context.n = 2;
+              return this.memoryManager.getAllTools();
+            case 2:
+              this.toolRegistry = _context.v;
+              this.promptManager = new _prompt_manager_js__WEBPACK_IMPORTED_MODULE_1__["default"](this._getBaseSystemPrompt(), this.toolRegistry);
+            case 3:
               conversationHistory = [].concat(_toConsumableArray(this.stateManager.getState().conversationHistory), [{
                 role: "user",
                 content: this.userQuery
@@ -83022,18 +83119,18 @@ var ReActController = /*#__PURE__*/function () {
                 conversationHistory: conversationHistory,
                 activePlan: null
               });
-              _context.n = 2;
+              _context.n = 4;
               return this.memoryManager.addConversationTurn({
                 speaker: "user",
                 content: this.userQuery,
                 turn: conversationHistory.length,
                 sessionId: this.sessionId
               });
-            case 2:
+            case 4:
               console.log("ReActController: Starting ReAct cycle for query:", this.userQuery);
-              _context.n = 3;
+              _context.n = 5;
               return this.run();
-            case 3:
+            case 5:
               return _context.a(2);
           }
         }, _callee, this);
@@ -83043,6 +83140,16 @@ var ReActController = /*#__PURE__*/function () {
       }
       return _handleUserQuery;
     }()
+  }, {
+    key: "_getBaseSystemPrompt",
+    value: function _getBaseSystemPrompt() {
+      return "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by executing a pre-defined plan ONE STEP AT A TIME.\n\n## CRITICAL: RESPONSE FORMAT\nYou MUST respond with EXACTLY ONE Thought and ONE Action. Your entire response must follow this exact format:\n\nThought: [Your reasoning about the current step, what tool to use, and why. Be concise.]\nAction: { \"name\": \"tool_name\", \"parameters\": { \"param1\": \"value1\" } }\n\n<!-- DYNAMIC_TOOL_INSTRUCTIONS -->\n\n## CRITICAL THINKING & ADAPTATION\n1.  **Analyze the last Observation:** Before deciding your next action, you MUST carefully analyze the most recent Observation in the scratchpad.\n2.  **Entity-Attribute Integrity:** When you identify an entity (e.g., a restaurant name) from an 'Observation', you MUST use other attributes (like its address) from that *same* 'Observation'. Do NOT combine an entity from an 'Observation' with an address from the user's original query in '<CONVERSATION_HISTORY>'. If an attribute like an address is missing for a found entity, your action should be to use a tool to find it.\n3.  **Assess Success:** Did the last action succeed? Did it return the expected information? For example, if you searched for something, did the observation indicate that items were found?\n4.  **Adapt Your Plan:**\n    - If the observation is unexpected (e.g., \"Found 0 places\", an error message, or \"Tool not implemented\"), DO NOT blindly proceed with the original plan.\n    - Your 'Thought' must explain how you are adapting to the new information.\n    - Your next 'Action' should be a direct attempt to recover.\n        - **If a tool is not implemented:** Your thought must be to try a different, more suitable tool from the available list to achieve the same goal.\n        - **If you need to geocode an address that appears incomplete:** Do not immediately use 'ask_user'. First, attempt to use the 'find_places_nearby' tool with the partial address in the 'amenity' parameter. The results may contain a complete, geocodable address. If so, use that address in a subsequent 'geocode_address' action. Only ask the user for clarification if this approach fails.\n        - **If you are truly stuck on a step for other reasons:** Use the 'ask_user' tool for clarification.\n    - Only if the last observation was successful and expected should you proceed to the next step of the plan.\n\n## FINISHING THE TASK\nWhen all steps are complete and you have gathered all necessary information, you MUST use the 'finish' tool.\n- **Thought:** Your thought should summarize the key findings from the scratchpad.\n- **Action:** The 'answer' parameter in the 'finish' tool MUST contain the complete, final answer for the user, synthesized from the observations.\n- **Example:**\n  Thought: The scratchpad shows that the geocoding was successful and the subsequent search found three restaurants. I will now format these results into a final answer for the user.\n  Action: { \"name\": \"finish\", \"parameters\": { \"answer\": \"I found 3 Indian restaurants near your location: [List of restaurants and their details].\" } }\n\n## AVAILABLE ACTIONS\n- Use one of the provided tools.\n- Use the 'finish(answer=...)' tool when you have the final answer.\n- Use the 'escalate_tool_level' tool if the current tools are insufficient.\n- Use the 'ask_user' tool if you need clarification from the user.";
+    }
+  }, {
+    key: "_getStaticSystemPrompt",
+    value: function _getStaticSystemPrompt() {
+      return "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by executing a pre-defined plan ONE STEP AT A TIME.\n\n## CRITICAL: RESPONSE FORMAT\nYou MUST respond with EXACTLY ONE Thought and ONE Action. Your entire response must follow this exact format:\n\nThought: [Your reasoning about the current step, what tool to use, and why. Be concise.]\nAction: { \"name\": \"tool_name\", \"parameters\": { \"param1\": \"value1\" } }\n\n## CRITICAL THINKING & ADAPTATION\n1.  **Analyze the last Observation:** Before deciding your next action, you MUST carefully analyze the most recent Observation in the scratchpad.\n2.  **Entity-Attribute Integrity:** When you identify an entity (e.g., a restaurant name) from an 'Observation', you MUST use other attributes (like its address) from that *same* 'Observation'. Do NOT combine an entity from an 'Observation' with an address from the user's original query in '<CONVERSATION_HISTORY>'. If an attribute like an address is missing for a found entity, your action should be to use a tool to find it.\n3.  **Assess Success:** Did the last action succeed? Did it return the expected information? For example, if you searched for something, did the observation indicate that items were found?\n\n4.  **Adapt Your Plan:**\n    - If the observation is unexpected (e.g., \"Found 0 places\", an error message, or \"Tool not implemented\"), DO NOT blindly proceed with the original plan.\n    - Your 'Thought' must explain how you are adapting to the new information.\n    - Your next 'Action' should be a direct attempt to recover.\n        - **If you get \"Found 0 places\":** Your primary strategy is to expand the search. The system will track your attempts. If the observation says you MUST try again, then you must call the *same tool* but with a *larger search radius*. Look at the previous action in the scratchpad to see what the last radius was and increase it significantly (e.g., double it).\n        - **If a tool is not implemented:** Your thought must be to try a different, more suitable tool from the available list to achieve the same goal.\n        - **If you need to geocode an address that appears incomplete:** Do not immediately use 'ask_user'. First, attempt to use the 'find_places_nearby' tool with the partial address in the 'amenity' parameter. The results may contain a complete, geocodable address. If so, use that address in a subsequent 'geocode_address' action. Only ask the user for clarification if this approach fails.\n        - **If you are truly stuck on a step for other reasons:** Use the 'ask_user' tool for clarification.\n    - Only if the last observation was successful and expected should you proceed to the next step of the plan.\n\n## FINISHING THE TASK\nWhen all steps are complete and you have gathered all necessary information, you MUST use the 'finish' tool.\n- **Thought:** Your thought should summarize the key findings from the scratchpad.\n- **Action:** The 'answer' parameter in the 'finish' tool MUST contain the complete, final answer for the user, synthesized from the observations.\n- **Example:**\n  Thought: The scratchpad shows that the geocoding was successful and the subsequent search found three restaurants. I will now format these results into a final answer for the user.\n  Action: { \"name\": \"finish\", \"parameters\": { \"answer\": \"I found 3 Indian restaurants near your location: [List of restaurants and their details].\" } }\n\n## AVAILABLE ACTIONS\n- Use one of the provided tools.\n- Use the 'finish(answer=...)' tool when you have the final answer.\n- Use the 'escalate_tool_level' tool if the current tools are insufficient.\n- Use the 'ask_user' tool if you need clarification from the user.";
+    }
   }, {
     key: "run",
     value: function () {
@@ -83058,7 +83165,7 @@ var ReActController = /*#__PURE__*/function () {
               REPETITION_LIMIT = 3;
               lastActionHistory = [];
               _loop = /*#__PURE__*/_regenerator().m(function _loop() {
-                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, observation, correctedPlan, _errorMsg, _currentState2, conversationHistory, _observation, questionText, _errorMsg2, standardizedAction, _currentState3, _observation2, chosenTool, currentStepType, _observation3, executionParams, _observation4, finalObservation, geocodeCoordErrorRegex, match, lat, lon, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
+                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, startTime, endTime, turnTime, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, observation, correctedPlan, _errorMsg, _currentState2, conversationHistory, _observation, questionText, _errorMsg2, standardizedAction, _currentState3, _observation2, chosenTool, currentStepType, _observation3, executionParams, _observation4, finalObservation, geocodeCoordErrorRegex, match, lat, lon, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
                 return _regenerator().w(function (_context2) {
                   while (1) switch (_context2.n) {
                     case 0:
@@ -83110,6 +83217,7 @@ var ReActController = /*#__PURE__*/function () {
                       console.log("ReActController: Assembled context for AI invocation:", messages);
                       _context2.p = 4;
                       console.log("ReActController: Invoking AI core with messages...");
+                      startTime = Date.now();
                       _context2.n = 5;
                       return _this.aiCore.chat.completions.create({
                         messages: messages,
@@ -83118,6 +83226,17 @@ var ReActController = /*#__PURE__*/function () {
                       });
                     case 5:
                       reply = _context2.v;
+                      endTime = Date.now();
+                      turnTime = endTime - startTime;
+                      console.log(JSON.stringify({
+                        "timestamp": new Date().toISOString(),
+                        "turnId": _this.sessionId + '-' + loopCount,
+                        "promptChars": messages.map(function (m) {
+                          return m.content;
+                        }).join('').length,
+                        "activeToolPrompts": Array.from(_this.promptManager.activeToolPrompts.keys()),
+                        "processingTimeMs": turnTime
+                      }));
                       console.log("ReActController: AI core responded. Full reply object:", reply);
                       if (!(reply && reply.choices && reply.choices.length > 0 && reply.choices[0].message)) {
                         _context2.n = 6;
@@ -83448,7 +83567,7 @@ var ReActController = /*#__PURE__*/function () {
                     case 28:
                       _observation4 = _context2.v;
                       finalObservation = _observation4; // Regex to match the specific error message from geocodeAddress for coordinates
-                      geocodeCoordErrorRegex = /^Invalid input: "(-?\d+\.\d+),\s*(-?\d+\.\d+)" looks like coordinates\. To convert coordinates to a text address, you MUST use the 'reverse_geocode' tool\.$/;
+                      geocodeCoordErrorRegex = /^Invalid input: \"(-?\d+\.\d+),\s*(-?\d+\.\d+)\" looks like coordinates\. To convert coordinates to a text address, you MUST use the 'reverse_geocode' tool\.$/;
                       match = typeof _observation4 === "string" ? _observation4.match(geocodeCoordErrorRegex) : null;
                       if (match) {
                         lat = parseFloat(match[1]);
@@ -83780,6 +83899,7 @@ var ReActController = /*#__PURE__*/function () {
           systemPrompt,
           userPrompt,
           _systemPrompt,
+          _toolNames,
           _userPrompt,
           _args6 = arguments;
         return _regenerator().w(function (_context6) {
@@ -83826,7 +83946,15 @@ var ReActController = /*#__PURE__*/function () {
                   content: userPrompt
                 });
               } else {
-                _systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by executing a pre-defined plan ONE STEP AT A TIME.\n\n## CRITICAL: RESPONSE FORMAT\nYou MUST respond with EXACTLY ONE Thought and ONE Action. Your entire response must follow this exact format:\n\nThought: [Your reasoning about the current step, what tool to use, and why. Be concise.]\nAction: { \"name\": \"tool_name\", \"parameters\": { \"param1\": \"value1\" } }\n\n## CRITICAL THINKING & ADAPTATION\n1.  **Analyze the last Observation:** Before deciding your next action, you MUST carefully analyze the most recent Observation in the scratchpad.\n2.  **Entity-Attribute Integrity:** When you identify an entity (e.g., a restaurant name) from an 'Observation', you MUST use other attributes (like its address) from that *same* 'Observation'. Do NOT combine an entity from an 'Observation' with an address from the user's original query in '<CONVERSATION_HISTORY>'. If an attribute like an address is missing for a found entity, your action should be to use a tool to find it.\n3.  **Assess Success:** Did the last action succeed? Did it return the expected information? For example, if you searched for something, did the observation indicate that items were found?\n4.  **Geocoding vs. Reverse Geocoding:**\n    - Use 'geocode_address' ONLY when you have a street address (text) and need its latitude and longitude.\n    - Use 'reverse_geocode' ONLY when you have latitude and longitude (numbers) and need the corresponding street address (text).\n    - NEVER pass coordinates to 'geocode_address'.\n    - NEVER pass a text address to 'reverse_geocode'.\n5.  **Adapt Your Plan:**\n    - If the observation is unexpected (e.g., \"Found 0 places\", an error message, or \"Tool not implemented\"), DO NOT blindly proceed with the original plan.\n    - Your 'Thought' must explain how you are adapting to the new information.\n    - Your next 'Action' should be a direct attempt to recover.\n        - **If you get \"Found 0 places\":** Your primary strategy is to expand the search. The system will track your attempts. If the observation says you MUST try again, then you must call the *same tool* but with a *larger search radius*. Look at the previous action in the scratchpad to see what the last radius was and increase it significantly (e.g., double it).\n        - **If a tool is not implemented:** Your thought must be to try a different, more suitable tool from the available list to achieve the same goal.\n        - **If you need to geocode an address that appears incomplete:** Do not immediately use 'ask_user'. First, attempt to use the 'find_places_nearby' tool with the partial address in the 'amenity' parameter. The results may contain a complete, geocodable address. If so, use that address in a subsequent 'geocode_address' action. Only ask the user for clarification if this approach fails.\n        - **If you are truly stuck on a step for other reasons:** Use the 'ask_user' tool for clarification.\n    - Only if the last observation was successful and expected should you proceed to the next step of the plan.\n\n## FINISHING THE TASK\nWhen all steps are complete and you have gathered all necessary information, you MUST use the 'finish' tool.\n- **Thought:** Your thought should summarize the key findings from the scratchpad.\n- **Action:** The 'answer' parameter in the 'finish' tool MUST contain the complete, final answer for the user, synthesized from the observations.\n- **Example:**\n  Thought: The scratchpad shows that the geocoding was successful and the subsequent search found three restaurants. I will now format these results into a final answer for the user.\n  Action: { \"name\": \"finish\", \"parameters\": { \"answer\": \"I found 3 Indian restaurants near your location: [List of restaurants and their details].\" } }\n\n## AVAILABLE ACTIONS\n- Use one of the provided tools.\n- Use the 'finish(answer=...)' tool when you have the final answer.\n- Use the 'escalate_tool_level' tool if the current tools are insufficient.\n- Use the 'ask_user' tool if you need clarification from the user.";
+                if (_config_js__WEBPACK_IMPORTED_MODULE_2__["default"].USE_DYNAMIC_PROMPTS) {
+                  _toolNames = availableTools.map(function (t) {
+                    return t.name;
+                  });
+                  this.promptManager.updatePrompts(_toolNames);
+                  _systemPrompt = this.promptManager.getFinalPrompt();
+                } else {
+                  _systemPrompt = this._getStaticSystemPrompt();
+                }
                 _userPrompt = "You have access to the following tools to help you. Select ONE tool to achieve the current goal.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(availableTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\n### Conversation History\n").concat(conversationalContext.map(function (c) {
                   return c.content;
                 }).join("\n") || "No relevant conversation history.", " \n\n### Known Facts from Knowledge Base\n").concat(factualContext.length > 0 ? JSON.stringify(factualContext, null, 2) : "No relevant facts found in knowledge base.", " \n\nHere is the full conversation history for context:\n<CONVERSATION_HISTORY>\n").concat(formattedHistory || "No previous conversation history.", " \n</CONVERSATION_HISTORY>\n\nHere is the user's original request for context:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the current goal for this step:\n<CURRENT_GOAL>\n").concat(currentGoal, "\n</CURRENT_GOAL>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
@@ -84084,7 +84212,7 @@ var ReActController = /*#__PURE__*/function () {
                 if (_extractedJSON.startsWith('"') && _extractedJSON.endsWith('"')) {
                   try {
                     // Remove outer quotes and unescape inner quotes
-                    var unescapedString = _extractedJSON.substring(1, _extractedJSON.length - 1).replace(/"/g, '"');
+                    var unescapedString = _extractedJSON.substring(1, _extractedJSON.length - 1).replace(/\"/g, '"');
                     parsedAction = JSON.parse(unescapedString);
                     parseError = null;
                   } catch (e4) {

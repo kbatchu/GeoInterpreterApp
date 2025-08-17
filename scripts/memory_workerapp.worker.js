@@ -44602,6 +44602,12 @@ async function getRelevantTools(query, topN, levels) {
   return results.toArray().map((row) => row.toJSON());
 }
 
+async function getAllTools() {
+  const sql = `SELECT tool_id, description, parameters_json, category, level, system_prompt FROM tool_registry_db.duckdb_tools;`;
+  const results = await dbConn.query(sql);
+  return results.toArray().map((row) => row.toJSON());
+}
+
 async function addConversationTurn(turn) {
     const { sessionId, turnIndex, speaker, content } = turn;
     const embedding = await generateEmbedding(content);
