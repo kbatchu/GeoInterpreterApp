@@ -44664,6 +44664,7 @@ async function addGeospatialAttribute(attribute) {
         VALUES (uuid(), ?, ST_GeomFromText(?));
     `;
     const stmt = await dbConn.prepare(sql);
+    console.log("DEBUG: addGeospatialAttribute - typeof geometry:", typeof geometry, "geometry:", geometry);
     await stmt.query(entityId, String(geometry)); // Explicitly cast geometry to string
     dbDirty = true;
 }
