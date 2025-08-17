@@ -44659,19 +44659,34 @@ async function addAttribute(attribute) {
 
 async function addGeospatialAttribute(data) {
   try {
-    const { entityId, entityType, latitude, longitude, address, sessionId } = data;
+    // Extract from the nested structure - the data comes as { attribute: { ... } }
+    const attributeData = data.attribute || data;
+    const { entityId, entityType, latitude, longitude, address, sessionId, geometry } = attributeData;
     
-    // Validate and convert coordinates to numbers first, then to strings for ST_GeomFromText
-    const lat = parseFloat(latitude);
-    const lon = parseFloat(longitude);
+    let lat, lon, wktPoint;
     
-    // Validate that we have valid numbers
-    if (isNaN(lat) || isNaN(lon)) {
-      throw new Error(`Invalid coordinates: latitude=${latitude}, longitude=${longitude}`);
+    // Handle different input formats
+    if (geometry) {
+      // If geometry is already provided (like "POINT(lon lat)")
+      if (typeof geometry === 'string' && geometry.startsWith('POINT(')) {
+        wktPoint = geometry;
+      } else {
+        throw new Error(`Invalid geometry format: ${geometry}`);
+      }
+    } else if (latitude !== undefined && longitude !== undefined) {
+      // Convert coordinates to numbers and validate
+      lat = parseFloat(latitude);
+      lon = parseFloat(longitude);
+      
+      if (isNaN(lat) || isNaN(lon)) {
+        throw new Error(`Invalid coordinates: latitude=${latitude}, longitude=${longitude}`);
+      }
+      
+      // Create WKT string - note: longitude comes first in WKT format
+      wktPoint = `POINT(${lon} ${lat})`;
+    } else {
+      throw new Error(`Missing coordinate data: latitude=${latitude}, longitude=${longitude}, geometry=${geometry}`);
     }
-    
-    // Create WKT string - ST_GeomFromText expects a string in Well-Known Text format
-    const wktPoint = `POINT(${lon} ${lat})`;
     
     const sql = `
       INSERT OR REPLACE INTO geospatial_attributes 
@@ -44681,13 +44696,13 @@ async function addGeospatialAttribute(data) {
     
     await dbConn.run(sql, [
       entityId,
-      entityType,
-      wktPoint, // Pass the WKT string, not the coordinates directly
+      entityType || 'Unknown',
+      wktPoint,
       address || null,
-      sessionId
+      sessionId || 'default'
     ]);
     
-    console.log(`Memory Worker: Added geospatial attribute for entity ${entityId}`);
+    console.log(`Memory Worker: Added geospatial attribute for entity ${entityId} at ${wktPoint}`);
     return { success: true };
     
   } catch (error) {

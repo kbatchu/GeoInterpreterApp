@@ -82915,9 +82915,8 @@ var MemoryManager = /*#__PURE__*/function () {
   }, {
     key: "addGeospatialAttribute",
     value: function addGeospatialAttribute(attribute) {
-      return this._postMessageAsync("addGeospatialAttribute", {
-        attribute: attribute
-      });
+      // Pass the attribute data directly, not nested under 'attribute' key
+      return this._postMessageAsync("addGeospatialAttribute", attribute);
     }
   }, {
     key: "addRelationship",
@@ -83450,7 +83449,7 @@ var ReActController = /*#__PURE__*/function () {
                       _observation4 = _context2.v;
                       finalObservation = _observation4; // Regex to match the specific error message from geocodeAddress for coordinates
                       geocodeCoordErrorRegex = /^Invalid input: "(-?\d+\.\d+),\s*(-?\d+\.\d+)" looks like coordinates\. To convert coordinates to a text address, you MUST use the 'reverse_geocode' tool\.$/;
-                      match = typeof _observation4 === 'string' ? _observation4.match(geocodeCoordErrorRegex) : null;
+                      match = typeof _observation4 === "string" ? _observation4.match(geocodeCoordErrorRegex) : null;
                       if (match) {
                         lat = parseFloat(match[1]);
                         lon = parseFloat(match[2]);
@@ -83614,7 +83613,11 @@ var ReActController = /*#__PURE__*/function () {
               _context4.n = 5;
               return this.memoryManager.addGeospatialAttribute({
                 entityId: entity.entity_id,
-                geometry: "POINT(".concat(place.lon, " ").concat(place.lat, ")")
+                entityType: 'Restaurant',
+                latitude: place.lat,
+                longitude: place.lon,
+                address: place.address,
+                sessionId: this.sessionId
               });
             case 5:
               _context4.n = 2;
@@ -83648,7 +83651,11 @@ var ReActController = /*#__PURE__*/function () {
               _context4.n = 12;
               return this.memoryManager.addGeospatialAttribute({
                 entityId: _entity.entity_id,
-                geometry: "POINT(".concat(observation.lon, " ").concat(observation.lat, ")")
+                entityType: 'Address',
+                latitude: observation.lat,
+                longitude: observation.lon,
+                address: action.params.address,
+                sessionId: this.sessionId
               });
             case 12:
               _context4.n = 15;
@@ -83668,7 +83675,11 @@ var ReActController = /*#__PURE__*/function () {
               _context4.n = 15;
               return this.memoryManager.addGeospatialAttribute({
                 entityId: _entity2.entity_id,
-                geometry: "POINT(".concat(action.params.longitude, " ").concat(action.params.latitude, ")")
+                entityType: 'Address',
+                latitude: action.params.latitude,
+                longitude: action.params.longitude,
+                address: observation.address,
+                sessionId: this.sessionId
               });
             case 15:
               return _context4.a(2);
@@ -83818,7 +83829,7 @@ var ReActController = /*#__PURE__*/function () {
                 _systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by executing a pre-defined plan ONE STEP AT A TIME.\n\n## CRITICAL: RESPONSE FORMAT\nYou MUST respond with EXACTLY ONE Thought and ONE Action. Your entire response must follow this exact format:\n\nThought: [Your reasoning about the current step, what tool to use, and why. Be concise.]\nAction: { \"name\": \"tool_name\", \"parameters\": { \"param1\": \"value1\" } }\n\n## CRITICAL THINKING & ADAPTATION\n1.  **Analyze the last Observation:** Before deciding your next action, you MUST carefully analyze the most recent Observation in the scratchpad.\n2.  **Entity-Attribute Integrity:** When you identify an entity (e.g., a restaurant name) from an 'Observation', you MUST use other attributes (like its address) from that *same* 'Observation'. Do NOT combine an entity from an 'Observation' with an address from the user's original query in '<CONVERSATION_HISTORY>'. If an attribute like an address is missing for a found entity, your action should be to use a tool to find it.\n3.  **Assess Success:** Did the last action succeed? Did it return the expected information? For example, if you searched for something, did the observation indicate that items were found?\n4.  **Geocoding vs. Reverse Geocoding:**\n    - Use 'geocode_address' ONLY when you have a street address (text) and need its latitude and longitude.\n    - Use 'reverse_geocode' ONLY when you have latitude and longitude (numbers) and need the corresponding street address (text).\n    - NEVER pass coordinates to 'geocode_address'.\n    - NEVER pass a text address to 'reverse_geocode'.\n5.  **Adapt Your Plan:**\n    - If the observation is unexpected (e.g., \"Found 0 places\", an error message, or \"Tool not implemented\"), DO NOT blindly proceed with the original plan.\n    - Your 'Thought' must explain how you are adapting to the new information.\n    - Your next 'Action' should be a direct attempt to recover.\n        - **If you get \"Found 0 places\":** Your primary strategy is to expand the search. The system will track your attempts. If the observation says you MUST try again, then you must call the *same tool* but with a *larger search radius*. Look at the previous action in the scratchpad to see what the last radius was and increase it significantly (e.g., double it).\n        - **If a tool is not implemented:** Your thought must be to try a different, more suitable tool from the available list to achieve the same goal.\n        - **If you need to geocode an address that appears incomplete:** Do not immediately use 'ask_user'. First, attempt to use the 'find_places_nearby' tool with the partial address in the 'amenity' parameter. The results may contain a complete, geocodable address. If so, use that address in a subsequent 'geocode_address' action. Only ask the user for clarification if this approach fails.\n        - **If you are truly stuck on a step for other reasons:** Use the 'ask_user' tool for clarification.\n    - Only if the last observation was successful and expected should you proceed to the next step of the plan.\n\n## FINISHING THE TASK\nWhen all steps are complete and you have gathered all necessary information, you MUST use the 'finish' tool.\n- **Thought:** Your thought should summarize the key findings from the scratchpad.\n- **Action:** The 'answer' parameter in the 'finish' tool MUST contain the complete, final answer for the user, synthesized from the observations.\n- **Example:**\n  Thought: The scratchpad shows that the geocoding was successful and the subsequent search found three restaurants. I will now format these results into a final answer for the user.\n  Action: { \"name\": \"finish\", \"parameters\": { \"answer\": \"I found 3 Indian restaurants near your location: [List of restaurants and their details].\" } }\n\n## AVAILABLE ACTIONS\n- Use one of the provided tools.\n- Use the 'finish(answer=...)' tool when you have the final answer.\n- Use the 'escalate_tool_level' tool if the current tools are insufficient.\n- Use the 'ask_user' tool if you need clarification from the user.";
                 _userPrompt = "You have access to the following tools to help you. Select ONE tool to achieve the current goal.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(availableTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\n### Conversation History\n").concat(conversationalContext.map(function (c) {
                   return c.content;
-                }).join('\n') || "No relevant conversation history.", " \n\n### Known Facts from Knowledge Base\n").concat(factualContext.length > 0 ? JSON.stringify(factualContext, null, 2) : "No relevant facts found in knowledge base.", " \n\nHere is the full conversation history for context:\n<CONVERSATION_HISTORY>\n").concat(formattedHistory || "No previous conversation history.", " \n</CONVERSATION_HISTORY>\n\nHere is the user's original request for context:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the current goal for this step:\n<CURRENT_GOAL>\n").concat(currentGoal, "\n</CURRENT_GOAL>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
+                }).join("\n") || "No relevant conversation history.", " \n\n### Known Facts from Knowledge Base\n").concat(factualContext.length > 0 ? JSON.stringify(factualContext, null, 2) : "No relevant facts found in knowledge base.", " \n\nHere is the full conversation history for context:\n<CONVERSATION_HISTORY>\n").concat(formattedHistory || "No previous conversation history.", " \n</CONVERSATION_HISTORY>\n\nHere is the user's original request for context:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the current goal for this step:\n<CURRENT_GOAL>\n").concat(currentGoal, "\n</CURRENT_GOAL>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
                   return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
                 }).join("\n"), "\n\nThought:");
                 messages.push({
@@ -84073,7 +84084,7 @@ var ReActController = /*#__PURE__*/function () {
                 if (_extractedJSON.startsWith('"') && _extractedJSON.endsWith('"')) {
                   try {
                     // Remove outer quotes and unescape inner quotes
-                    var unescapedString = _extractedJSON.substring(1, _extractedJSON.length - 1).replace(/\"/g, '"');
+                    var unescapedString = _extractedJSON.substring(1, _extractedJSON.length - 1).replace(/"/g, '"');
                     parsedAction = JSON.parse(unescapedString);
                     parseError = null;
                   } catch (e4) {
@@ -84286,8 +84297,8 @@ var ReActController = /*#__PURE__*/function () {
             case 0:
               _context0.p = 0;
               // Ensure coordinates are valid numbers
-              lat = typeof latitude === 'string' ? parseFloat(latitude) : latitude;
-              lon = typeof longitude === 'string' ? parseFloat(longitude) : longitude;
+              lat = typeof latitude === "string" ? parseFloat(latitude) : latitude;
+              lon = typeof longitude === "string" ? parseFloat(longitude) : longitude;
               if (!(isNaN(lat) || isNaN(lon))) {
                 _context0.n = 1;
                 break;
@@ -84309,7 +84320,7 @@ var ReActController = /*#__PURE__*/function () {
             case 3:
               _context0.p = 3;
               _t5 = _context0.v;
-              console.error('ReActController: Error adding geospatial data:', _t5);
+              console.error("ReActController: Error adding geospatial data:", _t5);
               throw _t5;
             case 4:
               return _context0.a(2);
