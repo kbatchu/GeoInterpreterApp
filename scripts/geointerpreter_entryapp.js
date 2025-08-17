@@ -83029,7 +83029,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _prompt_manager_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./prompt_manager.js */ "./scripts/modules/orchestration/prompt_manager.js");
 /* harmony import */ var _config_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../config.js */ "./scripts/config.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 function _regeneratorValues(e) { if (null != e) { var t = e["function" == typeof Symbol && Symbol.iterator || "@@iterator"], r = 0; if (t) return t.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) return { next: function next() { return e && r >= e.length && (e = void 0), { value: e && e[r++], done: !e }; } }; } throw new TypeError(_typeof(e) + " is not iterable"); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
@@ -83038,9 +83037,10 @@ function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present,
 function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
 function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
@@ -83081,7 +83081,7 @@ var ReActController = /*#__PURE__*/function () {
     key: "_handleUserQuery",
     value: function () {
       var _handleUserQuery2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(event) {
-        var conversationHistory;
+        var allAvailableTools, _iterator, _step, tool, conversationHistory;
         return _regenerator().w(function (_context) {
           while (1) switch (_context.n) {
             case 0:
@@ -83095,6 +83095,23 @@ var ReActController = /*#__PURE__*/function () {
               _context.n = 1;
               return this.memoryManager.initialize();
             case 1:
+              _context.n = 2;
+              return this._getRelevantTools(this.userQuery, 999, [1, 2, 3]);
+            case 2:
+              allAvailableTools = _context.v;
+              // Get all tools
+              this.toolRegistry = {};
+              _iterator = _createForOfIteratorHelper(allAvailableTools);
+              try {
+                for (_iterator.s(); !(_step = _iterator.n()).done;) {
+                  tool = _step.value;
+                  this.toolRegistry[tool.name] = tool;
+                }
+              } catch (err) {
+                _iterator.e(err);
+              } finally {
+                _iterator.f();
+              }
               if (_config_js__WEBPACK_IMPORTED_MODULE_2__["default"].USE_DYNAMIC_PROMPTS) {
                 this.promptManager = new _prompt_manager_js__WEBPACK_IMPORTED_MODULE_1__["default"](this._getBaseSystemPrompt(), this.toolRegistry);
               }
@@ -83107,18 +83124,18 @@ var ReActController = /*#__PURE__*/function () {
                 conversationHistory: conversationHistory,
                 activePlan: null
               });
-              _context.n = 2;
+              _context.n = 3;
               return this.memoryManager.addConversationTurn({
                 speaker: "user",
                 content: this.userQuery,
                 turn: conversationHistory.length,
                 sessionId: this.sessionId
               });
-            case 2:
-              console.log("ReActController: Starting ReAct cycle for query:", this.userQuery);
-              _context.n = 3;
-              return this.run();
             case 3:
+              console.log("ReActController: Starting ReAct cycle for query:", this.userQuery);
+              _context.n = 4;
+              return this.run();
+            case 4:
               return _context.a(2);
           }
         }, _callee, this);
@@ -83686,7 +83703,7 @@ var ReActController = /*#__PURE__*/function () {
     key: "_extractAndStoreEntities",
     value: function () {
       var _extractAndStoreEntities2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(action, observation) {
-        var _iterator, _step, place, entity, _entity, _entity2, _t3;
+        var _iterator2, _step2, place, entity, _entity, _entity2, _t3;
         return _regenerator().w(function (_context4) {
           while (1) switch (_context4.n) {
             case 0:
@@ -83694,15 +83711,15 @@ var ReActController = /*#__PURE__*/function () {
                 _context4.n = 10;
                 break;
               }
-              _iterator = _createForOfIteratorHelper(observation);
+              _iterator2 = _createForOfIteratorHelper(observation);
               _context4.p = 1;
-              _iterator.s();
+              _iterator2.s();
             case 2:
-              if ((_step = _iterator.n()).done) {
+              if ((_step2 = _iterator2.n()).done) {
                 _context4.n = 6;
                 break;
               }
-              place = _step.value;
+              place = _step2.value;
               _context4.n = 3;
               return this.memoryManager.addEntity({
                 entityName: place.name,
@@ -83735,10 +83752,10 @@ var ReActController = /*#__PURE__*/function () {
             case 7:
               _context4.p = 7;
               _t3 = _context4.v;
-              _iterator.e(_t3);
+              _iterator2.e(_t3);
             case 8:
               _context4.p = 8;
-              _iterator.f();
+              _iterator2.f();
               return _context4.f(8);
             case 9:
               _context4.n = 15;
@@ -83979,8 +83996,8 @@ var ReActController = /*#__PURE__*/function () {
           dbTools,
           internalTools,
           uniqueTools,
-          _iterator2,
-          _step2,
+          _iterator3,
+          _step3,
           _tool,
           _i,
           _internalTools,
@@ -84092,16 +84109,16 @@ var ReActController = /*#__PURE__*/function () {
                 }
               });
               uniqueTools = new Map();
-              _iterator2 = _createForOfIteratorHelper(dbTools);
+              _iterator3 = _createForOfIteratorHelper(dbTools);
               try {
-                for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-                  _tool = _step2.value;
+                for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+                  _tool = _step3.value;
                   uniqueTools.set(_tool.name, _tool);
                 }
               } catch (err) {
-                _iterator2.e(err);
+                _iterator3.e(err);
               } finally {
-                _iterator2.f();
+                _iterator3.f();
               }
               for (_i = 0, _internalTools = internalTools; _i < _internalTools.length; _i++) {
                 tool = _internalTools[_i];
