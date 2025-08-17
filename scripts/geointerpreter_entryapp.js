@@ -82744,7 +82744,7 @@ var MemoryManager = /*#__PURE__*/function () {
 
                 // Fallback to inline worker
                 console.log("MemoryManager: Falling back to inline worker");
-                workerCode = "\n        console.log(\"Memory Worker: Hello from the worker!\");\n\n        self.onmessage = (event) => {\n          const { messageId, command, args } = event.data;\n          \n          try {\n            switch (command) {\n              case 'initialize':\n                self.postMessage({ messageId, payload: 'initialized' });\n                break;\n              \n              case 'generateEmbedding':\n                self.postMessage({ messageId, payload: [] });\n                break;\n                \n              case 'query':\n                self.postMessage({ messageId, payload: [] });\n                break;\n                \n              case 'getRelevantTools':\n                self.postMessage({ messageId, payload: [] });\n                break;\n                \n              case 'addConversationTurn':\n                self.postMessage({ messageId, payload: 'turn added' });\n                break;\n              \n              case 'getAllTools':\n                self.postMessage({ messageId, payload: [] });\n                break;\n\n              default:\n                self.postMessage({\n                  messageId,\n                  error: 'Unknown command: ' + command,\n                });\n            }\n          } catch (error) {\n            self.postMessage({\n              messageId,\n              error: error.message\n            });\n          }\n        };\n";
+                workerCode = "\n        console.log(\"Memory Worker: Hello from the worker!\");\n\n        \n\n        self.onmessage = async (event) => {\n          const { messageId, command, args } = event.data;\n          \n          try {\n            switch (command) {\n              case 'initialize':\n                self.postMessage({ messageId, payload: 'initialized' });\n                break;\n              \n              case 'generateEmbedding':\n                self.postMessage({ messageId, payload: [] });\n                break;\n                \n              case 'query':\n                self.postMessage({ messageId, payload: [] });\n                break;\n                \n              case 'getRelevantTools':\n                self.postMessage({ messageId, payload: [] });\n                break;\n                \n              case 'addConversationTurn':\n                self.postMessage({ messageId, payload: 'turn added' });\n                break;\n              \n              \n\n              default:\n                self.postMessage({\n                  messageId,\n                  error: 'Unknown command: ' + command,\n                });\n            }\n          } catch (error) {\n            self.postMessage({\n              messageId,\n              error: error.message\n            });\n          }\n        };\n";
                 blob = new Blob([workerCode], {
                   type: "application/javascript"
                 });
@@ -82886,11 +82886,6 @@ var MemoryManager = /*#__PURE__*/function () {
         topN: topN,
         levels: levels
       });
-    }
-  }, {
-    key: "getAllTools",
-    value: function getAllTools() {
-      return this._postMessageAsync("getAllTools");
     }
 
     /**
@@ -83100,16 +83095,9 @@ var ReActController = /*#__PURE__*/function () {
               _context.n = 1;
               return this.memoryManager.initialize();
             case 1:
-              if (!_config_js__WEBPACK_IMPORTED_MODULE_2__["default"].USE_DYNAMIC_PROMPTS) {
-                _context.n = 3;
-                break;
+              if (_config_js__WEBPACK_IMPORTED_MODULE_2__["default"].USE_DYNAMIC_PROMPTS) {
+                this.promptManager = new _prompt_manager_js__WEBPACK_IMPORTED_MODULE_1__["default"](this._getBaseSystemPrompt(), this.toolRegistry);
               }
-              _context.n = 2;
-              return this.memoryManager.getAllTools();
-            case 2:
-              this.toolRegistry = _context.v;
-              this.promptManager = new _prompt_manager_js__WEBPACK_IMPORTED_MODULE_1__["default"](this._getBaseSystemPrompt(), this.toolRegistry);
-            case 3:
               conversationHistory = [].concat(_toConsumableArray(this.stateManager.getState().conversationHistory), [{
                 role: "user",
                 content: this.userQuery
@@ -83119,18 +83107,18 @@ var ReActController = /*#__PURE__*/function () {
                 conversationHistory: conversationHistory,
                 activePlan: null
               });
-              _context.n = 4;
+              _context.n = 2;
               return this.memoryManager.addConversationTurn({
                 speaker: "user",
                 content: this.userQuery,
                 turn: conversationHistory.length,
                 sessionId: this.sessionId
               });
-            case 4:
+            case 2:
               console.log("ReActController: Starting ReAct cycle for query:", this.userQuery);
-              _context.n = 5;
+              _context.n = 3;
               return this.run();
-            case 5:
+            case 3:
               return _context.a(2);
           }
         }, _callee, this);
