@@ -84729,7 +84729,7 @@ function validateAndExtractParams(params) {
     throw new Error("Missing required parameters. 'latitude', 'longitude', and 'amenity' are required.");
   }
 
-  // Validate parameter types
+  // Validate parameter types and values
   if (typeof latitude !== "number" || typeof longitude !== "number") {
     throw new Error("Latitude and longitude must be numbers.");
   }
