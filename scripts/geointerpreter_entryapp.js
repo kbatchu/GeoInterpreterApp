@@ -84016,7 +84016,7 @@ var ReActController = /*#__PURE__*/function () {
                 return {
                   name: tool.tool_id,
                   description: tool.description,
-                  parameters: JSON.parse(tool.parameters_json),
+                  parameters: tool.parameters_json ? JSON.parse(tool.parameters_json) : {},
                   category: tool.category,
                   level: tool.level
                 };
