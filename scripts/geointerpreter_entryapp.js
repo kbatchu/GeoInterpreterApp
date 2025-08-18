@@ -84598,15 +84598,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   geocodeAddress: () => (/* binding */ geocodeAddress),
 /* harmony export */   reverseGeocode: () => (/* binding */ reverseGeocode)
 /* harmony export */ });
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _regeneratorValues(e) { if (null != e) { var t = e["function" == typeof Symbol && Symbol.iterator || "@@iterator"], r = 0; if (t) return t.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) return { next: function next() { return e && r >= e.length && (e = void 0), { value: e && e[r++], done: !e }; } }; } throw new TypeError(_typeof(e) + " is not iterable"); }
 function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
 function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
 // c:\Kiran\Work\GIS\DATAVIZ\GeoInterpreter\scripts\modules\tools\geocoding_tool.js
 /**
- * Helper function to perform a search against the Nominatim API.
+ * Helper function to perform a search against the Nominatim API with retry logic.
+ * Implements exponential backoff with jitter for rate limiting and transient network errors.
  * @param {string} query The search query.
- * @returns {Promise<object[]|null>} A promise that resolves to an array of results or null on error.
+ * @param {number} [maxRetries=3] Maximum number of retries.
+ * @param {number} [initialDelayMs=1000] Initial delay in milliseconds before the first retry.
+ * @returns {Promise<object[]|{error: string}|null>} A promise that resolves to an array of results, an error object, or null.
  * @private
  */
 function _nominatimSearch(_x) {
@@ -84620,42 +84625,128 @@ function _nominatimSearch(_x) {
  */
 function _nominatimSearch2() {
   _nominatimSearch2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(query) {
-    var encodedQuery, url, response, _t;
-    return _regenerator().w(function (_context) {
-      while (1) switch (_context.n) {
+    var maxRetries,
+      initialDelayMs,
+      encodedQuery,
+      url,
+      retries,
+      delay,
+      _loop,
+      _ret,
+      _args2 = arguments;
+    return _regenerator().w(function (_context2) {
+      while (1) switch (_context2.n) {
         case 0:
+          maxRetries = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : 3;
+          initialDelayMs = _args2.length > 2 && _args2[2] !== undefined ? _args2[2] : 1000;
           encodedQuery = encodeURIComponent(query);
           url = "https://nominatim.openstreetmap.org/search?q=".concat(encodedQuery, "&format=json&limit=1");
           console.log("Geocoding: Querying Nominatim with URL: ".concat(url));
-          _context.p = 1;
-          _context.n = 2;
-          return fetch(url, {
-            headers: {
-              // Nominatim API Usage Policy requires a custom User-Agent.
-              // See: https://operations.osmfoundation.org/policies/nominatim/
-              "User-Agent": "GeoInterpreter/1.0 (https://github.com/your-repo/your-app)" // It's good practice to link to a project page.
-            }
+          retries = 0;
+          delay = initialDelayMs;
+          _loop = /*#__PURE__*/_regenerator().m(function _loop() {
+            var response, jitter, _jitter, _t, _t2;
+            return _regenerator().w(function (_context) {
+              while (1) switch (_context.n) {
+                case 0:
+                  _context.p = 0;
+                  _context.n = 1;
+                  return fetch(url, {
+                    headers: {
+                      "User-Agent": "GeoInterpreter/1.0 (https://github.com/your-repo/your-app)"
+                    }
+                  });
+                case 1:
+                  response = _context.v;
+                  if (!(response.status === 429)) {
+                    _context.n = 3;
+                    break;
+                  }
+                  // Too Many Requests
+                  console.warn("Nominatim API rate limit hit for query \"".concat(query, "\". Retrying in ").concat(delay, "ms..."));
+                  retries++;
+                  delay = Math.min(delay * 2, 30000); // Exponential backoff, cap at 30 seconds
+                  jitter = Math.random() * 500; // Add up to 500ms jitter
+                  _context.n = 2;
+                  return new Promise(function (resolve) {
+                    return setTimeout(resolve, delay + jitter);
+                  });
+                case 2:
+                  return _context.a(2, 0);
+                case 3:
+                  if (response.ok) {
+                    _context.n = 4;
+                    break;
+                  }
+                  console.error("Nominatim API request failed for query \"".concat(query, "\" with status: ").concat(response.status));
+                  return _context.a(2, {
+                    v: null
+                  });
+                case 4:
+                  _context.n = 5;
+                  return response.json();
+                case 5:
+                  _t = _context.v;
+                  return _context.a(2, {
+                    v: _t
+                  });
+                case 6:
+                  _context.p = 6;
+                  _t2 = _context.v;
+                  console.error("An error occurred during Nominatim search for query \"".concat(query, "\":"), _t2);
+                  if (!(retries < maxRetries)) {
+                    _context.n = 8;
+                    break;
+                  }
+                  console.warn("Network error for query \"".concat(query, "\". Retrying in ").concat(delay, "ms..."));
+                  retries++;
+                  delay = Math.min(delay * 2, 30000); // Exponential backoff, cap at 30 seconds
+                  _jitter = Math.random() * 500; // Add up to 500ms jitter
+                  _context.n = 7;
+                  return new Promise(function (resolve) {
+                    return setTimeout(resolve, delay + _jitter);
+                  });
+                case 7:
+                  return _context.a(2, 0);
+                case 8:
+                  return _context.a(2, {
+                    v: {
+                      error: "Network error during geocoding: ".concat(_t2.message, ". Please check your internet connection or try again later.")
+                    }
+                  });
+                case 9:
+                  return _context.a(2);
+              }
+            }, _loop, null, [[0, 6]]);
           });
-        case 2:
-          response = _context.v;
-          if (response.ok) {
-            _context.n = 3;
+        case 1:
+          if (!(retries <= maxRetries)) {
+            _context2.n = 5;
             break;
           }
-          console.error("Nominatim API request failed for query \"".concat(query, "\" with status: ").concat(response.status));
-          return _context.a(2, null);
+          return _context2.d(_regeneratorValues(_loop()), 2);
+        case 2:
+          _ret = _context2.v;
+          if (!(_ret === 0)) {
+            _context2.n = 3;
+            break;
+          }
+          return _context2.a(3, 1);
         case 3:
-          _context.n = 4;
-          return response.json();
+          if (!_ret) {
+            _context2.n = 4;
+            break;
+          }
+          return _context2.a(2, _ret.v);
         case 4:
-          return _context.a(2, _context.v);
+          _context2.n = 1;
+          break;
         case 5:
-          _context.p = 5;
-          _t = _context.v;
-          console.error("An error occurred during Nominatim search for query \"".concat(query, "\":"), _t);
-          return _context.a(2, null);
+          return _context2.a(2, {
+            error: "Geocoding failed for query \"".concat(query, "\" after ").concat(maxRetries, " retries due to persistent issues.")
+          });
       }
-    }, _callee, null, [[1, 5]]);
+    }, _callee);
   }));
   return _nominatimSearch2.apply(this, arguments);
 }
@@ -84672,15 +84763,23 @@ function geocodeAddress(_x2) {
  */
 function _geocodeAddress() {
   _geocodeAddress = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(address) {
-    var coordRegex, sanitizedAddress, data, addressWithoutNumber;
-    return _regenerator().w(function (_context2) {
-      while (1) switch (_context2.n) {
+    var maxRetries,
+      initialDelayMs,
+      coordRegex,
+      sanitizedAddress,
+      data,
+      addressWithoutNumber,
+      _args3 = arguments;
+    return _regenerator().w(function (_context3) {
+      while (1) switch (_context3.n) {
         case 0:
+          maxRetries = _args3.length > 1 && _args3[1] !== undefined ? _args3[1] : 3;
+          initialDelayMs = _args3.length > 2 && _args3[2] !== undefined ? _args3[2] : 1000;
           if (!(!address || typeof address !== "string")) {
-            _context2.n = 1;
+            _context3.n = 1;
             break;
           }
-          return _context2.a(2, {
+          return _context3.a(2, {
             error: "Invalid address provided. Please provide a valid street address as a string."
           });
         case 1:
@@ -84688,51 +84787,66 @@ function _geocodeAddress() {
           // It's a simple check to prevent misuse of the tool with coordinates.
           coordRegex = /^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/;
           if (!coordRegex.test(address.trim())) {
-            _context2.n = 2;
+            _context3.n = 2;
             break;
           }
-          return _context2.a(2, {
+          return _context3.a(2, {
             error: "Invalid input: \"".concat(address, "\" looks like coordinates. To convert coordinates to a text address, you MUST use the 'reverse_geocode' tool.")
           });
         case 2:
           sanitizedAddress = address.replace(/-/g, ' '); // --- Attempt 1: Use the full address ---
-          _context2.n = 3;
-          return _nominatimSearch(sanitizedAddress);
+          _context3.n = 3;
+          return _nominatimSearch(sanitizedAddress, maxRetries, initialDelayMs);
         case 3:
-          data = _context2.v;
+          data = _context3.v;
+          if (!(data && data.error)) {
+            _context3.n = 4;
+            break;
+          }
+          return _context3.a(2, {
+            error: data.error
+          });
+        case 4:
           if (!(!data || data.length === 0)) {
-            _context2.n = 5;
+            _context3.n = 6;
             break;
           }
           console.warn("Geocoding failed for full address: \"".concat(sanitizedAddress, "\". Retrying without house number."));
           // This regex removes a sequence of digits at the start of the string, plus any following whitespace.
           addressWithoutNumber = sanitizedAddress.replace(/^\d+\s+/, ''); // Only retry if the address actually changed (i.e., it had a house number)
           if (!(addressWithoutNumber !== sanitizedAddress)) {
-            _context2.n = 5;
+            _context3.n = 6;
             break;
           }
-          _context2.n = 4;
-          return _nominatimSearch(addressWithoutNumber);
-        case 4:
-          data = _context2.v;
+          _context3.n = 5;
+          return _nominatimSearch(addressWithoutNumber, maxRetries, initialDelayMs);
         case 5:
+          data = _context3.v;
+          if (!(data && data.error)) {
+            _context3.n = 6;
+            break;
+          }
+          return _context3.a(2, {
+            error: data.error
+          });
+        case 6:
           if (!(data && data.length > 0)) {
-            _context2.n = 6;
+            _context3.n = 7;
             break;
           }
           console.log("Geocoding successful for \"".concat(address, "\". Found: ").concat(data[0].display_name));
-          return _context2.a(2, {
+          return _context3.a(2, {
             latitude: parseFloat(data[0].lat),
             longitude: parseFloat(data[0].lon)
           });
-        case 6:
+        case 7:
           // If all attempts fail, return the error.
           console.error("Geocoding failed for all attempts for address: \"".concat(address, "\""));
-          return _context2.a(2, {
+          return _context3.a(2, {
             error: "No results found for address: \"".concat(address, "\"")
           });
-        case 7:
-          return _context2.a(2);
+        case 8:
+          return _context3.a(2);
       }
     }, _callee2);
   }));
@@ -84743,73 +84857,73 @@ function reverseGeocode(_x3, _x4) {
 }
 function _reverseGeocode() {
   _reverseGeocode = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(latitude, longitude) {
-    var url, response, data, _t2;
-    return _regenerator().w(function (_context3) {
-      while (1) switch (_context3.n) {
+    var url, response, data, _t3;
+    return _regenerator().w(function (_context4) {
+      while (1) switch (_context4.n) {
         case 0:
           if (!(typeof latitude !== 'number' || typeof longitude !== 'number')) {
-            _context3.n = 1;
+            _context4.n = 1;
             break;
           }
-          return _context3.a(2, {
+          return _context4.a(2, {
             error: "Invalid coordinates provided. Please provide valid latitude and longitude as numbers."
           });
         case 1:
           // Nominatim API Usage Policy requires a custom User-Agent.
           // See: https://operations.osmfoundation.org/policies/nominatim/
           url = "https://nominatim.openstreetmap.org/reverse?lat=".concat(latitude, "&lon=").concat(longitude, "&format=json");
-          _context3.p = 2;
-          _context3.n = 3;
+          _context4.p = 2;
+          _context4.n = 3;
           return fetch(url, {
             headers: {
               "User-Agent": "GeoInterpreter/1.0 (https://github.com/your-repo/your-app)" // Replace with your app's info
             }
           });
         case 3:
-          response = _context3.v;
+          response = _context4.v;
           if (response.ok) {
-            _context3.n = 4;
+            _context4.n = 4;
             break;
           }
-          return _context3.a(2, {
+          return _context4.a(2, {
             error: "Nominatim API request failed with status: ".concat(response.status)
           });
         case 4:
-          _context3.n = 5;
+          _context4.n = 5;
           return response.json();
         case 5:
-          data = _context3.v;
+          data = _context4.v;
           if (!(data && data.display_name)) {
-            _context3.n = 6;
+            _context4.n = 6;
             break;
           }
-          return _context3.a(2, {
+          return _context4.a(2, {
             address: data.display_name
           });
         case 6:
           if (!data.error) {
-            _context3.n = 7;
+            _context4.n = 7;
             break;
           }
-          return _context3.a(2, {
+          return _context4.a(2, {
             error: "Nominatim API error: ".concat(data.error)
           });
         case 7:
-          return _context3.a(2, {
+          return _context4.a(2, {
             error: "No address found for coordinates: lat=".concat(latitude, ", lon=").concat(longitude)
           });
         case 8:
-          _context3.n = 10;
+          _context4.n = 10;
           break;
         case 9:
-          _context3.p = 9;
-          _t2 = _context3.v;
-          console.error("Reverse geocoding error:", _t2);
-          return _context3.a(2, {
-            error: "An error occurred during reverse geocoding: ".concat(_t2.message)
+          _context4.p = 9;
+          _t3 = _context4.v;
+          console.error("Reverse geocoding error:", _t3);
+          return _context4.a(2, {
+            error: "An error occurred during reverse geocoding: ".concat(_t3.message)
           });
         case 10:
-          return _context3.a(2);
+          return _context4.a(2);
       }
     }, _callee3, null, [[2, 9]]);
   }));
