@@ -83170,7 +83170,7 @@ var ReActController = /*#__PURE__*/function () {
               REPETITION_LIMIT = 3;
               lastActionHistory = [];
               _loop = /*#__PURE__*/_regenerator().m(function _loop() {
-                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, startTime, endTime, turnTime, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, observation, correctedPlan, _errorMsg, _currentState2, conversationHistory, _observation, questionText, _errorMsg2, standardizedAction, _currentState3, _observation2, chosenTool, currentStepType, _observation3, executionParams, _observation4, finalObservation, geocodeCoordErrorRegex, match, lat, lon, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
+                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, startTime, endTime, turnTime, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, observation, correctedPlan, _errorMsg, _currentState2, conversationHistory, _observation, questionText, _errorMsg2, standardizedAction, _currentState3, _observation2, chosenTool, currentStepType, _observation3, executionParams, coords, _observation4, finalObservation, geocodeCoordErrorRegex, match, lat, lon, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
                 return _regenerator().w(function (_context2) {
                   while (1) switch (_context2.n) {
                     case 0:
@@ -83565,6 +83565,13 @@ var ReActController = /*#__PURE__*/function () {
                           cuisine: action.params.keywords || action.params.cuisine,
                           radius_meters: action.params.radius || action.params.radius_meters
                         };
+                        if (action.params.around && typeof action.params.around === 'string') {
+                          coords = action.params.around.match(/-?\d+\.?\d*/g);
+                          if (coords && coords.length >= 2) {
+                            executionParams.latitude = parseFloat(coords[0]);
+                            executionParams.longitude = parseFloat(coords[1]);
+                          }
+                        }
                         console.log("ReActController: Remapped parameters:", executionParams);
                       }
                       _context2.n = 28;
@@ -84014,11 +84021,12 @@ var ReActController = /*#__PURE__*/function () {
               dbToolsRaw = _context7.v;
               dbTools = dbToolsRaw.map(function (tool) {
                 return {
-                  name: tool.tool_id,
+                  name: tool.name,
                   description: tool.description,
-                  parameters: tool.parameters_json ? JSON.parse(tool.parameters_json) : {},
+                  parameters: tool.parameters,
                   category: tool.category,
-                  level: tool.level
+                  level: tool.level,
+                  system_prompt: tool.system_prompt
                 };
               });
               if (dbTools.length > 0) {
@@ -84269,6 +84277,10 @@ var ReActController = /*#__PURE__*/function () {
               if (parsedAction.name === "geocode") {
                 console.warn("ReActController: Remapping 'geocode' tool to 'geocode_address'. AI hallucinated tool name.");
                 parsedAction.name = "geocode_address";
+              }
+              if (parsedAction.name === "search_places_nearby") {
+                console.warn("ReActController: Remapping 'search_places_nearby' tool to 'find_places_nearby'. AI hallucinated tool name.");
+                parsedAction.name = "find_places_nearby";
               }
               action = {
                 name: parsedAction.name,
