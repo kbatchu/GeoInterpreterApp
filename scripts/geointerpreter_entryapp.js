@@ -83559,8 +83559,8 @@ var ReActController = /*#__PURE__*/function () {
                       if (action.name === "find_places_nearby") {
                         console.log("ReActController: Remapping parameters for find_places_nearby");
                         executionParams = {
-                          latitude: action.params.lat || action.params.latitude,
-                          longitude: action.params.lng || action.params.longitude,
+                          latitude: action.params.lat || action.params.latitude || action.params.around_lat,
+                          longitude: action.params.lng || action.params.longitude || action.params.around_lng,
                           amenity: action.params.categories || action.params.amenity,
                           cuisine: action.params.keywords || action.params.cuisine,
                           radius_meters: action.params.radius || action.params.radius_meters
