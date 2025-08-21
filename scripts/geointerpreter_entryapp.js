@@ -83234,13 +83234,13 @@ var ReActController = /*#__PURE__*/function () {
                       endTime = Date.now();
                       turnTime = endTime - startTime;
                       console.log(JSON.stringify({
-                        "timestamp": new Date().toISOString(),
-                        "turnId": _this.sessionId + '-' + loopCount,
-                        "promptChars": messages.map(function (m) {
+                        timestamp: new Date().toISOString(),
+                        turnId: _this.sessionId + "-" + loopCount,
+                        promptChars: messages.map(function (m) {
                           return m.content;
-                        }).join('').length,
-                        "activeToolPrompts": Array.from(_this.promptManager.activeToolPrompts.keys()),
-                        "processingTimeMs": turnTime
+                        }).join("").length,
+                        activeToolPrompts: Array.from(_this.promptManager.activeToolPrompts.keys()),
+                        processingTimeMs: turnTime
                       }));
                       console.log("ReActController: AI core responded. Full reply object:", reply);
                       if (!(reply && reply.choices && reply.choices.length > 0 && reply.choices[0].message)) {
@@ -83565,7 +83565,7 @@ var ReActController = /*#__PURE__*/function () {
                           cuisine: action.params.keywords || action.params.cuisine,
                           radius_meters: action.params.radius || action.params.radius_meters
                         };
-                        if (action.params.around && typeof action.params.around === 'string') {
+                        if (action.params.around && typeof action.params.around === "string") {
                           coords = action.params.around.match(/-?\d+\.?\d*/g);
                           if (coords && coords.length >= 2) {
                             executionParams.latitude = parseFloat(coords[0]);
@@ -83714,7 +83714,7 @@ var ReActController = /*#__PURE__*/function () {
         return _regenerator().w(function (_context4) {
           while (1) switch (_context4.n) {
             case 0:
-              if (!(action.name === 'find_places_nearby' && Array.isArray(observation))) {
+              if (!(action.name === "find_places_nearby" && Array.isArray(observation))) {
                 _context4.n = 10;
                 break;
               }
@@ -83730,24 +83730,24 @@ var ReActController = /*#__PURE__*/function () {
               _context4.n = 3;
               return this.memoryManager.addEntity({
                 entityName: place.name,
-                entityType: 'Restaurant'
+                entityType: "Restaurant"
               });
             case 3:
               entity = _context4.v;
               _context4.n = 4;
               return this.memoryManager.addAttribute({
                 entityId: entity.entity_id,
-                attributeKey: 'address',
+                attributeKey: "address",
                 attributeValue: place.address
               });
             case 4:
               _context4.n = 5;
               return this.memoryManager.addGeospatialAttribute({
                 entityId: entity.entity_id,
-                entityType: 'Restaurant',
+                entityType: "Restaurant",
                 latitude: place.lat,
                 longitude: place.lon,
-                address: place.address.replace(place.name + ', ', ''),
+                address: place.address.replace(place.name + ", ", ""),
                 sessionId: this.sessionId
               });
             case 5:
@@ -83768,21 +83768,21 @@ var ReActController = /*#__PURE__*/function () {
               _context4.n = 15;
               break;
             case 10:
-              if (!(action.name === 'geocode_address' && observation.lat && observation.lon)) {
+              if (!(action.name === "geocode_address" && observation.lat && observation.lon)) {
                 _context4.n = 13;
                 break;
               }
               _context4.n = 11;
               return this.memoryManager.addEntity({
                 entityName: action.params.address,
-                entityType: 'Address'
+                entityType: "Address"
               });
             case 11:
               _entity = _context4.v;
               _context4.n = 12;
               return this.memoryManager.addGeospatialAttribute({
                 entityId: _entity.entity_id,
-                entityType: 'Address',
+                entityType: "Address",
                 latitude: observation.lat,
                 longitude: observation.lon,
                 address: action.params.address,
@@ -83792,21 +83792,21 @@ var ReActController = /*#__PURE__*/function () {
               _context4.n = 15;
               break;
             case 13:
-              if (!(action.name === 'reverse_geocode' && observation.address)) {
+              if (!(action.name === "reverse_geocode" && observation.address)) {
                 _context4.n = 15;
                 break;
               }
               _context4.n = 14;
               return this.memoryManager.addEntity({
                 entityName: observation.address,
-                entityType: 'Address'
+                entityType: "Address"
               });
             case 14:
               _entity2 = _context4.v;
               _context4.n = 15;
               return this.memoryManager.addGeospatialAttribute({
                 entityId: _entity2.entity_id,
-                entityType: 'Address',
+                entityType: "Address",
                 latitude: action.params.latitude,
                 longitude: action.params.longitude,
                 address: observation.address,
