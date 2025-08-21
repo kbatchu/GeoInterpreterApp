@@ -83072,6 +83072,7 @@ var ReActController = /*#__PURE__*/function () {
     this.sessionId = "session-".concat(Date.now());
     this.needsReplan = false;
     this.planStack = [];
+    this.placeholderConceptEmbedding = null;
     this.communicationBus.addEventListener("userQuerySubmitted", this._handleUserQuery.bind(this));
     this.communicationBus.addEventListener("userInputProvided", this._handleUserInput.bind(this));
     this.communicationBus.addEventListener("cancelProcessing", this._handleCancel.bind(this));
@@ -83083,7 +83084,7 @@ var ReActController = /*#__PURE__*/function () {
     key: "_handleUserQuery",
     value: function () {
       var _handleUserQuery2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(event) {
-        var allAvailableTools, _iterator, _step, tool, conversationHistory;
+        var placeholderText, allAvailableTools, _iterator, _step, tool, conversationHistory;
         return _regenerator().w(function (_context) {
           while (1) switch (_context.n) {
             case 0:
@@ -83097,9 +83098,19 @@ var ReActController = /*#__PURE__*/function () {
               _context.n = 1;
               return this.memoryManager.initialize();
             case 1:
+              if (this.placeholderConceptEmbedding) {
+                _context.n = 3;
+                break;
+              }
+              placeholderText = "a placeholder for a missing value like a name, address, distance, or other unknown information";
               _context.n = 2;
-              return this._getRelevantTools(this.userQuery, 999, [1, 2, 3]);
+              return this.memoryManager.generateEmbedding(placeholderText);
             case 2:
+              this.placeholderConceptEmbedding = _context.v;
+            case 3:
+              _context.n = 4;
+              return this._getRelevantTools(this.userQuery, 999, [1, 2, 3]);
+            case 4:
               allAvailableTools = _context.v;
               // Get all tools
               this.toolRegistry = {};
@@ -83126,18 +83137,18 @@ var ReActController = /*#__PURE__*/function () {
                 conversationHistory: conversationHistory,
                 activePlan: null
               });
-              _context.n = 3;
+              _context.n = 5;
               return this.memoryManager.addConversationTurn({
                 speaker: "user",
                 content: this.userQuery,
                 turn: conversationHistory.length,
                 sessionId: this.sessionId
               });
-            case 3:
+            case 5:
               console.log("ReActController: Starting ReAct cycle for query:", this.userQuery);
-              _context.n = 4;
+              _context.n = 6;
               return this.run();
-            case 4:
+            case 6:
               return _context.a(2);
           }
         }, _callee, this);
@@ -83177,7 +83188,7 @@ var ReActController = /*#__PURE__*/function () {
               REPETITION_LIMIT = 3;
               lastActionHistory = [];
               _loop = /*#__PURE__*/_regenerator().m(function _loop() {
-                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, startTime, endTime, turnTime, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, observation, refinedPlan, correctedPlan, parentPlanState, _errorMsg, _currentState2, conversationHistory, _observation, questionText, _errorMsg2, standardizedAction, _currentState3, _observation2, chosenTool, currentStepType, _observation3, executionParams, coords, _observation4, finalObservation, geocodeCoordErrorRegex, match, lat, lon, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
+                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, startTime, endTime, turnTime, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, observation, refinedPlan, correctedPlan, parentPlanState, _errorMsg, placeholderRegex, hasInvalidPlaceholder, answerText, matches, placeholderChecks, results, _errorMsg2, _currentState2, conversationHistory, _observation, questionText, _errorMsg3, standardizedAction, _currentState3, _observation2, chosenTool, currentStepType, _observation3, executionParams, coords, _observation4, finalObservation, geocodeCoordErrorRegex, match, lat, lon, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
                 return _regenerator().w(function (_context2) {
                   while (1) switch (_context2.n) {
                     case 0:
@@ -83438,11 +83449,11 @@ var ReActController = /*#__PURE__*/function () {
                     case 21:
                       throw new Error("AI did not return a valid plan in planning mode.");
                     case 22:
-                      _context2.n = 37;
+                      _context2.n = 40;
                       break;
                     case 23:
                       if (!(action.name === "finish")) {
-                        _context2.n = 27;
+                        _context2.n = 30;
                         break;
                       }
                       if (!(_this.planStack.length > 0)) {
@@ -83475,6 +83486,45 @@ var ReActController = /*#__PURE__*/function () {
                       _this._dispatchScratchpadUpdate();
                       return _context2.a(2, 0);
                     case 25:
+                      // Use embedding similarity to detect if bracketed content is a placeholder.
+                      placeholderRegex = /\[(.*?)\]/g; // Use g for matchAll
+                      hasInvalidPlaceholder = false;
+                      answerText = action.params.answer;
+                      matches = _toConsumableArray(answerText.matchAll(placeholderRegex));
+                      if (!(matches.length > 0)) {
+                        _context2.n = 27;
+                        break;
+                      }
+                      placeholderChecks = matches.map(function (match) {
+                        return _this._isInvalidPlaceholder(match[1]);
+                      });
+                      _context2.n = 26;
+                      return Promise.all(placeholderChecks);
+                    case 26:
+                      results = _context2.v;
+                      if (results.some(function (isInvalid) {
+                        return isInvalid;
+                      })) {
+                        hasInvalidPlaceholder = true;
+                      }
+                    case 27:
+                      if (!hasInvalidPlaceholder) {
+                        _context2.n = 28;
+                        break;
+                      }
+                      _errorMsg2 = "Invalid action: 'finish' tool was called with an answer containing placeholders like '[address]'. The answer must be complete and based on facts from the scratchpad. You MUST find the missing information using a tool or ask the user for help.";
+                      console.error("ReActController: ".concat(_errorMsg2));
+                      _this.scratchpad.push({
+                        type: "action",
+                        content: action
+                      });
+                      _this.scratchpad.push({
+                        type: "observation",
+                        content: _errorMsg2
+                      });
+                      _this._dispatchScratchpadUpdate();
+                      return _context2.a(2, 0);
+                    case 28:
                       finished = true;
                       _this.scratchpad.push({
                         type: "action",
@@ -83490,23 +83540,23 @@ var ReActController = /*#__PURE__*/function () {
                         agentStatus: "idle",
                         conversationHistory: conversationHistory
                       });
-                      _context2.n = 26;
+                      _context2.n = 29;
                       return _this.memoryManager.addConversationTurn({
                         speaker: "assistant",
                         content: action.params.answer,
                         turn: conversationHistory.length,
                         sessionId: _this.sessionId
                       });
-                    case 26:
+                    case 29:
                       _this.communicationBus.dispatchEvent("finalAnswerReady", {
                         answer: action.params.answer
                       });
                       console.log("ReActController: AI finished with answer:", action.params.answer);
-                      _context2.n = 37;
+                      _context2.n = 40;
                       break;
-                    case 27:
+                    case 30:
                       if (!(action.name === "escalate_tool_level")) {
-                        _context2.n = 28;
+                        _context2.n = 31;
                         break;
                       }
                       _this.currentToolLevels = [2, 3];
@@ -83522,29 +83572,29 @@ var ReActController = /*#__PURE__*/function () {
                       _this._dispatchScratchpadUpdate();
                       console.log("ReActController: Escalating to lower-level tools.");
                       return _context2.a(2, 0);
-                    case 28:
+                    case 31:
                       if (!(action.name === "ask_user")) {
-                        _context2.n = 30;
+                        _context2.n = 33;
                         break;
                       }
                       questionText = action.params.question || action.params.prompt;
                       if (!(!questionText || typeof questionText !== "string" || questionText.trim() === "")) {
-                        _context2.n = 29;
+                        _context2.n = 32;
                         break;
                       }
-                      _errorMsg2 = "Invalid action: 'ask_user' tool was called without a valid 'question' or 'prompt' parameter.";
-                      console.error("ReActController: ".concat(_errorMsg2));
+                      _errorMsg3 = "Invalid action: 'ask_user' tool was called without a valid 'question' or 'prompt' parameter.";
+                      console.error("ReActController: ".concat(_errorMsg3));
                       _this.scratchpad.push({
                         type: "action",
                         content: action
                       });
                       _this.scratchpad.push({
                         type: "observation",
-                        content: _errorMsg2
+                        content: _errorMsg3
                       });
                       _this._dispatchScratchpadUpdate();
                       return _context2.a(2, 0);
-                    case 29:
+                    case 32:
                       standardizedAction = {
                         name: "ask_user",
                         params: {
@@ -83572,9 +83622,9 @@ var ReActController = /*#__PURE__*/function () {
                       return _context2.a(2, {
                         v: void 0
                       });
-                    case 30:
+                    case 33:
                       if (!(action.name === "parse_error")) {
-                        _context2.n = 31;
+                        _context2.n = 34;
                         break;
                       }
                       _observation2 = "Parse error occurred. The AI response format was incorrect. Error: ".concat(action.params.error);
@@ -83589,13 +83639,13 @@ var ReActController = /*#__PURE__*/function () {
                       _this._dispatchScratchpadUpdate();
                       console.log("ReActController: Parse error, prompting AI to correct format.");
                       return _context2.a(2, 0);
-                    case 31:
+                    case 34:
                       chosenTool = availableTools.find(function (t) {
                         return t.name === action.name;
                       });
                       currentStepType = currentStep ? currentStep.step_type : null;
                       if (!(currentStepType === "geospatial" && chosenTool && !["geospatial", "data_retrieval"].includes(chosenTool.category.toLowerCase()))) {
-                        _context2.n = 32;
+                        _context2.n = 35;
                         break;
                       }
                       console.warn("ReActController: Mismatch detected! Step type is 'geospatial' but chosen tool '".concat(action.name, "' is category '").concat(chosenTool.category, "'."));
@@ -83614,7 +83664,7 @@ var ReActController = /*#__PURE__*/function () {
                       });
                       _this._dispatchScratchpadUpdate();
                       return _context2.a(2, 0);
-                    case 32:
+                    case 35:
                       _this.scratchpad.push({
                         type: "action",
                         content: action
@@ -83646,9 +83696,9 @@ var ReActController = /*#__PURE__*/function () {
                         }
                         console.log("ReActController: Remapped parameters:", executionParams);
                       }
-                      _context2.n = 33;
+                      _context2.n = 36;
                       return _this.toolExecutor.execute(action.name, executionParams, _this.stateManager.getState());
-                    case 33:
+                    case 36:
                       _observation4 = _context2.v;
                       finalObservation = _observation4; // Regex to match the specific error message from geocodeAddress for coordinates
                       geocodeCoordErrorRegex = /^Invalid input: \"(-?\d+\.\d+),\s*(-?\d+\.\d+)\" looks like coordinates\. To convert coordinates to a text address, you MUST use the 'reverse_geocode' tool\.$/;
@@ -83671,7 +83721,7 @@ var ReActController = /*#__PURE__*/function () {
                         _this._findPlacesRetryCount = 0;
                       }
                       if (!(typeof _observation4 === "string" && _observation4.startsWith("Tool '") && _observation4.endsWith("' not implemented in ToolExecutor."))) {
-                        _context2.n = 34;
+                        _context2.n = 37;
                         break;
                       }
                       console.log("ReActController: Tool not found, re-evaluating current step.");
@@ -83680,9 +83730,9 @@ var ReActController = /*#__PURE__*/function () {
                         content: _observation4
                       });
                       console.log("ReActController: Tool Observation:", _observation4);
-                      _context2.n = 36;
+                      _context2.n = 39;
                       break;
-                    case 34:
+                    case 37:
                       _this.scratchpad.push({
                         type: "observation",
                         content: finalObservation
@@ -83691,17 +83741,17 @@ var ReActController = /*#__PURE__*/function () {
                       if (_this._isCriticalFailure(finalObservation)) {
                         _this.needsReplan = true;
                       }
-                      _context2.n = 35;
+                      _context2.n = 38;
                       return _this._extractAndStoreEntities(action, finalObservation);
-                    case 35:
-                      _this.currentPlanStepIndex++;
-                    case 36:
-                      _this._dispatchScratchpadUpdate();
-                    case 37:
-                      _context2.n = 39;
-                      break;
                     case 38:
-                      _context2.p = 38;
+                      _this.currentPlanStepIndex++;
+                    case 39:
+                      _this._dispatchScratchpadUpdate();
+                    case 40:
+                      _context2.n = 42;
+                      break;
+                    case 41:
+                      _context2.p = 41;
                       _t2 = _context2.v;
                       console.error("ReActController: Error during ReAct cycle:", _t2);
                       _this.scratchpad.push({
@@ -83727,10 +83777,10 @@ var ReActController = /*#__PURE__*/function () {
                         });
                         finished = true;
                       }
-                    case 39:
+                    case 42:
                       return _context2.a(2);
                   }
-                }, _loop, null, [[7, 11], [2, 38]]);
+                }, _loop, null, [[7, 11], [2, 41]]);
               });
             case 1:
               if (!(!finished && loopCount < MAX_LOOP_ITERATIONS)) {
@@ -84587,6 +84637,66 @@ var ReActController = /*#__PURE__*/function () {
       }
       return _correctPlanStepTypes;
     }()
+    /**
+     * Calculates the cosine similarity between two vectors.
+     * @param {number[]} vecA The first vector.
+     * @param {number[]} vecB The second vector.
+     * @returns {number} The cosine similarity score.
+     * @private
+     */
+  }, {
+    key: "_cosineSimilarity",
+    value: function _cosineSimilarity(vecA, vecB) {
+      var dotProduct = 0.0;
+      var normA = 0.0;
+      var normB = 0.0;
+      for (var i = 0; i < vecA.length; i++) {
+        dotProduct += vecA[i] * vecB[i];
+        normA += vecA[i] * vecA[i];
+        normB += vecB[i] * vecB[i];
+      }
+      if (normA === 0 || normB === 0) {
+        return 0;
+      }
+      return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+    }
+
+    /**
+     * Determines if a string from within brackets is an invalid placeholder.
+     * @param {string} bracketContent The text content from inside square brackets.
+     * @returns {Promise<boolean>} True if the content is likely a placeholder.
+     * @private
+     */
+  }, {
+    key: "_isInvalidPlaceholder",
+    value: (function () {
+      var _isInvalidPlaceholder2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee0(bracketContent) {
+        var SIMILARITY_THRESHOLD, contentEmbedding, similarity;
+        return _regenerator().w(function (_context1) {
+          while (1) switch (_context1.n) {
+            case 0:
+              SIMILARITY_THRESHOLD = 0.7; // Add exceptions for common valid formats like "[source: wiki]" or "[1,2,3]".
+              if (!(bracketContent.includes(":") || /^[0-9,\s.-]+$/.test(bracketContent))) {
+                _context1.n = 1;
+                break;
+              }
+              return _context1.a(2, false);
+            case 1:
+              _context1.n = 2;
+              return this.memoryManager.generateEmbedding(bracketContent);
+            case 2:
+              contentEmbedding = _context1.v;
+              similarity = this._cosineSimilarity(contentEmbedding, this.placeholderConceptEmbedding);
+              console.log("ReActController: Placeholder check for \"[".concat(bracketContent, "]\". Similarity: ").concat(similarity.toFixed(4)));
+              return _context1.a(2, similarity > SIMILARITY_THRESHOLD);
+          }
+        }, _callee0, this);
+      }));
+      function _isInvalidPlaceholder(_x0) {
+        return _isInvalidPlaceholder2.apply(this, arguments);
+      }
+      return _isInvalidPlaceholder;
+    }())
   }, {
     key: "_dispatchScratchpadUpdate",
     value: function _dispatchScratchpadUpdate() {
@@ -84606,22 +84716,22 @@ var ReActController = /*#__PURE__*/function () {
   }, {
     key: "addGeospatialData",
     value: function () {
-      var _addGeospatialData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee0(entityId, entityType, latitude, longitude, address, sessionId) {
+      var _addGeospatialData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1(entityId, entityType, latitude, longitude, address, sessionId) {
         var lat, lon, _t7;
-        return _regenerator().w(function (_context1) {
-          while (1) switch (_context1.n) {
+        return _regenerator().w(function (_context10) {
+          while (1) switch (_context10.n) {
             case 0:
-              _context1.p = 0;
+              _context10.p = 0;
               // Ensure coordinates are valid numbers
               lat = typeof latitude === "string" ? parseFloat(latitude) : latitude;
               lon = typeof longitude === "string" ? parseFloat(longitude) : longitude;
               if (!(isNaN(lat) || isNaN(lon))) {
-                _context1.n = 1;
+                _context10.n = 1;
                 break;
               }
               throw new Error("Invalid coordinates for ".concat(entityId, ": lat=").concat(latitude, ", lon=").concat(longitude));
             case 1:
-              _context1.n = 2;
+              _context10.n = 2;
               return this.memoryManager.addGeospatialAttribute({
                 entityId: entityId,
                 entityType: entityType,
@@ -84631,19 +84741,19 @@ var ReActController = /*#__PURE__*/function () {
                 sessionId: this.sessionId
               });
             case 2:
-              _context1.n = 4;
+              _context10.n = 4;
               break;
             case 3:
-              _context1.p = 3;
-              _t7 = _context1.v;
+              _context10.p = 3;
+              _t7 = _context10.v;
               console.error("ReActController: Error adding geospatial data:", _t7);
               throw _t7;
             case 4:
-              return _context1.a(2);
+              return _context10.a(2);
           }
-        }, _callee0, this, [[0, 3]]);
+        }, _callee1, this, [[0, 3]]);
       }));
-      function addGeospatialData(_x0, _x1, _x10, _x11, _x12, _x13) {
+      function addGeospatialData(_x1, _x10, _x11, _x12, _x13, _x14) {
         return _addGeospatialData.apply(this, arguments);
       }
       return addGeospatialData;
