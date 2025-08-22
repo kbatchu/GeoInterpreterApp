@@ -44769,55 +44769,38 @@ self.onmessage = async (event) => {
         break;
 
       case "getRelevantTools":
-        const MIN_SIMILARITY_THRESHOLD = 0.7; // Define a threshold for relevance
-
         let tools = [];
-        let foundRelevantTool = false;
 
-        // Try to find relevant tools at Level 3 first
-        let level3Tools = await toolRetriever.getRelevantToolsWithDependencies(
+        // Try to find relevant tools at Level 1 first
+        tools = await toolRetriever.getRelevantToolsWithDependencies(
           args.query,
           args.topN,
-          [3] // Only search Level 3
+          [1] // Only search Level 1
         );
 
-        // Check if any Level 3 tool meets the minimum similarity threshold
-        if (level3Tools.length > 0 && level3Tools[0].similarity >= MIN_SIMILARITY_THRESHOLD) {
-            tools = level3Tools;
-            foundRelevantTool = true;
-        }
-
-        if (!foundRelevantTool) {
-          // If no sufficiently relevant Level 3 tools found, try Level 2
-          let level2Tools = await toolRetriever.getRelevantToolsWithDependencies(
+        if (tools.length === 0) {
+          // If no Level 1 tools found, try Level 2
+          tools = await toolRetriever.getRelevantToolsWithDependencies(
             args.query,
             args.topN,
             [2] // Only search Level 2
           );
-          if (level2Tools.length > 0 && level2Tools[0].similarity >= MIN_SIMILARITY_THRESHOLD) {
-              tools = level2Tools;
-              foundRelevantTool = true;
-          }
         }
 
-        if (!foundRelevantTool) {
-          // If no sufficiently relevant Level 2 tools found, try Level 1
-          let level1Tools = await toolRetriever.getRelevantToolsWithDependencies(
+        if (tools.length === 0) {
+          // If no Level 2 tools found, try Level 3
+          tools = await toolRetriever.getRelevantToolsWithDependencies(
             args.query,
             args.topN,
-            [1] // Only search Level 1
+            [3] // Only search Level 3
           );
-          if (level1Tools.length > 0 && level1Tools[0].similarity >= MIN_SIMILARITY_THRESHOLD) {
-              tools = level1Tools;
-              foundRelevantTool = true;
-          }
         }
 
-        if (!tools || tools.length === 0) { // If no tools found at any level with sufficient relevance
+        if (!tools || tools.length === 0) { // If no tools found at any level
             self.postMessage({ messageId, payload: [] });
             break;
         }
-        console.log("Relevant tools retrieved:", tools.map(tool => tool.name)); // Added console log
+        console.log("Relevant tools retrieved:", tools.map(tool => tool.name));
         self.postMessage({ messageId, payload: tools });
         break;
 
