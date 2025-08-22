@@ -83171,7 +83171,7 @@ var ReActController = /*#__PURE__*/function () {
   }, {
     key: "_getStaticSystemPrompt",
     value: function _getStaticSystemPrompt() {
-      return "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by executing a pre-defined plan ONE STEP AT A TIME.\n\n## CRITICAL: RESPONSE FORMAT\nYou MUST respond with EXACTLY ONE Thought and ONE Action. Your entire response must follow this exact format:\n\nThought: [Your reasoning about the current step, what tool to use, and why. Be concise.]\nAction: { \"name\": \"tool_name\", \"parameters\": { \"param1\": \"value1\" } }\n\n## CRITICAL THINKING & ADAPTATION\n1.  **Analyze the last Observation:** Before deciding your next action, you MUST carefully analyze the most recent Observation in the scratchpad.\n2.  **Entity-Attribute Integrity:** When you identify an entity (e.g., a restaurant name) from an 'Observation', you MUST use other attributes (like its address) from that *same* 'Observation'. Do NOT combine an entity from an 'Observation' with an address from the user's original query in '<CONVERSATION_HISTORY>'. If an attribute like an address is missing for a found entity, your action should be to use a tool to find it.\n3.  **Assess Success:** Did the last action succeed? Did it return the expected information? For example, if you searched for something, did the observation indicate that items were found?\n\n4.  **Adapt Your Plan:**\n    - If the observation is unexpected (e.g., \"Found 0 places\", an error message, or \"Tool not implemented\"), DO NOT blindly proceed with the original plan.\n    - Your 'Thought' must explain how you are adapting to the new information.\n    - Your next 'Action' should be a direct attempt to recover.\n        - **If you get \"Found 0 places\":** Your primary strategy is to expand the search. The system will track your attempts. If the observation says you MUST try again, then you must call the *same tool* but with a *larger search radius*. Look at the previous action in the scratchpad to see what the last radius was and increase it significantly (e.g., double it).\n        - **If a tool is not implemented:** Your thought must be to try a different, more suitable tool from the available list to achieve the same goal.\n        - **If you need to geocode an address that appears incomplete:** Do not immediately use 'ask_user'. First, attempt to use the 'find_places_nearby' tool with the partial address in the 'amenity' parameter. The results may contain a complete, geocodable address. If so, use that address in a subsequent 'geocode_address' action. Only ask the user for clarification if this approach fails.\n        - **If you are truly stuck on a step for other reasons:** Use the 'ask_user' tool for clarification.\n    - Only if the last observation was successful and expected should you proceed to the next step of the plan.\n\n## FINISHING THE TASK\nWhen all steps are complete and you have gathered all necessary information, you MUST use the 'finish' tool.\n- **Thought:** Your thought should summarize the key findings from the scratchpad.\n- **Action:** The 'answer' parameter in the 'finish' tool MUST contain the complete, final answer for the user, synthesized from the observations.\n- **Example:**\n  Thought: The scratchpad shows that the geocoding was successful and the subsequent search found three restaurants. I will now format these results into a final answer for the user.\n  Action: { \"name\": \"finish\", \"parameters\": { \"answer\": \"I found 3 Indian restaurants near your location: [List of restaurants and their details].\" } }\n\n## AVAILABLE ACTIONS\n- Use one of the provided tools.\n- Use the 'finish(answer=...)' tool when you have the final answer.\n- Use the 'escalate_tool_level' tool if the current tools are insufficient.\n- Use the 'ask_user' tool if you need clarification from the user.";
+      return "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your goal is to help the user by executing a pre-defined plan ONE STEP AT A TIME.\n\n## CRITICAL: RESPONSE FORMAT\nYou MUST respond with EXACTLY ONE Thought and ONE Action. Your entire response must follow this exact format:\n\nThought: [Your reasoning about the current step, what tool to use, and why. Be concise.]\nAction: { \"name\": \"tool_name\", \"parameters\": { \"param1\": \"value1\" } }\n\n## CRITICAL THINKING & ADAPTATION\n1.  **Analyze the last Observation:** Before deciding your next action, you MUST carefully analyze the most recent Observation in the scratchpad.\n2.  **Entity-Attribute Integrity:** When you identify an entity (e.g., a restaurant name) from an 'Observation', you MUST use other attributes (like its address) from that *same* 'Observation'. Do NOT combine an entity from an 'Observation' with an address from the user's original query in '<CONVERSATION_HISTORY>'. If an attribute like an address is missing for a found entity, your action should be to use a tool to find it.\n3.  **Assess Success:** Did the last action succeed? Did it return the expected information? For example, if you searched for something, did the observation indicate that items were found?\n\n4.  **Adapt Your Plan:**\n    - If the observation is unexpected (e.g., \"Found 0 places\", an error message, or \"Tool not implemented\"), DO NOT blindly proceed with the original plan.\n    - Your 'Thought' must explain how you are adapting to the new information.\n    - Your next 'Action' should be a direct attempt to recover.\n        - **If you get \"Found 0 places\":** Your primary strategy is to expand the search. The system will track your attempts. If the observation says you MUST try again, then you must call the *same tool* but with a *larger search radius*. Look at the previous action in the scratchpad to see what the last radius was and increase it significantly (e.g., double it).\n        - **If you need to filter by a specific sub-type (e.g., 'childrens hospital', 'sushi restaurant') and are unsure of the correct OSM tags:** Before using 'find_places_nearby', you should FIRST use the 'get_osm_tag_info' tool. For example, `Action: { \"name\": \"get_osm_tag_info\", \"params\": { \"key\": \"amenity\", \"value\": \"hospital\" } }`. The observation will guide you on which keys (like 'healthcare:speciality') to use in the 'tags' parameter of the 'find_places_nearby' tool in your *next* step.\n        - **If a tool is not implemented:** Your thought must be to try a different, more suitable tool from the available list to achieve the same goal.\n        - **If you need to geocode an address that appears incomplete:** Do not immediately use 'ask_user'. First, attempt to use the 'find_places_nearby' tool with the partial address in the 'amenity' parameter. The results may contain a complete, geocodable address. If so, use that address in a subsequent 'geocode_address' action. Only ask the user for clarification if this approach fails.\n        - **If you are truly stuck on a step for other reasons:** Use the 'ask_user' tool for clarification.\n    - Only if the last observation was successful and expected should you proceed to the next step of the plan.\n\n## FINISHING THE TASK\nWhen all steps are complete and you have gathered all necessary information, you MUST use the 'finish' tool.\n- **Thought:** Your thought should summarize the key findings from the scratchpad.\n- **Action:** The 'answer' parameter in the 'finish' tool MUST contain the complete, final answer for the user, synthesized from the observations.\n- **Example:**\n  Thought: The scratchpad shows that the geocoding was successful and the subsequent search found three restaurants. I will now format these results into a final answer for the user.\n  Action: { \"name\": \"finish\", \"parameters\": { \"answer\": \"I found 3 Indian restaurants near your location: [List of restaurants and their details].\" } }\n\n## AVAILABLE ACTIONS\n- Use one of the provided tools.\n- Use the 'finish(answer=...)' tool when you have the final answer.\n- Use the 'escalate_tool_level' tool if the current tools are insufficient.\n- Use the 'ask_user' tool if you need clarification from the user.";
     }
   }, {
     key: "run",
@@ -83487,7 +83487,7 @@ var ReActController = /*#__PURE__*/function () {
                       return _context2.a(2, 0);
                     case 25:
                       // Use embedding similarity to detect if bracketed content is a placeholder.
-                      placeholderRegex = /\[(.*?)\]/g; // Use g for matchAll
+                      placeholderRegex = /.*\[(.*?)].*/g; // Use g for matchAll
                       hasInvalidPlaceholder = false;
                       answerText = action.params.answer;
                       matches = _toConsumableArray(answerText.matchAll(placeholderRegex));
@@ -83701,7 +83701,7 @@ var ReActController = /*#__PURE__*/function () {
                     case 36:
                       _observation4 = _context2.v;
                       finalObservation = _observation4; // Regex to match the specific error message from geocodeAddress for coordinates
-                      geocodeCoordErrorRegex = /^Invalid input: \"(-?\d+\.\d+),\s*(-?\d+\.\d+)\" looks like coordinates\. To convert coordinates to a text address, you MUST use the 'reverse_geocode' tool\.$/;
+                      geocodeCoordErrorRegex = /^Invalid input: \"(-?\d+\.\d+),\s*(-?\d+\.\d+)\" looks like coordinates. To convert coordinates to a text address, you MUST use the 'reverse_geocode' tool\.$/;
                       match = typeof _observation4 === "string" ? _observation4.match(geocodeCoordErrorRegex) : null;
                       if (match) {
                         lat = parseFloat(match[1]);
@@ -85731,6 +85731,159 @@ function _calculate_route_details() {
 
 /***/ }),
 
+/***/ "./scripts/modules/tools/taginfo_tool.js":
+/*!***********************************************!*\
+  !*** ./scripts/modules/tools/taginfo_tool.js ***!
+  \***********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   getOsmTagInfo: () => (/* binding */ getOsmTagInfo)
+/* harmony export */ });
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+/**
+ * @module taginfo_tool
+ * This tool interacts with the OpenStreetMap Taginfo API to discover common
+ * tags used in combination with a given primary tag. This helps the agent
+ * learn how to correctly filter for specific types of amenities.
+ */
+/**
+ * Fetches tag combination data from the Taginfo API.
+ * @param {string} key The primary OSM key (e.g., 'amenity').
+ * @param {string} value The primary OSM value (e.g., 'hospital').
+ * @returns {Promise<object>} The raw JSON response from the API.
+ * @private
+ */
+function _fetchTagCombinations(_x, _x2) {
+  return _fetchTagCombinations2.apply(this, arguments);
+}
+/**
+ * Formats the Taginfo API response into a human-readable string for the LLM.
+ * @param {object} data The API response data.
+ * @param {string} primaryKey The primary key used in the query.
+ * @param {string} primaryValue The primary value used in the query.
+ * @returns {string} A formatted string providing guidance.
+ * @private
+ */
+function _fetchTagCombinations2() {
+  _fetchTagCombinations2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(key, value) {
+    var url, response, _t;
+    return _regenerator().w(function (_context) {
+      while (1) switch (_context.n) {
+        case 0:
+          url = "https://taginfo.openstreetmap.org/api/4/tag/combinations?key=".concat(key, "&value=").concat(value, "&sortname=together_count&sortorder=desc");
+          console.log("Taginfo Tool: Querying URL: ".concat(url));
+          _context.p = 1;
+          _context.n = 2;
+          return fetch(url, {
+            headers: {
+              "User-Agent": "GeoInterpreter/1.0 (Agent-based research)"
+            }
+          });
+        case 2:
+          response = _context.v;
+          if (response.ok) {
+            _context.n = 3;
+            break;
+          }
+          throw new Error("Taginfo API request failed with status ".concat(response.status));
+        case 3:
+          _context.n = 4;
+          return response.json();
+        case 4:
+          return _context.a(2, _context.v);
+        case 5:
+          _context.p = 5;
+          _t = _context.v;
+          console.error("Taginfo API error:", _t);
+          return _context.a(2, {
+            error: "Failed to fetch data from Taginfo API: ".concat(_t.message)
+          });
+      }
+    }, _callee, null, [[1, 5]]);
+  }));
+  return _fetchTagCombinations2.apply(this, arguments);
+}
+function _formatTagInfoResponse(data, primaryKey, primaryValue) {
+  if (!data || !Array.isArray(data.data) || data.data.length === 0) {
+    return "No common tag combinations found for ".concat(primaryKey, "=").concat(primaryValue, ". You may need to search without additional tags.");
+  }
+
+  // Filter for relevant keys and remove generic ones
+  var excludedKeys = new Set(['name', 'source', 'website', 'phone', 'opening_hours', primaryKey]);
+  var addressPrefix = 'addr:';
+  var relevantTags = data.data.map(function (item) {
+    return item.other_key;
+  }).filter(function (key) {
+    return !excludedKeys.has(key) && !key.startsWith(addressPrefix);
+  });
+
+  // Get unique keys
+  var uniqueKeys = _toConsumableArray(new Set(relevantTags)).slice(0, 5); // Limit to top 5 for brevity
+
+  if (uniqueKeys.length === 0) {
+    return "For features tagged with ".concat(primaryKey, "=").concat(primaryValue, ", the most common additional tags are for basic information like name, address, and phone number. No special filtering tags were found.");
+  }
+  var keyList = uniqueKeys.map(function (k) {
+    return "'".concat(k, "'");
+  }).join(', ');
+  return "Guidance for ".concat(primaryKey, "=").concat(primaryValue, ": To add more specific filters, use the 'tags' parameter in the 'find_places_nearby' tool. Common filtering keys for this amenity are: ").concat(keyList, ". For example, to find a sushi restaurant, you might use 'tags: { \"cuisine\": \"sushi\" }'.");
+}
+
+/**
+ * Discovers common OpenStreetMap tags associated with a given amenity to help construct more detailed queries.
+ * For example, given 'amenity=restaurant', it can discover that the 'cuisine' tag is commonly used for filtering.
+ * @param {object} params The parameters for the tool.
+ * @param {string} params.key The primary OSM key to query (e.g., 'amenity', 'leisure').
+ * @param {string} params.value The value for the primary key (e.g., 'hospital', 'restaurant', 'pitch').
+ * @returns {Promise<string>} A promise that resolves to a string containing guidance on which tags to use.
+ */
+function getOsmTagInfo(_x3) {
+  return _getOsmTagInfo.apply(this, arguments);
+}
+function _getOsmTagInfo() {
+  _getOsmTagInfo = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(params) {
+    var _ref, key, value, data;
+    return _regenerator().w(function (_context2) {
+      while (1) switch (_context2.n) {
+        case 0:
+          _ref = params || {}, key = _ref.key, value = _ref.value;
+          if (!(!key || !value || typeof key !== 'string' || typeof value !== 'string')) {
+            _context2.n = 1;
+            break;
+          }
+          return _context2.a(2, "Error: The 'key' and 'value' parameters are required and must be strings.");
+        case 1:
+          _context2.n = 2;
+          return _fetchTagCombinations(key, value);
+        case 2:
+          data = _context2.v;
+          if (!data.error) {
+            _context2.n = 3;
+            break;
+          }
+          return _context2.a(2, data.error);
+        case 3:
+          return _context2.a(2, _formatTagInfoResponse(data, key, value));
+      }
+    }, _callee2);
+  }));
+  return _getOsmTagInfo.apply(this, arguments);
+}
+
+/***/ }),
+
 /***/ "./scripts/modules/tools/tool_executor.js":
 /*!************************************************!*\
   !*** ./scripts/modules/tools/tool_executor.js ***!
@@ -85746,6 +85899,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _geocoding_tool_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geocoding_tool.js */ "./scripts/modules/tools/geocoding_tool.js");
 /* harmony import */ var _routing_tools_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./routing_tools.js */ "./scripts/modules/tools/routing_tools.js");
 /* harmony import */ var _geolocation_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geolocation.js */ "./scripts/modules/geolocation.js");
+/* harmony import */ var _taginfo_tool_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./taginfo_tool.js */ "./scripts/modules/tools/taginfo_tool.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
 function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
@@ -85757,6 +85911,7 @@ function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), 
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 // c:\Kiran\Work\GIS\DATAVIZ\GeoInterpreter\scripts\modules\tools\tool_executor.js
+
 
 
 
@@ -86015,6 +86170,22 @@ var ToolExecutor = /*#__PURE__*/function () {
           return _ref10.apply(this, arguments);
         };
       }());
+      this.toolRegistry.set('get_osm_tag_info', /*#__PURE__*/function () {
+        var _ref11 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee11(params, state) {
+          return _regenerator().w(function (_context11) {
+            while (1) switch (_context11.n) {
+              case 0:
+                _context11.n = 1;
+                return (0,_taginfo_tool_js__WEBPACK_IMPORTED_MODULE_4__.getOsmTagInfo)(params);
+              case 1:
+                return _context11.a(2, _context11.v);
+            }
+          }, _callee11);
+        }));
+        return function (_x23, _x24) {
+          return _ref11.apply(this, arguments);
+        };
+      }());
     }
 
     /**
@@ -86027,27 +86198,27 @@ var ToolExecutor = /*#__PURE__*/function () {
   }, {
     key: "execute",
     value: (function () {
-      var _execute = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee11(toolName, params, state) {
+      var _execute = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee12(toolName, params, state) {
         var toolFunction;
-        return _regenerator().w(function (_context11) {
-          while (1) switch (_context11.n) {
+        return _regenerator().w(function (_context12) {
+          while (1) switch (_context12.n) {
             case 0:
               console.log("ToolExecutor: Executing tool '".concat(toolName, "' with params:"), params);
               if (!this.toolRegistry.has(toolName)) {
-                _context11.n = 2;
+                _context12.n = 2;
                 break;
               }
               toolFunction = this.toolRegistry.get(toolName); // Use .call(this, ...) to ensure the tool function has access to `this.dbConnection`.
-              _context11.n = 1;
+              _context12.n = 1;
               return toolFunction.call(this, params, state);
             case 1:
-              return _context11.a(2, _context11.v);
+              return _context12.a(2, _context12.v);
             case 2:
-              return _context11.a(2, "Tool '".concat(toolName, "' not implemented in ToolExecutor."));
+              return _context12.a(2, "Tool '".concat(toolName, "' not implemented in ToolExecutor."));
           }
-        }, _callee11, this);
+        }, _callee12, this);
       }));
-      function execute(_x23, _x24, _x25) {
+      function execute(_x25, _x26, _x27) {
         return _execute.apply(this, arguments);
       }
       return execute;
