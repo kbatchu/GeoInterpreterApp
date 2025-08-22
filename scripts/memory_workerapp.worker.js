@@ -44769,11 +44769,32 @@ self.onmessage = async (event) => {
         break;
 
       case "getRelevantTools":
-        const tools = await toolRetriever.getRelevantToolsWithDependencies(
+        let tools = [];
+        // Try to find relevant tools at Level 3 first
+        tools = await toolRetriever.getRelevantToolsWithDependencies(
           args.query,
           args.topN,
-          args.levels
+          [3] // Only search Level 3
         );
+
+        if (tools.length === 0) {
+          // If no Level 3 tools found, try Level 2
+          tools = await toolRetriever.getRelevantToolsWithDependencies(
+            args.query,
+            args.topN,
+            [2] // Only search Level 2
+          );
+        }
+
+        if (tools.length === 0) {
+          // If no Level 2 tools found, try Level 1
+          tools = await toolRetriever.getRelevantToolsWithDependencies(
+            args.query,
+            args.topN,
+            [1] // Only search Level 1
+          );
+        }
+
         if (!tools) {
             self.postMessage({ messageId, payload: [] });
             break;
