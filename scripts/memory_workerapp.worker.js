@@ -44817,6 +44817,7 @@ self.onmessage = async (event) => {
             self.postMessage({ messageId, payload: [] });
             break;
         }
+        console.log("Relevant tools retrieved:", tools.map(tool => tool.name)); // Added console log
         self.postMessage({ messageId, payload: tools });
         break;
 
