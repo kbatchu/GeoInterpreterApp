@@ -44774,6 +44774,10 @@ self.onmessage = async (event) => {
           args.topN,
           args.levels
         );
+        if (!tools) {
+            self.postMessage({ messageId, payload: [] });
+            break;
+        }
         self.postMessage({ messageId, payload: tools });
         break;
 
@@ -44922,7 +44926,7 @@ var ToolRetriever = /*#__PURE__*/function () {
               // 2. Build the WHERE clause for tool levels.
               levelFilter = "WHERE level IN (".concat(levels.join(','), ")"); // 2. Perform a vector similarity search in DuckDB.
               // The embeddings were generated using Xenova/all-MiniLM-L6-v2 model (384 dimensions).
-              querySql = "\n            SELECT\n                tool_id,\n                category,\n                semantic_description,\n                parameters_json,\n                system_prompt,\n                array_cosine_distance(\n                    semantic_description_embedding,\n                    CAST('".concat(queryEmbeddingString, "' AS DOUBLE[384])\n                ) AS distance\n            FROM\n                tool_registry_db.duckdb_tools\n            ").concat(levelFilter, "\n            ORDER BY\n                distance ASC\n            LIMIT ").concat(topN, ";\n        ");
+              querySql = "\n            SELECT\n                tool_id,\n                category,\n                semantic_description,\n                parameters_json,\n                implementation_type,\n                description,\n                array_cosine_distance(\n                    semantic_description_embedding,\n                    CAST('".concat(queryEmbeddingString, "' AS DOUBLE[384])\n                ) AS distance\n            FROM\n                tool_registry_db.duckdb_tools\n            ").concat(levelFilter, "\n            ORDER BY\n                distance ASC\n            LIMIT ").concat(topN, ";\n        ");
               _context.n = 3;
               return this.duckdbConnection.query(querySql)["catch"](function (e) {
                 console.error("ToolRetriever: Error querying tool registry:", e);
@@ -44943,7 +44947,6 @@ var ToolRetriever = /*#__PURE__*/function () {
                       category: row.category,
                       description: row.semantic_description,
                       parameters: JSON.parse(row.parameters_json),
-                      system_prompt: row.system_prompt,
                       // Convert cosine distance to cosine similarity (1 is a perfect match)
                       similarity: 1 - row.distance
                     });
@@ -45102,7 +45105,7 @@ var ToolRetriever = /*#__PURE__*/function () {
               toolIdList = toolIds.map(function (id) {
                 return "'".concat(id, "'");
               }).join(',');
-              querySql = "\n      SELECT\n        tool_id,\n        category,\n        semantic_description,\n        parameters_json,\n        system_prompt\n      FROM\n        tool_registry_db.duckdb_tools\n      WHERE\n        tool_id IN (".concat(toolIdList, ");\n    ");
+              querySql = "\n      SELECT\n        tool_id,\n        category,\n        semantic_description,\n        parameters_json,\n        implementation_type,\n        description\n      FROM\n        tool_registry_db.duckdb_tools\n      WHERE\n        tool_id IN (".concat(toolIdList, ");\n    ");
               _context4.n = 2;
               return this.duckdbConnection.query(querySql)["catch"](function (e) {
                 console.error("ToolRetriever: Error fetching tool definitions:", e);
@@ -45121,8 +45124,7 @@ var ToolRetriever = /*#__PURE__*/function () {
                       name: row.tool_id,
                       category: row.category,
                       description: row.semantic_description,
-                      parameters: JSON.parse(row.parameters_json),
-                      system_prompt: row.system_prompt
+                      parameters: JSON.parse(row.parameters_json)
                     });
                   }
                 } catch (err) {

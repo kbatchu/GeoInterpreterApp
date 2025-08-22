@@ -82991,8 +82991,8 @@ var PromptManager = /*#__PURE__*/function () {
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done;) {
           var toolName = _step.value;
-          if (this.toolRegistry[toolName] && this.toolRegistry[toolName].system_prompt) {
-            newActiveToolPrompts.set(toolName, this.toolRegistry[toolName].system_prompt);
+          if (this.toolRegistry[toolName]) {
+            newActiveToolPrompts.set(toolName, this.toolRegistry[toolName].description);
           }
         }
       } catch (err) {
@@ -84243,8 +84243,7 @@ var ReActController = /*#__PURE__*/function () {
                   description: tool.description,
                   parameters: tool.parameters,
                   category: tool.category,
-                  level: tool.level,
-                  system_prompt: tool.system_prompt
+                  level: tool.level
                 };
               });
               if (dbTools.length > 0) {
