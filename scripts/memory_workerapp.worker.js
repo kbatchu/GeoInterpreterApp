@@ -44846,11 +44846,11 @@ function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArra
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
 function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
-function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
-function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
 function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
 function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
@@ -44881,9 +44881,10 @@ var ToolRetriever = /*#__PURE__*/function () {
 
   /**
    * Retrieves relevant tools from the tool registry using vector similarity search.
+   * This function retrieves tools in a hierarchical manner, starting from level 1, then level 2, and finally level 3,
+   * based on the number of tools found at each level.
    * @param {string} query - The user query or current plan step.
-   * @param {number} [topN=15] - The number of top relevant tools to retrieve.
-   * @param {Array<number>} [levels=[1, 2, 3]] - The priority levels of tools to search for.
+   * @param {number} [topN=5] - The number of top relevant tools to retrieve.
    * @returns {Promise<Array<object>>} A promise that resolves to an array of tool definitions,
    * including a `similarity` score (where 1 is a perfect match).
    */
@@ -44892,23 +44893,18 @@ var ToolRetriever = /*#__PURE__*/function () {
     value: (function () {
       var _getRelevantTools = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(query) {
         var topN,
-          levels,
           queryEmbedding,
           queryEmbeddingString,
-          levelFilter,
-          querySql,
-          result,
+          levels,
           tools,
-          toolRows,
-          _iterator,
-          _step,
-          row,
+          _i,
+          _levels,
+          level,
           _args = arguments;
         return _regenerator().w(function (_context) {
           while (1) switch (_context.n) {
             case 0:
-              topN = _args.length > 1 && _args[1] !== undefined ? _args[1] : 15;
-              levels = _args.length > 2 && _args[2] !== undefined ? _args[2] : [1, 2, 3];
+              topN = _args.length > 1 && _args[1] !== undefined ? _args[1] : 5;
               _context.n = 1;
               return this.embeddingManager.readyPromise;
             case 1:
@@ -44918,19 +44914,55 @@ var ToolRetriever = /*#__PURE__*/function () {
               queryEmbedding = _context.v;
               queryEmbeddingString = JSON.stringify(Array.from(queryEmbedding));
               console.log("ToolRetriever: Embedding generated for query: \"".concat(query, "\""));
-
-              // 2. Build the WHERE clause for tool levels.
-              levelFilter = "WHERE level IN (".concat(levels.join(','), ")"); // 2. Perform a vector similarity search in DuckDB.
-              // The embeddings were generated using Xenova/all-MiniLM-L6-v2 model (384 dimensions).
-              querySql = "\n            SELECT\n                tool_id,\n                category,\n                semantic_description,\n                parameters_json,\n                system_prompt,\n                array_cosine_distance(\n                    semantic_description_embedding,\n                    CAST('".concat(queryEmbeddingString, "' AS DOUBLE[384])\n                ) AS distance\n            FROM\n                tool_registry_db.duckdb_tools\n            ").concat(levelFilter, "\n            ORDER BY\n                distance ASC\n            LIMIT ").concat(topN, ";\n        ");
-              _context.n = 3;
-              return this.duckdbConnection.query(querySql)["catch"](function (e) {
-                console.error("ToolRetriever: Error querying tool registry:", e);
-                throw new Error("Failed to retrieve tools from DuckDB: " + e.message);
-              });
+              levels = [1, 2, 3];
+              tools = [];
+              _i = 0, _levels = levels;
             case 3:
-              result = _context.v;
-              // 3. Parse DuckDB results into tool definitions.
+              if (!(_i < _levels.length)) {
+                _context.n = 6;
+                break;
+              }
+              level = _levels[_i];
+              _context.n = 4;
+              return this.getRelevantToolsByLevel(queryEmbeddingString, topN, level);
+            case 4:
+              tools = _context.v;
+              if (!(tools.length > 0)) {
+                _context.n = 5;
+                break;
+              }
+              console.log("ToolRetriever: Found ".concat(tools.length, " tools at level ").concat(level, "."));
+              return _context.a(3, 6);
+            case 5:
+              _i++;
+              _context.n = 3;
+              break;
+            case 6:
+              return _context.a(2, tools);
+          }
+        }, _callee, this);
+      }));
+      function getRelevantTools(_x) {
+        return _getRelevantTools.apply(this, arguments);
+      }
+      return getRelevantTools;
+    }())
+  }, {
+    key: "getRelevantToolsByLevel",
+    value: function () {
+      var _getRelevantToolsByLevel = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(queryEmbeddingString, topN, level) {
+        var querySql, result, tools, toolRows, _iterator, _step, row;
+        return _regenerator().w(function (_context2) {
+          while (1) switch (_context2.n) {
+            case 0:
+              querySql = "\n            SELECT\n                tool_id,\n                category,\n                semantic_description,\n                parameters_json,\n                system_prompt,\n                array_cosine_distance(\n                    semantic_description_embedding,\n                    CAST('".concat(queryEmbeddingString, "' AS DOUBLE[384])\n                ) AS distance\n            FROM\n                tool_registry_db.duckdb_tools\n            WHERE level = ").concat(level, "\n            ORDER BY\n                distance ASC\n            LIMIT ").concat(topN, ";\n        ");
+              _context2.n = 1;
+              return this.duckdbConnection.query(querySql)["catch"](function (e) {
+                console.error("ToolRetriever: Error querying tool registry for level ".concat(level, ":"), e);
+                throw new Error("Failed to retrieve tools from DuckDB for level ".concat(level, ": ") + e.message);
+              });
+            case 1:
+              result = _context2.v;
               tools = [];
               if (result && result.toArray) {
                 toolRows = result.toArray();
@@ -44944,7 +44976,6 @@ var ToolRetriever = /*#__PURE__*/function () {
                       description: row.semantic_description,
                       parameters: JSON.parse(row.parameters_json),
                       system_prompt: row.system_prompt,
-                      // Convert cosine distance to cosine similarity (1 is a perfect match)
                       similarity: 1 - row.distance
                     });
                   }
@@ -44954,30 +44985,29 @@ var ToolRetriever = /*#__PURE__*/function () {
                   _iterator.f();
                 }
               }
-              return _context.a(2, tools);
+              return _context2.a(2, tools);
           }
-        }, _callee, this);
+        }, _callee2, this);
       }));
-      function getRelevantTools(_x) {
-        return _getRelevantTools.apply(this, arguments);
+      function getRelevantToolsByLevel(_x2, _x3, _x4) {
+        return _getRelevantToolsByLevel.apply(this, arguments);
       }
-      return getRelevantTools;
+      return getRelevantToolsByLevel;
     }()
     /**
      * Retrieves relevant tools and their dependencies from the tool registry.
+     * This function retrieves tools in a hierarchical manner, starting from level 1, then level 2, and finally level 3,
+     * based on the number of tools found at each level.
      * @param {string} query - The user query or current plan step.
-     * @param {number} [topN=15] - The number of top relevant tools to retrieve.
-     * @param {Array<number>} [levels=[1, 2, 3]] - The priority levels of tools to search for.
+     * @param {number} [topN=5] - The number of top relevant tools to retrieve.
      * @returns {Promise<Array<object>>} A promise that resolves to an array of tool definitions, including dependencies.
      */
-    )
   }, {
     key: "getRelevantToolsWithDependencies",
     value: (function () {
-      var _getRelevantToolsWithDependencies = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(query) {
+      var _getRelevantToolsWithDependencies = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(query) {
         var _this = this;
         var topN,
-          levels,
           initialTools,
           initialToolIds,
           allToolIds,
@@ -44985,42 +45015,41 @@ var ToolRetriever = /*#__PURE__*/function () {
           _loop,
           finalTools,
           finalToolMap,
-          _args3 = arguments;
-        return _regenerator().w(function (_context3) {
-          while (1) switch (_context3.n) {
+          _args4 = arguments;
+        return _regenerator().w(function (_context4) {
+          while (1) switch (_context4.n) {
             case 0:
-              topN = _args3.length > 1 && _args3[1] !== undefined ? _args3[1] : 15;
-              levels = _args3.length > 2 && _args3[2] !== undefined ? _args3[2] : [1, 2, 3];
-              _context3.n = 1;
-              return this.getRelevantTools(query, topN, levels);
+              topN = _args4.length > 1 && _args4[1] !== undefined ? _args4[1] : 5;
+              _context4.n = 1;
+              return this.getRelevantTools(query, topN);
             case 1:
-              initialTools = _context3.v;
+              initialTools = _context4.v;
               initialToolIds = initialTools.map(function (t) {
                 return t.name;
               });
               if (!(initialToolIds.length === 0)) {
-                _context3.n = 2;
+                _context4.n = 2;
                 break;
               }
-              return _context3.a(2, []);
+              return _context4.a(2, []);
             case 2:
               // 2. Find all dependent tools recursively
               allToolIds = new Set(initialToolIds);
               toolsToQuery = _toConsumableArray(initialToolIds);
               _loop = /*#__PURE__*/_regenerator().m(function _loop() {
                 var currentToolId, dependencyQuery, result, dependencyRows, _iterator2, _step2, row, dependencyId;
-                return _regenerator().w(function (_context2) {
-                  while (1) switch (_context2.n) {
+                return _regenerator().w(function (_context3) {
+                  while (1) switch (_context3.n) {
                     case 0:
                       currentToolId = toolsToQuery.shift();
                       dependencyQuery = "\n        SELECT dependency_id\n        FROM tool_registry_db.tool_dependencies\n        WHERE tool_id = '".concat(currentToolId, "';\n      ");
-                      _context2.n = 1;
+                      _context3.n = 1;
                       return _this.duckdbConnection.query(dependencyQuery)["catch"](function (e) {
                         console.error("ToolRetriever: Error querying dependencies for tool ".concat(currentToolId, ":"), e);
                         return null;
                       });
                     case 1:
-                      result = _context2.v;
+                      result = _context3.v;
                       if (result) {
                         dependencyRows = result.toArray();
                         _iterator2 = _createForOfIteratorHelper(dependencyRows);
@@ -45040,24 +45069,24 @@ var ToolRetriever = /*#__PURE__*/function () {
                         }
                       }
                     case 2:
-                      return _context2.a(2);
+                      return _context3.a(2);
                   }
                 }, _loop);
               });
             case 3:
               if (!(toolsToQuery.length > 0)) {
-                _context3.n = 5;
+                _context4.n = 5;
                 break;
               }
-              return _context3.d(_regeneratorValues(_loop()), 4);
+              return _context4.d(_regeneratorValues(_loop()), 4);
             case 4:
-              _context3.n = 3;
+              _context4.n = 3;
               break;
             case 5:
-              _context3.n = 6;
+              _context4.n = 6;
               return this.getToolDefinitions(Array.from(allToolIds));
             case 6:
-              finalTools = _context3.v;
+              finalTools = _context4.v;
               // 4. Combine and de-duplicate tools, preserving the original similarity scores
               finalToolMap = new Map();
               initialTools.forEach(function (t) {
@@ -45070,11 +45099,11 @@ var ToolRetriever = /*#__PURE__*/function () {
                   })); // Set a default similarity for dependencies
                 }
               });
-              return _context3.a(2, Array.from(finalToolMap.values()));
+              return _context4.a(2, Array.from(finalToolMap.values()));
           }
-        }, _callee2, this);
+        }, _callee3, this);
       }));
-      function getRelevantToolsWithDependencies(_x2) {
+      function getRelevantToolsWithDependencies(_x5) {
         return _getRelevantToolsWithDependencies.apply(this, arguments);
       }
       return getRelevantToolsWithDependencies;
@@ -45088,28 +45117,28 @@ var ToolRetriever = /*#__PURE__*/function () {
   }, {
     key: "getToolDefinitions",
     value: (function () {
-      var _getToolDefinitions = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(toolIds) {
+      var _getToolDefinitions = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(toolIds) {
         var toolIdList, querySql, result, tools, toolRows, _iterator3, _step3, row;
-        return _regenerator().w(function (_context4) {
-          while (1) switch (_context4.n) {
+        return _regenerator().w(function (_context5) {
+          while (1) switch (_context5.n) {
             case 0:
               if (!(toolIds.length === 0)) {
-                _context4.n = 1;
+                _context5.n = 1;
                 break;
               }
-              return _context4.a(2, []);
+              return _context5.a(2, []);
             case 1:
               toolIdList = toolIds.map(function (id) {
                 return "'".concat(id, "'");
               }).join(',');
               querySql = "\n      SELECT\n        tool_id,\n        category,\n        semantic_description,\n        parameters_json,\n        system_prompt\n      FROM\n        tool_registry_db.duckdb_tools\n      WHERE\n        tool_id IN (".concat(toolIdList, ");\n    ");
-              _context4.n = 2;
+              _context5.n = 2;
               return this.duckdbConnection.query(querySql)["catch"](function (e) {
                 console.error("ToolRetriever: Error fetching tool definitions:", e);
                 throw new Error("Failed to fetch tool definitions from DuckDB: " + e.message);
               });
             case 2:
-              result = _context4.v;
+              result = _context5.v;
               tools = [];
               if (result && result.toArray) {
                 toolRows = result.toArray();
@@ -45131,11 +45160,11 @@ var ToolRetriever = /*#__PURE__*/function () {
                   _iterator3.f();
                 }
               }
-              return _context4.a(2, tools);
+              return _context5.a(2, tools);
           }
-        }, _callee3, this);
+        }, _callee4, this);
       }));
-      function getToolDefinitions(_x3) {
+      function getToolDefinitions(_x6) {
         return _getToolDefinitions.apply(this, arguments);
       }
       return getToolDefinitions;
