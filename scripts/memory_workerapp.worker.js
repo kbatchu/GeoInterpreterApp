@@ -44438,7 +44438,7 @@ async function initializeDatabase() {
     try {
       await dbConn.query(`CREATE TABLE IF NOT EXISTS entities (entity_id UUID PRIMARY KEY, entity_name VARCHAR, entity_type VARCHAR, created_at TIMESTAMP DEFAULT current_timestamp);`);
       await dbConn.query(`CREATE TABLE IF NOT EXISTS entity_attributes (attribute_id UUID PRIMARY KEY, entity_id UUID REFERENCES entities(entity_id), attribute_key VARCHAR, attribute_value VARCHAR, created_at TIMESTAMP DEFAULT current_timestamp);`);
-      await dbConn.query(`CREATE TABLE IF NOT EXISTS geospatial_attributes (entity_id UUID, session_id VARCHAR, geometry GEOMETRY, address VARCHAR, created_at TIMESTAMP DEFAULT current_timestamp, PRIMARY KEY (entity_id, session_id));`);
+      await dbConn.query(`CREATE TABLE IF NOT EXISTS geospatial_attributes (geo_id UUID PRIMARY KEY, entity_id UUID REFERENCES entities(entity_id), geometry GEOMETRY, address VARCHAR, session_id VARCHAR, created_at TIMESTAMP DEFAULT current_timestamp);`);
       await dbConn.query(`CREATE INDEX IF NOT EXISTS rtree_idx ON geospatial_attributes USING RTREE (geometry);`);
       await dbConn.query(`CREATE TABLE IF NOT EXISTS relationships (relationship_id UUID PRIMARY KEY, source_entity_id UUID REFERENCES entities(entity_id), target_entity_id UUID REFERENCES entities(entity_id), relationship_type VARCHAR, created_at TIMESTAMP DEFAULT current_timestamp);`);
       self.postMessage({ progress: { type: "status", message: "Knowledge graph tables created." } });
@@ -44653,7 +44653,7 @@ async function addGeospatialAttribute(data) {
   try {
     // Extract from the nested structure - the data comes as { attribute: { ... } }
     const attributeData = data.attribute || data;
-    const { entityId, latitude, longitude, address, sessionId, geometry } = attributeData;
+    const { entityId, entityType, latitude, longitude, address, sessionId, geometry } = attributeData;
     
     let lat, lon, wktPoint;
     
@@ -44682,19 +44682,19 @@ async function addGeospatialAttribute(data) {
     
     const sql = `
       INSERT OR REPLACE INTO geospatial_attributes 
-      (entity_id, session_id, geometry, address, created_at)
-      VALUES (?, ?, ST_GeomFromText(?), ?, datetime('now'))
+      (entity_id, entity_type, geometry, address, session_id, created_at)
+      VALUES (?, ?, ST_GeomFromText(?), ?, ?, datetime('now'))
     `;
     
     await dbConn.run(sql, [
       entityId,
-      sessionId || 'default',
+      entityType || 'Unknown',
       wktPoint,
       address || null,
+      sessionId || 'default'
     ]);
     
-    console.log(`Memory Worker: Added/updated geospatial attribute for entity ${entityId} at ${wktPoint}`);
-    dbDirty = true;
+    console.log(`Memory Worker: Added geospatial attribute for entity ${entityId} at ${wktPoint}`);
     return { success: true };
     
   } catch (error) {
@@ -44743,34 +44743,6 @@ async function getEntity(entityId) {
         geospatial_attributes: JSON.parse(raw.geospatial_attributes || '[]'),
         relationships: JSON.parse(raw.relationships || '[]'),
     };
-}
-
-async function getLastGeocodedLocation(sessionId) {
-  try {
-    const sql = `
-      SELECT
-        ST_Y(geometry) AS latitude,
-        ST_X(geometry) AS longitude,
-        address
-      FROM
-        geospatial_attributes
-      WHERE
-        session_id = ?
-      ORDER BY
-        created_at DESC
-      LIMIT 1;
-    `;
-    const stmt = await dbConn.prepare(sql);
-    const result = await stmt.query(sessionId);
-    const rows = result.toArray().map((row) => row.toJSON());
-    if (rows.length > 0) {
-      return rows[0];
-    }
-    return null;
-  } catch (error) {
-    console.error("Memory Worker: Error getting last geocoded location:", error);
-    throw error;
-  }
 }
 
 self.onmessage = async (event) => {

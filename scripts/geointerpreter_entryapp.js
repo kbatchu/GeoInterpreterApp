@@ -82951,19 +82951,6 @@ var MemoryManager = /*#__PURE__*/function () {
     }
 
     /**
-     * Retrieves the last geocoded location for a given session.
-     * @param {string} sessionId The ID of the current session.
-     * @returns {Promise<object|null>} An object containing latitude, longitude, and address, or null if not found.
-     */
-  }, {
-    key: "getLastGeocodedLocation",
-    value: function getLastGeocodedLocation(sessionId) {
-      return this._postMessageAsync("getLastGeocodedLocation", {
-        sessionId: sessionId
-      });
-    }
-
-    /**
      * Resets the memory worker's state.
      * @returns {Promise<void>}
      */
@@ -83076,7 +83063,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 
 
 
-var MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT = _config_js__WEBPACK_IMPORTED_MODULE_2__["default"].MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT;
+var MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT = 10;
 var ReActController = /*#__PURE__*/function () {
   function ReActController(stateManager, communicationBus, aiCore, toolExecutor, memoryManager) {
     _classCallCheck(this, ReActController);
@@ -83207,11 +83194,11 @@ var ReActController = /*#__PURE__*/function () {
             case 0:
               finished = false;
               loopCount = 0;
-              MAX_LOOP_ITERATIONS = _config_js__WEBPACK_IMPORTED_MODULE_2__["default"].MAX_LOOP_ITERATIONS;
-              REPETITION_LIMIT = _config_js__WEBPACK_IMPORTED_MODULE_2__["default"].REPETITION_LIMIT;
+              MAX_LOOP_ITERATIONS = 25;
+              REPETITION_LIMIT = 3;
               lastActionHistory = [];
               _loop = /*#__PURE__*/_regenerator().m(function _loop() {
-                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, startTime, endTime, turnTime, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, observation, refinedPlan, correctedPlan, parentPlanState, _errorMsg, placeholderRegex, hasInvalidPlaceholder, answerText, matches, placeholderChecks, results, _errorMsg2, _currentState2, conversationHistory, _observation, questionText, _errorMsg3, standardizedAction, _currentState3, _observation2, chosenTool, currentStepType, _observation3, executionParams, coords, lastGeocodedLocation, citySearchKeywords, userQuery, isCitySearch, _observation4, finalObservation, geocodeCoordErrorRegex, match, lat, lon, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
+                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, startTime, endTime, turnTime, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, observation, refinedPlan, correctedPlan, parentPlanState, _errorMsg, placeholderRegex, hasInvalidPlaceholder, answerText, matches, placeholderChecks, results, _errorMsg2, _currentState2, conversationHistory, _observation, questionText, _errorMsg3, standardizedAction, _currentState3, _observation2, chosenTool, currentStepType, _observation3, executionParams, _currentState4, userLocation, coords, citySearchKeywords, userQuery, isCitySearch, _observation4, finalObservation, geocodeCoordErrorRegex, match, lat, lon, MAX_RETRIES, finalErrorMessage, _currentState5, _t, _t2;
                 return _regenerator().w(function (_context2) {
                   while (1) switch (_context2.n) {
                     case 0:
@@ -83225,6 +83212,18 @@ var ReActController = /*#__PURE__*/function () {
                         v: void 0
                       });
                     case 1:
+                      if (_this.needsReplan) {
+                        console.log("ReActController: Critical failure detected. Initiating re-plan.");
+                        _this.stateManager.updateState({
+                          activePlan: null
+                        });
+                        _this.scratchpad.push({
+                          type: "observation",
+                          content: "Observation: The previous plan failed. A new approach is required."
+                        });
+                        _this.isPlanningMode = true;
+                        _this.needsReplan = false; // Reset the flag
+                      }
                       if (_this.needsReplan) {
                         console.log("ReActController: Critical failure detected. Initiating re-plan.");
                         _this.stateManager.updateState({
@@ -83460,7 +83459,7 @@ var ReActController = /*#__PURE__*/function () {
                     case 21:
                       throw new Error("AI did not return a valid plan in planning mode.");
                     case 22:
-                      _context2.n = 43;
+                      _context2.n = 40;
                       break;
                     case 23:
                       if (!(action.name === "finish")) {
@@ -83563,7 +83562,7 @@ var ReActController = /*#__PURE__*/function () {
                         answer: action.params.answer
                       });
                       console.log("ReActController: AI finished with answer:", action.params.answer);
-                      _context2.n = 43;
+                      _context2.n = 40;
                       break;
                     case 30:
                       if (!(action.name === "escalate_tool_level")) {
@@ -83689,60 +83688,42 @@ var ReActController = /*#__PURE__*/function () {
                         params: action.params
                       });
                       executionParams = action.params;
-                      if (!(action.name === "find_places_nearby")) {
-                        _context2.n = 38;
-                        break;
-                      }
-                      console.log("ReActController: Remapping parameters for find_places_nearby");
-                      executionParams = {
-                        latitude: action.params.lat || action.params.latitude || action.params.around_lat,
-                        longitude: action.params.lng || action.params.longitude || action.params.around_lng,
-                        amenity: action.params.categories || action.params.amenity,
-                        cuisine: action.params.keywords || action.params.cuisine,
-                        radius_meters: action.params.radius || action.params.radius_meters
-                      };
-                      if (action.params.around && typeof action.params.around === "string") {
-                        coords = action.params.around.match(/-?\d+\.?\d*/g);
-                        if (coords && coords.length >= 2) {
-                          executionParams.latitude = parseFloat(coords[0]);
-                          executionParams.longitude = parseFloat(coords[1]);
+                      if (action.name === "find_places_nearby") {
+                        console.log("ReActController: Remapping parameters for find_places_nearby");
+                        _currentState4 = _this.stateManager.getState();
+                        userLocation = _currentState4.currentLocation;
+                        executionParams = {
+                          latitude: action.params.lat || action.params.latitude || action.params.around_lat || (userLocation ? userLocation.latitude : undefined),
+                          longitude: action.params.lng || action.params.longitude || action.params.around_lng || (userLocation ? userLocation.longitude : undefined),
+                          amenity: action.params.categories || action.params.amenity,
+                          cuisine: action.params.keywords || action.params.cuisine,
+                          radius_meters: action.params.radius || action.params.radius_meters
+                        };
+                        if (action.params.around && typeof action.params.around === "string") {
+                          coords = action.params.around.match(/-?\d+\.?\d*/g);
+                          if (coords && coords.length >= 2) {
+                            executionParams.latitude = parseFloat(coords[0]);
+                            executionParams.longitude = parseFloat(coords[1]);
+                          }
                         }
-                      }
 
-                      // Fallback to last geocoded location if not provided by AI
-                      if (!(!executionParams.latitude || !executionParams.longitude)) {
-                        _context2.n = 37;
-                        break;
+                        // If radius is 0 or not provided, check for city-wide search keywords
+                        if (!executionParams.radius_meters || executionParams.radius_meters === 0) {
+                          citySearchKeywords = ['in the city of', 'in seattle', 'in new york', 'in london', 'in paris', 'in tokyo'];
+                          userQuery = _this.userQuery.toLowerCase();
+                          isCitySearch = citySearchKeywords.some(function (keyword) {
+                            return userQuery.includes(keyword);
+                          });
+                          if (isCitySearch) {
+                            executionParams.radius_meters = 15000;
+                            console.log("ReActController: City-wide search detected. Setting radius_meters to 15000.");
+                          }
+                        }
+                        console.log("ReActController: Remapped parameters:", executionParams);
                       }
                       _context2.n = 36;
-                      return _this.memoryManager.getLastGeocodedLocation(_this.sessionId);
-                    case 36:
-                      lastGeocodedLocation = _context2.v;
-                      if (lastGeocodedLocation) {
-                        console.log("ReActController: Using last geocoded location as fallback for find_places_nearby.");
-                        executionParams.latitude = lastGeocodedLocation.latitude;
-                        executionParams.longitude = lastGeocodedLocation.longitude;
-                      } else {
-                        console.warn("ReActController: No geocoded location available for find_places_nearby. This might lead to incorrect results.");
-                      }
-                    case 37:
-                      // If radius is 0 or not provided, check for city-wide search keywords
-                      if (!executionParams.radius_meters || executionParams.radius_meters === 0) {
-                        citySearchKeywords = ['in the city of', 'in seattle', 'in new york', 'in london', 'in paris', 'in tokyo'];
-                        userQuery = _this.userQuery.toLowerCase();
-                        isCitySearch = citySearchKeywords.some(function (keyword) {
-                          return userQuery.includes(keyword);
-                        });
-                        if (isCitySearch) {
-                          executionParams.radius_meters = 15000;
-                          console.log("ReActController: City-wide search detected. Setting radius_meters to 15000.");
-                        }
-                      }
-                      console.log("ReActController: Remapped parameters:", executionParams);
-                    case 38:
-                      _context2.n = 39;
                       return _this.toolExecutor.execute(action.name, executionParams, _this.stateManager.getState());
-                    case 39:
+                    case 36:
                       _observation4 = _context2.v;
                       finalObservation = _observation4; // Regex to match the specific error message from geocodeAddress for coordinates
                       geocodeCoordErrorRegex = /^Invalid input: \"(-?\d+\.\d+),\s*(-?\d+\.\d+)\" looks like coordinates\. To convert coordinates to a text address, you MUST use the 'reverse_geocode' tool\.$/;
@@ -83765,7 +83746,7 @@ var ReActController = /*#__PURE__*/function () {
                         _this._findPlacesRetryCount = 0;
                       }
                       if (!(typeof _observation4 === "string" && _observation4.startsWith("Tool '") && _observation4.endsWith("' not implemented in ToolExecutor."))) {
-                        _context2.n = 40;
+                        _context2.n = 37;
                         break;
                       }
                       console.log("ReActController: Tool not found, re-evaluating current step.");
@@ -83774,9 +83755,9 @@ var ReActController = /*#__PURE__*/function () {
                         content: _observation4
                       });
                       console.log("ReActController: Tool Observation:", _observation4);
-                      _context2.n = 42;
+                      _context2.n = 39;
                       break;
-                    case 40:
+                    case 37:
                       _this.scratchpad.push({
                         type: "observation",
                         content: finalObservation
@@ -83785,17 +83766,17 @@ var ReActController = /*#__PURE__*/function () {
                       if (_this._isCriticalFailure(finalObservation)) {
                         _this.needsReplan = true;
                       }
-                      _context2.n = 41;
+                      _context2.n = 38;
                       return _this._extractAndStoreEntities(action, finalObservation);
-                    case 41:
+                    case 38:
                       _this.currentPlanStepIndex++;
-                    case 42:
+                    case 39:
                       _this._dispatchScratchpadUpdate();
-                    case 43:
-                      _context2.n = 45;
+                    case 40:
+                      _context2.n = 42;
                       break;
-                    case 44:
-                      _context2.p = 44;
+                    case 41:
+                      _context2.p = 41;
                       _t2 = _context2.v;
                       console.error("ReActController: Error during ReAct cycle:", _t2);
                       _this.scratchpad.push({
@@ -83806,23 +83787,25 @@ var ReActController = /*#__PURE__*/function () {
                       _this.stateManager.updateState({
                         agentStatus: "error"
                       });
-                      finalErrorMessage = "An error occurred: ".concat(_t2.message, ".");
-                      _currentState4 = _this.stateManager.getState();
-                      _this.stateManager.updateState({
-                        agentStatus: "idle",
-                        conversationHistory: [].concat(_toConsumableArray(_currentState4.conversationHistory), [{
-                          role: "assistant",
-                          content: finalErrorMessage
-                        }])
-                      });
-                      _this.communicationBus.dispatchEvent("finalAnswerReady", {
-                        answer: finalErrorMessage
-                      });
-                      finished = true;
-                    case 45:
+                      if (loopCount >= MAX_LOOP_ITERATIONS) {
+                        finalErrorMessage = "An error occurred: ".concat(_t2.message, ". Max iterations reached.");
+                        _currentState5 = _this.stateManager.getState();
+                        _this.stateManager.updateState({
+                          agentStatus: "idle",
+                          conversationHistory: [].concat(_toConsumableArray(_currentState5.conversationHistory), [{
+                            role: "assistant",
+                            content: finalErrorMessage
+                          }])
+                        });
+                        _this.communicationBus.dispatchEvent("finalAnswerReady", {
+                          answer: finalErrorMessage
+                        });
+                        finished = true;
+                      }
+                    case 42:
                       return _context2.a(2);
                   }
-                }, _loop, null, [[7, 11], [2, 44]]);
+                }, _loop, null, [[7, 11], [2, 41]]);
               });
             case 1:
               if (!(!finished && loopCount < MAX_LOOP_ITERATIONS)) {
@@ -84004,6 +83987,7 @@ var ReActController = /*#__PURE__*/function () {
               _context5.n = 5;
               return this.memoryManager.addGeospatialAttribute({
                 entityId: entity.entity_id,
+                entityType: "Restaurant",
                 latitude: place.lat,
                 longitude: place.lon,
                 address: place.address.replace(place.name + ", ", ""),
@@ -84041,6 +84025,7 @@ var ReActController = /*#__PURE__*/function () {
               _context5.n = 12;
               return this.memoryManager.addGeospatialAttribute({
                 entityId: _entity.entity_id,
+                entityType: "Address",
                 latitude: observation.lat,
                 longitude: observation.lon,
                 address: action.params.address,
@@ -84064,6 +84049,7 @@ var ReActController = /*#__PURE__*/function () {
               _context5.n = 15;
               return this.memoryManager.addGeospatialAttribute({
                 entityId: _entity2.entity_id,
+                entityType: "Address",
                 latitude: action.params.latitude,
                 longitude: action.params.longitude,
                 address: observation.address,
@@ -84158,7 +84144,6 @@ var ReActController = /*#__PURE__*/function () {
           toolNames,
           formattedHistory,
           conversationalContext,
-          lastGeocodedLocation,
           factualContext,
           messages,
           planningTools,
@@ -84193,17 +84178,7 @@ var ReActController = /*#__PURE__*/function () {
               return this.memoryManager.getRelevantConversation(this.userQuery, 3);
             case 2:
               conversationalContext = _context7.v;
-              _context7.n = 3;
-              return this.memoryManager.getLastGeocodedLocation(this.sessionId);
-            case 3:
-              lastGeocodedLocation = _context7.v;
-              factualContext = [];
-              if (lastGeocodedLocation) {
-                factualContext.push({
-                  type: "geocoded_location",
-                  content: "The user's last known geocoded location is: Latitude ".concat(lastGeocodedLocation.latitude, ", Longitude ").concat(lastGeocodedLocation.longitude, ", Address: ").concat(lastGeocodedLocation.address, ".")
-                });
-              }
+              factualContext = []; // In a real implementation, we would extract entities and get their facts
               messages = [];
               if (this.isPlanningMode) {
                 planningTools = availableTools.filter(function (t) {
@@ -84233,9 +84208,7 @@ var ReActController = /*#__PURE__*/function () {
                 }
                 _userPrompt = "You have access to the following tools to help you. Select ONE tool to achieve the current goal.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(availableTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\n### Conversation History\n").concat(conversationalContext.map(function (c) {
                   return c.content;
-                }).join("\n") || "No relevant conversation history.", " \n\n### Known Facts from Knowledge Base\n").concat(factualContext.length > 0 ? factualContext.map(function (f) {
-                  return f.content;
-                }).join("\n") : "No relevant facts found in knowledge base.", " \n\nHere is the full conversation history for context:\n<CONVERSATION_HISTORY>\n").concat(formattedHistory || "No previous conversation history.", " \n</CONVERSATION_HISTORY>\n\nHere is the user's original request for context:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the current goal for this step:\n<CURRENT_GOAL>\n").concat(currentGoal, "\n</CURRENT_GOAL>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
+                }).join("\n") || "No relevant conversation history.", " \n\n### Known Facts from Knowledge Base\n").concat(factualContext.length > 0 ? JSON.stringify(factualContext, null, 2) : "No relevant facts found in knowledge base.", " \n\nHere is the full conversation history for context:\n<CONVERSATION_HISTORY>\n").concat(formattedHistory || "No previous conversation history.", " \n</CONVERSATION_HISTORY>\n\nHere is the user's original request for context:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the current goal for this step:\n<CURRENT_GOAL>\n").concat(currentGoal, "\n</CURRENT_GOAL>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
                   return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
                 }).join("\n"), "\n\nThought:");
                 messages.push({
@@ -84764,7 +84737,7 @@ var ReActController = /*#__PURE__*/function () {
   }, {
     key: "addGeospatialData",
     value: function () {
-      var _addGeospatialData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1(entityId, latitude, longitude, address, sessionId) {
+      var _addGeospatialData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1(entityId, entityType, latitude, longitude, address, sessionId) {
         var lat, lon, _t7;
         return _regenerator().w(function (_context10) {
           while (1) switch (_context10.n) {
@@ -84782,6 +84755,7 @@ var ReActController = /*#__PURE__*/function () {
               _context10.n = 2;
               return this.memoryManager.addGeospatialAttribute({
                 entityId: entityId,
+                entityType: entityType,
                 latitude: lat,
                 longitude: lon,
                 address: address,
@@ -84800,7 +84774,7 @@ var ReActController = /*#__PURE__*/function () {
           }
         }, _callee1, this, [[0, 3]]);
       }));
-      function addGeospatialData(_x1, _x10, _x11, _x12, _x13) {
+      function addGeospatialData(_x1, _x10, _x11, _x12, _x13, _x14) {
         return _addGeospatialData.apply(this, arguments);
       }
       return addGeospatialData;
@@ -84841,7 +84815,9 @@ var StateManager = /*#__PURE__*/function () {
       // Array of message objects (user, assistant, tool)
       agentStatus: "initializing",
       // e.g., initializing, idle, planning, thinking, executing_tool, error
-      activePlan: null // Object storing the multi-step plan generated by AI Core
+      activePlan: null,
+      // Object storing the multi-step plan generated by AI Core
+      currentLocation: null // Stores the user's last geocoded location {latitude, longitude}
     };
     this._subscribers = new Set();
   }
@@ -84954,13 +84930,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   geocodeAddress: () => (/* binding */ geocodeAddress),
 /* harmony export */   reverseGeocode: () => (/* binding */ reverseGeocode)
 /* harmony export */ });
+/* harmony import */ var _orchestration_state_manager_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../orchestration/state_manager.js */ "./scripts/modules/orchestration/state_manager.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _regeneratorValues(e) { if (null != e) { var t = e["function" == typeof Symbol && Symbol.iterator || "@@iterator"], r = 0; if (t) return t.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) return { next: function next() { return e && r >= e.length && (e = void 0), { value: e && e[r++], done: !e }; } }; } throw new TypeError(_typeof(e) + " is not iterable"); }
 function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
 function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
-// c:\Kiran\Work\GIS\DATAVIZ\GeoInterpreter\scripts\modules\tools\geocoding_tool.js
+
+var stateManager = new _orchestration_state_manager_js__WEBPACK_IMPORTED_MODULE_0__["default"]();
+
 /**
  * Helper function to perform a search against the Nominatim API with retry logic.
  * Implements exponential backoff with jitter for rate limiting and transient network errors.
@@ -85125,6 +85104,7 @@ function _geocodeAddress() {
       sanitizedAddress,
       data,
       addressWithoutNumber,
+      result,
       _args3 = arguments;
     return _regenerator().w(function (_context3) {
       while (1) switch (_context3.n) {
@@ -85191,10 +85171,14 @@ function _geocodeAddress() {
             break;
           }
           console.log("Geocoding successful for \"".concat(address, "\". Found: ").concat(data[0].display_name));
-          return _context3.a(2, {
+          result = {
             latitude: parseFloat(data[0].lat),
             longitude: parseFloat(data[0].lon)
-          });
+          };
+          stateManager.updateState({
+            currentLocation: result
+          }); // Store geocoded location
+          return _context3.a(2, result);
         case 7:
           // If all attempts fail, return the error.
           console.error("Geocoding failed for all attempts for address: \"".concat(address, "\""));
