@@ -83806,21 +83806,19 @@ var ReActController = /*#__PURE__*/function () {
                       _this.stateManager.updateState({
                         agentStatus: "error"
                       });
-                      if (loopCount >= MAX_LOOP_ITERATIONS) {
-                        finalErrorMessage = "An error occurred: ".concat(_t2.message, ". Max iterations reached.");
-                        _currentState4 = _this.stateManager.getState();
-                        _this.stateManager.updateState({
-                          agentStatus: "idle",
-                          conversationHistory: [].concat(_toConsumableArray(_currentState4.conversationHistory), [{
-                            role: "assistant",
-                            content: finalErrorMessage
-                          }])
-                        });
-                        _this.communicationBus.dispatchEvent("finalAnswerReady", {
-                          answer: finalErrorMessage
-                        });
-                        finished = true;
-                      }
+                      finalErrorMessage = "An error occurred: ".concat(_t2.message, ".");
+                      _currentState4 = _this.stateManager.getState();
+                      _this.stateManager.updateState({
+                        agentStatus: "idle",
+                        conversationHistory: [].concat(_toConsumableArray(_currentState4.conversationHistory), [{
+                          role: "assistant",
+                          content: finalErrorMessage
+                        }])
+                      });
+                      _this.communicationBus.dispatchEvent("finalAnswerReady", {
+                        answer: finalErrorMessage
+                      });
+                      finished = true;
                     case 45:
                       return _context2.a(2);
                   }
