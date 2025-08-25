@@ -83351,7 +83351,7 @@ var ReActController = /*#__PURE__*/function () {
     key: "_assembleContext",
     value: function () {
       var _assembleContext2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(currentGoal, currentStep) {
-        var availableTools, systemPrompt, plannerSystemPrompt, conversationHistory, scratchpadContent, messages, _t;
+        var availableTools, systemPrompt, plannerSystemPrompt, conversationHistory, scratchpadContent, messages;
         return _regenerator().w(function (_context3) {
           while (1) switch (_context3.n) {
             case 0:
@@ -83359,30 +83359,19 @@ var ReActController = /*#__PURE__*/function () {
               return this._getRelevantTools(this.userQuery, 15, this.currentToolLevels);
             case 1:
               availableTools = _context3.v;
-              if (!this.isPlanningMode) {
-                _context3.n = 2;
-                break;
+              if (this.isPlanningMode) {
+                plannerSystemPrompt = "You are a master planner. Your task is to create a detailed, step-by-step plan to address the user's query.\nThe plan should be a JSON array of objects, where each object has 'step', 'description', 'step_type', and 'decomposable' fields.\nThe 'step_type' must be one of: 'geospatial', 'data_retrieval', 'calculation', 'aggregation', 'filter', 'visualization'.\n'decomposable' should be true if a step is high-level and needs its own sub-plan.\nRespond with ONLY the JSON plan inside a 'create_plan' action.";
+                systemPrompt = plannerSystemPrompt;
+              } else {
+                if (_config_js__WEBPACK_IMPORTED_MODULE_2__["default"].USE_DYNAMIC_PROMPTS) {
+                  this.promptManager.updatePrompts(availableTools.map(function (t) {
+                    return t.name;
+                  }));
+                  systemPrompt = this.promptManager.getFinalPrompt();
+                } else {
+                  systemPrompt = this._getStaticSystemPrompt();
+                }
               }
-              plannerSystemPrompt = "You are a master planner. Your task is to create a detailed, step-by-step plan to address the user's query.\nThe plan should be a JSON array of objects, where each object has 'step', 'description', 'step_type', and 'decomposable' fields.\nThe 'step_type' must be one of: 'geospatial', 'data_retrieval', 'calculation', 'aggregation', 'filter', 'visualization'.\n'decomposable' should be true if a step is high-level and needs its own sub-plan.\nRespond with ONLY the JSON plan inside a 'create_plan' action.";
-              systemPrompt = plannerSystemPrompt;
-              _context3.n = 6;
-              break;
-            case 2:
-              if (!_config_js__WEBPACK_IMPORTED_MODULE_2__["default"].USE_DYNAMIC_PROMPTS) {
-                _context3.n = 4;
-                break;
-              }
-              _context3.n = 3;
-              return this.promptManager.getDynamicSystemPrompt(this.userQuery, this.scratchpad);
-            case 3:
-              _t = _context3.v;
-              _context3.n = 5;
-              break;
-            case 4:
-              _t = this._getStaticSystemPrompt();
-            case 5:
-              systemPrompt = _t;
-            case 6:
               conversationHistory = this.stateManager.getState().conversationHistory.slice(-5);
               scratchpadContent = this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
                 return "".concat(entry.type, ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
@@ -83423,7 +83412,7 @@ var ReActController = /*#__PURE__*/function () {
               REPETITION_LIMIT = 3;
               lastActionHistory = [];
               _loop = /*#__PURE__*/_regenerator().m(function _loop() {
-                var currentGoal, currentStep, activePlan, _yield$_this2$_assemb, messages, availableTools, reply, aiResponse, startTime, endTime, turnTime, _this2$_parseAIRespon, thought, action, actionSignature, errorMsg, _currentState, observation, refinedPlan, correctedPlan, parentPlanState, _errorMsg, placeholderRegex, hasInvalidPlaceholder, answerText, matches, placeholderChecks, results, _errorMsg2, _currentState2, conversationHistory, _observation, questionText, _errorMsg3, standardizedAction, _currentState3, _observation2, chosenTool, currentStepType, _observation3, executionParams, lastGeocoded, coords, _observation4, finalObservation, geocodeCoordErrorRegex, match, lat, lon, MAX_RETRIES, finalErrorMessage, _currentState4, _t2, _t3;
+                var currentGoal, currentStep, activePlan, _yield$_this2$_assemb, messages, availableTools, reply, aiResponse, startTime, endTime, turnTime, _this2$_parseAIRespon, thought, action, actionSignature, errorMsg, _currentState, observation, refinedPlan, correctedPlan, parentPlanState, _errorMsg, placeholderRegex, hasInvalidPlaceholder, answerText, matches, placeholderChecks, results, _errorMsg2, _currentState2, conversationHistory, _observation, questionText, _errorMsg3, standardizedAction, _currentState3, _observation2, chosenTool, currentStepType, _observation3, executionParams, lastGeocoded, coords, _observation4, finalObservation, geocodeCoordErrorRegex, match, lat, lon, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
                 return _regenerator().w(function (_context4) {
                   while (1) switch (_context4.n) {
                     case 0:
@@ -83559,9 +83548,9 @@ var ReActController = /*#__PURE__*/function () {
                       break;
                     case 11:
                       _context4.p = 11;
-                      _t2 = _context4.v;
-                      console.error("ReActController: Error during AI invocation:", _t2);
-                      throw new Error("AI invocation failed: ".concat(_t2.message));
+                      _t = _context4.v;
+                      console.error("ReActController: Error during AI invocation:", _t);
+                      throw new Error("AI invocation failed: ".concat(_t.message));
                     case 12:
                       _this2$_parseAIRespon = _this2._parseAIResponse(aiResponse), thought = _this2$_parseAIRespon.thought, action = _this2$_parseAIRespon.action;
                       _this2.scratchpad.push({
@@ -83722,7 +83711,7 @@ var ReActController = /*#__PURE__*/function () {
                       return _context4.a(2, 0);
                     case 25:
                       // Use embedding similarity to detect if bracketed content is a placeholder.
-                      placeholderRegex = /\\[(.*?)\\]/g; // Use g for matchAll
+                      placeholderRegex = /\\\[(.*?)\\\]/g; // Use g for matchAll
                       hasInvalidPlaceholder = false;
                       answerText = action.params.answer;
                       matches = _toConsumableArray(answerText.matchAll(placeholderRegex));
@@ -84007,18 +83996,18 @@ var ReActController = /*#__PURE__*/function () {
                       break;
                     case 41:
                       _context4.p = 41;
-                      _t3 = _context4.v;
-                      console.error("ReActController: Error during ReAct cycle:", _t3);
+                      _t2 = _context4.v;
+                      console.error("ReActController: Error during ReAct cycle:", _t2);
                       _this2.scratchpad.push({
                         type: "observation",
-                        content: "Error: ".concat(_t3.message)
+                        content: "Error: ".concat(_t2.message)
                       });
                       _this2._dispatchScratchpadUpdate();
                       _this2.stateManager.updateState({
                         agentStatus: "error"
                       });
                       if (loopCount >= MAX_LOOP_ITERATIONS) {
-                        finalErrorMessage = "An error occurred: ".concat(_t3.message, ". Max iterations reached.");
+                        finalErrorMessage = "An error occurred: ".concat(_t2.message, ". Max iterations reached.");
                         _currentState4 = _this2.stateManager.getState();
                         _this2.stateManager.updateState({
                           agentStatus: "idle",
@@ -84098,7 +84087,7 @@ var ReActController = /*#__PURE__*/function () {
     key: "_reviewAndRefinePlan",
     value: function () {
       var _reviewAndRefinePlan2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(plan) {
-        var criticSystemPrompt, criticUserPrompt, messages, reply, criticResponse, parsedResponse, _t4, _t5;
+        var criticSystemPrompt, criticUserPrompt, messages, reply, criticResponse, parsedResponse, _t3, _t4;
         return _regenerator().w(function (_context6) {
           while (1) switch (_context6.n) {
             case 0:
@@ -84141,8 +84130,8 @@ var ReActController = /*#__PURE__*/function () {
               break;
             case 6:
               _context6.p = 6;
-              _t4 = _context6.v;
-              console.error("ReActController: Failed to parse critic AI JSON response. Defaulting to original plan.", _t4);
+              _t3 = _context6.v;
+              console.error("ReActController: Failed to parse critic AI JSON response. Defaulting to original plan.", _t3);
               return _context6.a(2, plan);
             case 7:
               if (!(parsedResponse.status === "revised" && parsedResponse.plan)) {
@@ -84166,8 +84155,8 @@ var ReActController = /*#__PURE__*/function () {
               break;
             case 11:
               _context6.p = 11;
-              _t5 = _context6.v;
-              console.error("ReActController: Error during plan review and refinement: ".concat(_t5.message, ". Defaulting to original plan."));
+              _t4 = _context6.v;
+              console.error("ReActController: Error during plan review and refinement: ".concat(_t4.message, ". Defaulting to original plan."));
               return _context6.a(2, plan);
             case 12:
               return _context6.a(2);
@@ -84183,7 +84172,7 @@ var ReActController = /*#__PURE__*/function () {
     key: "_extractAndStoreEntities",
     value: function () {
       var _extractAndStoreEntities2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(action, observation) {
-        var _iterator3, _step3, place, entity, _entity, _t6;
+        var _iterator3, _step3, place, entity, _entity, _t5;
         return _regenerator().w(function (_context7) {
           while (1) switch (_context7.n) {
             case 0:
@@ -84231,8 +84220,8 @@ var ReActController = /*#__PURE__*/function () {
               break;
             case 7:
               _context7.p = 7;
-              _t6 = _context7.v;
-              _iterator3.e(_t6);
+              _t5 = _context7.v;
+              _iterator3.e(_t5);
             case 8:
               _context7.p = 8;
               _iterator3.f();
@@ -84614,7 +84603,7 @@ var ReActController = /*#__PURE__*/function () {
               SIMILARITY_THRESHOLD = 0.6;
               correctedPlanPromises = plan.map(/*#__PURE__*/function () {
                 var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8(step) {
-                  var descriptionEmbedding, descriptionEmbeddingString, querySql, result, similarity, _t7;
+                  var descriptionEmbedding, descriptionEmbeddingString, querySql, result, similarity, _t6;
                   return _regenerator().w(function (_context9) {
                     while (1) switch (_context9.n) {
                       case 0:
@@ -84655,8 +84644,8 @@ var ReActController = /*#__PURE__*/function () {
                         break;
                       case 6:
                         _context9.p = 6;
-                        _t7 = _context9.v;
-                        console.error("ReActController: Could not query geospatial term embeddings. Error: ".concat(_t7.message));
+                        _t6 = _context9.v;
+                        console.error("ReActController: Could not query geospatial term embeddings. Error: ".concat(_t6.message));
                         return _context9.a(2, step);
                       case 7:
                         return _context9.a(2, step);
@@ -84756,7 +84745,7 @@ var ReActController = /*#__PURE__*/function () {
     key: "addGeospatialData",
     value: function () {
       var _addGeospatialData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1(entityId, entityType, latitude, longitude, address, sessionId) {
-        var lat, lon, _t8;
+        var lat, lon, _t7;
         return _regenerator().w(function (_context10) {
           while (1) switch (_context10.n) {
             case 0:
@@ -84784,9 +84773,9 @@ var ReActController = /*#__PURE__*/function () {
               break;
             case 3:
               _context10.p = 3;
-              _t8 = _context10.v;
-              console.error("ReActController: Error adding geospatial data:", _t8);
-              throw _t8;
+              _t7 = _context10.v;
+              console.error("ReActController: Error adding geospatial data:", _t7);
+              throw _t7;
             case 4:
               return _context10.a(2);
           }
