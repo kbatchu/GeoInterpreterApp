@@ -83985,7 +83985,6 @@ var ReActController = /*#__PURE__*/function () {
               _context5.n = 5;
               return this.memoryManager.addGeospatialAttribute({
                 entityId: entity.entity_id,
-                entityType: "Restaurant",
                 latitude: place.lat,
                 longitude: place.lon,
                 address: place.address.replace(place.name + ", ", ""),
@@ -84023,7 +84022,6 @@ var ReActController = /*#__PURE__*/function () {
               _context5.n = 12;
               return this.memoryManager.addGeospatialAttribute({
                 entityId: _entity.entity_id,
-                entityType: "Address",
                 latitude: observation.lat,
                 longitude: observation.lon,
                 address: action.params.address,
@@ -84047,7 +84045,6 @@ var ReActController = /*#__PURE__*/function () {
               _context5.n = 15;
               return this.memoryManager.addGeospatialAttribute({
                 entityId: _entity2.entity_id,
-                entityType: "Address",
                 latitude: action.params.latitude,
                 longitude: action.params.longitude,
                 address: observation.address,
@@ -84735,7 +84732,7 @@ var ReActController = /*#__PURE__*/function () {
   }, {
     key: "addGeospatialData",
     value: function () {
-      var _addGeospatialData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1(entityId, entityType, latitude, longitude, address, sessionId) {
+      var _addGeospatialData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1(entityId, latitude, longitude, address, sessionId) {
         var lat, lon, _t7;
         return _regenerator().w(function (_context10) {
           while (1) switch (_context10.n) {
@@ -84753,7 +84750,6 @@ var ReActController = /*#__PURE__*/function () {
               _context10.n = 2;
               return this.memoryManager.addGeospatialAttribute({
                 entityId: entityId,
-                entityType: entityType,
                 latitude: lat,
                 longitude: lon,
                 address: address,
@@ -84772,7 +84768,7 @@ var ReActController = /*#__PURE__*/function () {
           }
         }, _callee1, this, [[0, 3]]);
       }));
-      function addGeospatialData(_x1, _x10, _x11, _x12, _x13, _x14) {
+      function addGeospatialData(_x1, _x10, _x11, _x12, _x13) {
         return _addGeospatialData.apply(this, arguments);
       }
       return addGeospatialData;
