@@ -44745,6 +44745,34 @@ async function getEntity(entityId) {
     };
 }
 
+async function getLastGeocodedLocation(sessionId) {
+  try {
+    const sql = `
+      SELECT
+        ST_Y(geometry) AS latitude,
+        ST_X(geometry) AS longitude,
+        address
+      FROM
+        geospatial_attributes
+      WHERE
+        session_id = ?
+      ORDER BY
+        created_at DESC
+      LIMIT 1;
+    `;
+    const stmt = await dbConn.prepare(sql);
+    const result = await stmt.query(sessionId);
+    const rows = result.toArray().map((row) => row.toJSON());
+    if (rows.length > 0) {
+      return rows[0];
+    }
+    return null;
+  } catch (error) {
+    console.error("Memory Worker: Error getting last geocoded location:", error);
+    throw error;
+  }
+}
+
 self.onmessage = async (event) => {
   const { messageId, command, args } = event.data;
 
