@@ -82955,8 +82955,20 @@ var MemoryManager = /*#__PURE__*/function () {
      * @returns {Promise<void>}
      */
   }, {
+    key: "setWorkingMemory",
+    value: function setWorkingMemory(key, value) {
+      this.workingMemory.set(key, value);
+      console.log("MemoryManager: Stored in working memory - ".concat(key, ":"), value);
+    }
+  }, {
+    key: "getWorkingMemory",
+    value: function getWorkingMemory(key) {
+      return this.workingMemory.get(key);
+    }
+  }, {
     key: "reset",
     value: function reset() {
+      this.workingMemory.clear();
       return this._postMessageAsync("reset");
     }
   }]);
@@ -83081,7 +83093,9 @@ var ReActController = /*#__PURE__*/function () {
     this._findPlacesRetryCount = 0;
     this.sessionId = "session-".concat(Date.now());
     this.needsReplan = false;
+    this.needsDiagnosticRun = false;
     this.planStack = [];
+    this.workingMemory = new Map();
     this.placeholderConceptEmbedding = null;
     this.communicationBus.addEventListener("userQuerySubmitted", this._handleUserQuery.bind(this));
     this.communicationBus.addEventListener("userInputProvided", this._handleUserInput.bind(this));
@@ -83171,7 +83185,7 @@ var ReActController = /*#__PURE__*/function () {
   }, {
     key: "_getPlanCriticPrompt",
     value: function _getPlanCriticPrompt() {
-      return "You are a meticulous and logical AI plan reviewer. Your task is to analyze a given plan and determine if it is sound. A sound plan is logical, efficient, and directly addresses the user's query.\n\n## INSTRUCTIONS\n1.  **Review the Plan:** Carefully examine the provided plan for the following flaws:\n    *   **Logical Inconsistencies:** Does a later step contradict an earlier one?\n    *   **Dependency Errors:** Does a step rely on information that has not yet been generated?\n    *   **Inefficiency:** Could two or more steps be combined for better performance? Is there a more direct tool or approach to achieve the goal?\n    *   **Hallucinations:** Does the plan reference tools, parameters, or concepts that don't exist or are irrelevant to the user's query?\n2.  **Provide Feedback:** Based on your review, you have two options:\n    *   **If the plan is sound:** Respond with a simple JSON object: {\"status\": \"OK\"}\n    *   **If the plan is flawed:** Respond with a JSON object containing a revised plan: {\"status\": \"revised\", \"plan\": [...]}\n\nYour response MUST be ONLY the JSON object, with no other text before or after it.";
+      return "You are a meticulous and logical AI plan reviewer. Your task is to analyze a given plan and determine if it is sound. A sound plan is logical, efficient, and directly addresses the user's query.\n\n## INSTRUCTIONS\n1.  **Review the Plan:** Carefully examine the provided plan for the following flaws:\n    *   **Logical Inconsistencies:** Does a later step contradict an earlier one?\n    *   **Dependency Errors:** Does a step rely on information that has not yet been generated?\n    *   **Inefficiency:** Could two or more steps be combined for better performance? Is there a more direct tool or approach to achieve the goal?\n    *   **Hallucinations:** Does the plan reference tools, parameters, or concepts that't exist or are irrelevant to the user's query?\n2.  **Provide Feedback:** Based on your review, you have two options:\n    *   **If the plan is sound:** Respond with a simple JSON object: {\"status\": \"OK\"}\n    *   **If the plan is flawed:** Respond with a JSON object containing a revised plan: {\"status\": \"revised\", \"plan\": [...]} \n\nYour response MUST be ONLY the JSON object, with no other text before or after it.";
     }
   }, {
     key: "_getBaseSystemPrompt",
@@ -83198,7 +83212,7 @@ var ReActController = /*#__PURE__*/function () {
               REPETITION_LIMIT = 3;
               lastActionHistory = [];
               _loop = /*#__PURE__*/_regenerator().m(function _loop() {
-                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, startTime, endTime, turnTime, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, observation, refinedPlan, correctedPlan, parentPlanState, _errorMsg, placeholderRegex, hasInvalidPlaceholder, answerText, matches, placeholderChecks, results, _errorMsg2, _currentState2, conversationHistory, _observation, questionText, _errorMsg3, standardizedAction, _currentState3, _observation2, chosenTool, currentStepType, _observation3, executionParams, coords, _observation4, finalObservation, geocodeCoordErrorRegex, match, lat, lon, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
+                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, startTime, endTime, turnTime, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, observation, refinedPlan, correctedPlan, parentPlanState, _errorMsg, placeholderRegex, hasInvalidPlaceholder, answerText, matches, placeholderChecks, results, _errorMsg2, _currentState2, conversationHistory, _observation, questionText, _errorMsg3, standardizedAction, _currentState3, _observation2, chosenTool, currentStepType, _observation3, executionParams, lastGeocoded, coords, _observation4, finalObservation, geocodeCoordErrorRegex, match, lat, lon, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
                 return _regenerator().w(function (_context2) {
                   while (1) switch (_context2.n) {
                     case 0:
@@ -83497,7 +83511,7 @@ var ReActController = /*#__PURE__*/function () {
                       return _context2.a(2, 0);
                     case 25:
                       // Use embedding similarity to detect if bracketed content is a placeholder.
-                      placeholderRegex = /\[(.*?)\]/g; // Use g for matchAll
+                      placeholderRegex = /\\\\[(.*?)\\\\]/g; // Use g for matchAll
                       hasInvalidPlaceholder = false;
                       answerText = action.params.answer;
                       matches = _toConsumableArray(answerText.matchAll(placeholderRegex));
@@ -83689,6 +83703,13 @@ var ReActController = /*#__PURE__*/function () {
                       });
                       executionParams = action.params;
                       if (action.name === "find_places_nearby") {
+                        lastGeocoded = _this.workingMemory.get('last_geocoded_coordinates');
+                        if (lastGeocoded) {
+                          console.log("ReActController: Using last geocoded coordinates for find_places_nearby");
+                          action.params.latitude = lastGeocoded.lat;
+                          action.params.longitude = lastGeocoded.lon;
+                          _this.workingMemory["delete"]('last_geocoded_coordinates'); // Clear after use
+                        }
                         console.log("ReActController: Remapping parameters for find_places_nearby");
                         executionParams = {
                           latitude: action.params.lat || action.params.latitude || action.params.around_lat,
@@ -83711,7 +83732,7 @@ var ReActController = /*#__PURE__*/function () {
                     case 36:
                       _observation4 = _context2.v;
                       finalObservation = _observation4; // Regex to match the specific error message from geocodeAddress for coordinates
-                      geocodeCoordErrorRegex = /^Invalid input: \"(-?\d+\.\d+),\s*(-?\d+\.\d+)\" looks like coordinates\. To convert coordinates to a text address, you MUST use the 'reverse_geocode' tool\.$/;
+                      geocodeCoordErrorRegex = /^Invalid input: \"(-?\d+\.\d+),\s*(-?\d+\.\d+)\" looks like coordinates. To convert coordinates to a text address, you MUST use the 'reverse_geocode' tool\.$/;
                       match = typeof _observation4 === "string" ? _observation4.match(geocodeCoordErrorRegex) : null;
                       if (match) {
                         lat = parseFloat(match[1]);
@@ -83719,16 +83740,29 @@ var ReActController = /*#__PURE__*/function () {
                         finalObservation = "Correction: The previous action to geocode an address failed because the input was coordinates (".concat(lat, ", ").concat(lon, "). You MUST use the 'reverse_geocode' tool with these coordinates to get a text address.");
                         console.log("ReActController: Correcting geocode_address misuse with reverse_geocode instruction.");
                       } else if (action.name === "find_places_nearby" && typeof _observation4 === "string" && _observation4.startsWith("Found 0 places")) {
-                        _this._findPlacesRetryCount++;
-                        MAX_RETRIES = 3;
-                        if (_this._findPlacesRetryCount <= MAX_RETRIES) {
-                          finalObservation = "".concat(_observation4, ". Search attempt ").concat(_this._findPlacesRetryCount, " of ").concat(MAX_RETRIES, ". You MUST try again with a larger radius.");
+                        // If this was a diagnostic run and it failed, then it's a critical failure
+                        if (_this.workingMemory.get('diagnostic_run_active')) {
+                          finalObservation = "Diagnostic search also failed. I am unable to retrieve mapping data and cannot complete your request.";
+                          finished = true; // End the loop
                         } else {
-                          finalObservation = "".concat(_observation4, ". Multiple search attempts have failed. Consider a different strategy.");
-                          _this._findPlacesRetryCount = 0;
+                          _this._findPlacesRetryCount++;
+                          MAX_RETRIES = 3;
+                          if (_this._findPlacesRetryCount <= MAX_RETRIES) {
+                            finalObservation = "".concat(_observation4, ". Search attempt ").concat(_this._findPlacesRetryCount, " of ").concat(MAX_RETRIES, ". You MUST try again with a larger radius.");
+                          } else {
+                            finalObservation = "".concat(_observation4, ". Multiple search attempts have failed. Consider a different strategy.");
+                            _this.needsDiagnosticRun = true; // Trigger diagnostic run
+                            _this._findPlacesRetryCount = 0;
+                            // Store original amenity for diagnostic follow-up
+                            _this.workingMemory.set('original_amenity', action.params.amenity);
+                            _this.workingMemory.set('diagnostic_run_active', true);
+                          }
                         }
                       } else if (action.name === "find_places_nearby") {
+                        // If find_places_nearby succeeded, reset retry count and diagnostic flags
                         _this._findPlacesRetryCount = 0;
+                        _this.workingMemory["delete"]('diagnostic_run_active');
+                        _this.workingMemory["delete"]('original_amenity');
                       }
                       if (!(typeof _observation4 === "string" && _observation4.startsWith("Tool '") && _observation4.endsWith("' not implemented in ToolExecutor."))) {
                         _context2.n = 37;
@@ -83938,7 +83972,7 @@ var ReActController = /*#__PURE__*/function () {
     key: "_extractAndStoreEntities",
     value: function () {
       var _extractAndStoreEntities2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(action, observation) {
-        var _iterator2, _step2, place, entity, _entity, _entity2, _t5;
+        var _iterator2, _step2, place, entity, _entity, _t5;
         return _regenerator().w(function (_context5) {
           while (1) switch (_context5.n) {
             case 0:
@@ -83993,13 +84027,17 @@ var ReActController = /*#__PURE__*/function () {
               _iterator2.f();
               return _context5.f(8);
             case 9:
-              _context5.n = 15;
+              _context5.n = 12;
               break;
             case 10:
               if (!(action.name === "geocode_address" && observation.lat && observation.lon)) {
-                _context5.n = 13;
+                _context5.n = 12;
                 break;
               }
+              this.workingMemory.set('last_geocoded_coordinates', {
+                lat: observation.lat,
+                lon: observation.lon
+              });
               _context5.n = 11;
               return this.memoryManager.addEntity({
                 entityName: action.params.address,
@@ -84017,30 +84055,6 @@ var ReActController = /*#__PURE__*/function () {
                 sessionId: this.sessionId
               });
             case 12:
-              _context5.n = 15;
-              break;
-            case 13:
-              if (!(action.name === "reverse_geocode" && observation.address)) {
-                _context5.n = 15;
-                break;
-              }
-              _context5.n = 14;
-              return this.memoryManager.addEntity({
-                entityName: observation.address,
-                entityType: "Address"
-              });
-            case 14:
-              _entity2 = _context5.v;
-              _context5.n = 15;
-              return this.memoryManager.addGeospatialAttribute({
-                entityId: _entity2.entity_id,
-                entityType: "Address",
-                latitude: action.params.latitude,
-                longitude: action.params.longitude,
-                address: observation.address,
-                sessionId: this.sessionId
-              });
-            case 15:
               return _context5.a(2);
           }
         }, _callee4, this, [[1, 7, 8, 9]]);
@@ -84118,652 +84132,6 @@ var ReActController = /*#__PURE__*/function () {
       this.stateManager.reset();
       this.memoryManager.reset();
     }
-  }, {
-    key: "_assembleContext",
-    value: function () {
-      var _assembleContext2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(currentGoal) {
-        var currentStep,
-          state,
-          toolQuery,
-          availableTools,
-          toolNames,
-          formattedHistory,
-          conversationalContext,
-          factualContext,
-          messages,
-          planningTools,
-          systemPrompt,
-          userPrompt,
-          _systemPrompt,
-          _toolNames,
-          _userPrompt,
-          _args7 = arguments;
-        return _regenerator().w(function (_context7) {
-          while (1) switch (_context7.n) {
-            case 0:
-              currentStep = _args7.length > 1 && _args7[1] !== undefined ? _args7[1] : null;
-              state = this.stateManager.getState();
-              toolQuery = currentGoal;
-              if (currentStep && currentStep.step_type) {
-                toolQuery = "".concat(currentStep.step_type, ": ").concat(currentGoal);
-              }
-              console.log("Getting tools for the query:", toolQuery);
-              _context7.n = 1;
-              return this._getRelevantTools(toolQuery, 15, this.currentToolLevels);
-            case 1:
-              availableTools = _context7.v;
-              toolNames = availableTools.map(function (t) {
-                return t.name;
-              });
-              console.log("ReActController: Retrieved available tools: [".concat(toolNames.join(", "), "]"));
-              formattedHistory = state.conversationHistory.map(function (msg) {
-                return "".concat(msg.role.charAt(0).toUpperCase() + msg.role.slice(1), ": ").concat(msg.content);
-              }).join("\n");
-              _context7.n = 2;
-              return this.memoryManager.getRelevantConversation(this.userQuery, 3);
-            case 2:
-              conversationalContext = _context7.v;
-              factualContext = []; // In a real implementation, we would extract entities and get their facts
-              messages = [];
-              if (this.isPlanningMode) {
-                planningTools = availableTools.filter(function (t) {
-                  return t.name === "create_plan";
-                });
-                systemPrompt = "You are GeoInterpreter, a world-class AI assistant for geospatial analysis. Your primary goal is to help the user by breaking down complex requests into a logical, step-by-step plan.\n\n## CRITICAL: YOU ARE IN PLANNING MODE\nYou MUST create a plan using the create_plan tool. Do NOT attempt to execute any other actions.\n\n## RESPONSE FORMAT\nYou MUST respond in the following format, with no other text before or after. Your entire response must start with \"Thought:\".\n\nThought: [Your reasoning for the plan you are about to create.]\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"...\", \"step_type\": \"...\" }, ... ] } }\n\n## PLAN REQUIREMENTS\n- Each step in the plan should be a discrete, self-contained analytical task.\n- For each step, you must provide a 'step_type' from this exact list: [geospatial, aggregation, filter, data_retrieval, calculation, visualization].\n\n## CRITICAL PLANNING INSTRUCTIONS\n- **Prioritize User-Provided Information:** If the user's query contains specific details like a street address, a location name, or a dataset, your plan MUST start by using that information.\n- **Entity Integrity:** Do not invent information. If you need the address of a place you found, your plan must include a step to find that address. Do not assume it's the same as another address mentioned in the conversation.\n- **Example:** If a street address is given, the first step of your plan MUST be to convert this address into geographic coordinates. After getting the coordinates, I can search for the restaurants.\n      - **Entity Integrity:** Do not invent information. If you need the address of a place you found, your plan must include a step to find that address. Do not assume it's the same as another address mentioned in the conversation.\n      - **Leverage Existing Coordinates:** If the scratchpad or conversation history contains the latitude and longitude for an entity whose address is requested, your plan MUST use the 'reverse_geocode' tool with those existing coordinates. Do NOT re-geocode an address or re-search for the entity if its coordinates are already known.\n      - **Example:** If a street address is given, the first step of your plan MUST be to convert this address into geographic coordinates. After getting the coordinates, I can search for the restaurants.\nAction: { \"name\": \"create_plan\", \"parameters\": { \"plan\": [ { \"step\": 1, \"description\": \"Geocode the address '1600 Pennsylvania Avenue NW, Washington, DC'\", \"step_type\": \"geospatial\" }, { \"step\": 2, \"description\": \"Search for Indian restaurants near the geocoded location\", \"step_type\": \"data_retrieval\" } ] } }";
-                userPrompt = "You have access to a single tool to help you. Use this tool to output your plan as a JSON array of steps.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(planningTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\nHere is the full conversation history for context:\n<CONVERSATION_HISTORY>\n").concat(formattedHistory || "No previous conversation history.", " \n</CONVERSATION_HISTORY>\n\nHere is the user's request:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
-                  return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
-                }).join("\n"), "\n\nThought:");
-                messages.push({
-                  role: "system",
-                  content: systemPrompt
-                });
-                messages.push({
-                  role: "user",
-                  content: userPrompt
-                });
-              } else {
-                if (_config_js__WEBPACK_IMPORTED_MODULE_2__["default"].USE_DYNAMIC_PROMPTS) {
-                  _toolNames = availableTools.map(function (t) {
-                    return t.name;
-                  });
-                  this.promptManager.updatePrompts(_toolNames);
-                  _systemPrompt = this.promptManager.getFinalPrompt();
-                } else {
-                  _systemPrompt = this._getStaticSystemPrompt();
-                }
-                _userPrompt = "You have access to the following tools to help you. Select ONE tool to achieve the current goal.\n\n<TOOL_DEFINITIONS_JSON>\n".concat(JSON.stringify(availableTools, null, 2), "\n</TOOL_DEFINITIONS_JSON>\n\n### Conversation History\n").concat(conversationalContext.map(function (c) {
-                  return c.content;
-                }).join("\n") || "No relevant conversation history.", " \n\n### Known Facts from Knowledge Base\n").concat(factualContext.length > 0 ? JSON.stringify(factualContext, null, 2) : "No relevant facts found in knowledge base.", " \n\nHere is the full conversation history for context:\n<CONVERSATION_HISTORY>\n").concat(formattedHistory || "No previous conversation history.", " \n</CONVERSATION_HISTORY>\n\nHere is the user's original request for context:\n<USER_QUERY>\n").concat(this.userQuery, "\n</USER_QUERY>\n\nHere is the current goal for this step:\n<CURRENT_GOAL>\n").concat(currentGoal, "\n</CURRENT_GOAL>\n\nHere is the history of your work on this request so far (Thought/Action/Observation):\n").concat(this.scratchpad.slice(-MAX_SCRATCHPAD_ENTRIES_FOR_PROMPT).map(function (entry) {
-                  return "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content) : entry.content);
-                }).join("\n"), "\n\nThought:");
-                messages.push({
-                  role: "system",
-                  content: _systemPrompt
-                });
-                messages.push({
-                  role: "user",
-                  content: _userPrompt
-                });
-              }
-              return _context7.a(2, {
-                messages: messages,
-                availableTools: availableTools
-              });
-          }
-        }, _callee6, this);
-      }));
-      function _assembleContext(_x6) {
-        return _assembleContext2.apply(this, arguments);
-      }
-      return _assembleContext;
-    }()
-  }, {
-    key: "_getRelevantTools",
-    value: function () {
-      var _getRelevantTools2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7(query) {
-        var topN,
-          levels,
-          dbToolsRaw,
-          dbTools,
-          internalTools,
-          uniqueTools,
-          _iterator3,
-          _step3,
-          _tool,
-          _i,
-          _internalTools,
-          tool,
-          _args8 = arguments;
-        return _regenerator().w(function (_context8) {
-          while (1) switch (_context8.n) {
-            case 0:
-              topN = _args8.length > 1 && _args8[1] !== undefined ? _args8[1] : 15;
-              levels = _args8.length > 2 && _args8[2] !== undefined ? _args8[2] : [1, 2, 3];
-              _context8.n = 1;
-              return this.memoryManager.getRelevantTools(query, topN, levels);
-            case 1:
-              dbToolsRaw = _context8.v;
-              dbTools = dbToolsRaw.map(function (tool) {
-                return {
-                  name: tool.name,
-                  description: tool.description,
-                  parameters: tool.parameters,
-                  category: tool.category,
-                  level: tool.level,
-                  system_prompt: tool.system_prompt
-                };
-              });
-              if (dbTools.length > 0) {
-                console.log("ReActController: Tools retrieved from Worker: [".concat(dbTools.map(function (t) {
-                  return t.name;
-                }).join(", "), "]"));
-              } else {
-                console.log("ReActController: No tools retrieved from Worker for query: \"".concat(query, "\""));
-              }
-              internalTools = [];
-              internalTools.push({
-                name: "create_plan",
-                description: "Breaks down a complex user request into a logical, step-by-step plan.",
-                parameters: {
-                  type: "object",
-                  properties: {
-                    plan: {
-                      type: "array",
-                      description: "A JSON array representing the multi-step plan.",
-                      items: {
-                        type: "object",
-                        properties: {
-                          step: {
-                            type: "number"
-                          },
-                          description: {
-                            type: "string"
-                          },
-                          step_type: {
-                            type: "string",
-                            "enum": ["geospatial", "aggregation", "filter", "data_retrieval", "calculation", "visualization"]
-                          },
-                          decomposable: {
-                            type: "boolean"
-                          }
-                        },
-                        required: ["step", "description", "step_type"]
-                      }
-                    }
-                  },
-                  required: ["plan"]
-                }
-              });
-              internalTools.push({
-                name: "finish",
-                description: "Call this tool when you have fully answered the user's request.",
-                parameters: {
-                  type: "object",
-                  properties: {
-                    answer: {
-                      type: "string",
-                      description: "The final answer to the user's question."
-                    }
-                  },
-                  required: ["answer"]
-                }
-              });
-              internalTools.push({
-                name: "escalate_tool_level",
-                description: "If you cannot solve the current goal with the available tools, use this to request a more granular set of tools.",
-                parameters: {
-                  type: "object",
-                  properties: {
-                    reason: {
-                      type: "string",
-                      description: "A brief reason why the current tools are insufficient."
-                    }
-                  },
-                  required: ["reason"]
-                }
-              });
-              internalTools.push({
-                name: "ask_user",
-                description: "Asks the user for clarification or additional information.",
-                parameters: {
-                  type: "object",
-                  properties: {
-                    question: {
-                      type: "string",
-                      description: "The clear, specific question to ask the user."
-                    },
-                    options: {
-                      type: "array",
-                      description: "Optional. A list of suggested response options for the user.",
-                      items: {
-                        type: "string"
-                      }
-                    }
-                  },
-                  required: ["question"]
-                }
-              });
-              uniqueTools = new Map();
-              _iterator3 = _createForOfIteratorHelper(dbTools);
-              try {
-                for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
-                  _tool = _step3.value;
-                  uniqueTools.set(_tool.name, _tool);
-                }
-              } catch (err) {
-                _iterator3.e(err);
-              } finally {
-                _iterator3.f();
-              }
-              for (_i = 0, _internalTools = internalTools; _i < _internalTools.length; _i++) {
-                tool = _internalTools[_i];
-                uniqueTools.set(tool.name, tool);
-              }
-              return _context8.a(2, Array.from(uniqueTools.values()));
-          }
-        }, _callee7, this);
-      }));
-      function _getRelevantTools(_x7) {
-        return _getRelevantTools2.apply(this, arguments);
-      }
-      return _getRelevantTools;
-    }()
-  }, {
-    key: "_parseAIResponse",
-    value: function _parseAIResponse(aiResponse) {
-      console.log("ReActController: Parsing AI response:", "\"".concat(aiResponse, "\""));
-      var cleanResponse = aiResponse.trim();
-      var thought = "No thought provided.";
-      var action = {
-        name: "continue",
-        params: {}
-      };
-      var actionPrefix = "Action:";
-      var actionIndex = cleanResponse.lastIndexOf(actionPrefix);
-      if (actionIndex !== -1) {
-        var rawThought = cleanResponse.substring(0, actionIndex).trim();
-        var thoughtPrefix = "Thought:";
-        if (rawThought.startsWith(thoughtPrefix)) {
-          rawThought = rawThought.substring(thoughtPrefix.length).trim();
-        }
-        if (rawThought) {
-          thought = rawThought;
-        }
-        var actionString = cleanResponse.substring(actionIndex + actionPrefix.length).trim();
-        var parsedAction;
-        var parseError = null;
-
-        // Helper function to extract valid JSON from a string
-        var extractValidJSON = function extractValidJSON(str) {
-          // Find the first '{' and the matching closing '}'
-          var firstBraceIndex = str.indexOf("{");
-          if (firstBraceIndex === -1) return null;
-          var braceCount = 0;
-          var endIndex = firstBraceIndex;
-          for (var i = firstBraceIndex; i < str.length; i++) {
-            if (str[i] === "{") {
-              braceCount++;
-            } else if (str[i] === "}") {
-              braceCount--;
-              if (braceCount === 0) {
-                endIndex = i;
-                break;
-              }
-            }
-          }
-          if (braceCount === 0) {
-            return str.substring(firstBraceIndex, endIndex + 1);
-          }
-          return null;
-        };
-        try {
-          // Attempt 1: Try parsing the actionString directly
-          parsedAction = JSON.parse(actionString);
-        } catch (e1) {
-          parseError = e1;
-          // Attempt 2: Check for JSON wrapped in markdown code block
-          var jsonBlockMatch = actionString.match(/```json\s*([\s\S]*?)\s*```/);
-          if (jsonBlockMatch && jsonBlockMatch[1]) {
-            try {
-              var extractedJSON = extractValidJSON(jsonBlockMatch[1]);
-              if (extractedJSON) {
-                try {
-                  parsedAction = JSON.parse(extractedJSON);
-                  parseError = null;
-                } catch (e2) {
-                  parseError = e2;
-                }
-              }
-            } catch (e2) {
-              parseError = e2;
-            }
-          }
-
-          // Attempt 3: Extract valid JSON using brace matching
-          if (parseError) {
-            var _extractedJSON = extractValidJSON(actionString);
-            if (_extractedJSON) {
-              try {
-                parsedAction = JSON.parse(_extractedJSON);
-                parseError = null;
-              } catch (e3) {
-                parseError = e3;
-                // If parsing fails, and the string looks like a double-escaped JSON string, try unescaping it
-                if (_extractedJSON.startsWith('"') && _extractedJSON.endsWith('"')) {
-                  try {
-                    // Remove outer quotes and unescape inner quotes
-                    var unescapedString = _extractedJSON.substring(1, _extractedJSON.length - 1).replace(/\"/g, '"');
-                    parsedAction = JSON.parse(unescapedString);
-                    parseError = null;
-                  } catch (e4) {
-                    parseError = e4;
-                  }
-                }
-              }
-            }
-          }
-        }
-        if (parseError) {
-          console.error("ReActController: Failed to parse action JSON. Error: ".concat(parseError.message, ". Raw string: \"").concat(actionString, "\""));
-          action = {
-            name: "parse_error",
-            params: {
-              error: parseError.message,
-              response: actionString
-            }
-          };
-        } else {
-          // The AI sometimes double-encodes the JSON by wrapping it in a string.
-          // If the parsed result is a string, we need to parse it again.
-          if (typeof parsedAction === "string") {
-            try {
-              parsedAction = JSON.parse(parsedAction);
-            } catch (e) {
-              console.error("ReActController: Failed to double-parse action JSON. Error: ".concat(e.message, ". Raw string: \"").concat(parsedAction, "\""));
-              parseError = e; // Set parseError for this case too
-            }
-          }
-          if (parseError) {
-            // Check again if double-parsing failed
-            action = {
-              name: "parse_error",
-              params: {
-                error: parseError.message,
-                response: actionString
-              }
-            };
-          } else {
-            console.log("ReActController: Debug - parsedAction:", parsedAction);
-            console.log("ReActController: Debug - typeof parsedAction:", _typeof(parsedAction));
-            if (parsedAction) {
-              console.log("ReActController: Debug - parsedAction.name:", parsedAction.name);
-              console.log("ReActController: Debug - typeof parsedAction.name:", _typeof(parsedAction.name));
-            }
-            if (parsedAction && _typeof(parsedAction) === "object" && typeof parsedAction.name === "string") {
-              // Remap 'geocode' to 'geocode_address' as a temporary workaround for AI hallucination
-              if (parsedAction.name === "geocode") {
-                console.warn("ReActController: Remapping 'geocode' tool to 'geocode_address'. AI hallucinated tool name.");
-                parsedAction.name = "geocode_address";
-              }
-              if (parsedAction.name === "search_places_nearby") {
-                console.warn("ReActController: Remapping 'search_places_nearby' tool to 'find_places_nearby'. AI hallucinated tool name.");
-                parsedAction.name = "find_places_nearby";
-              }
-              action = {
-                name: parsedAction.name,
-                params: parsedAction.parameters || parsedAction.params || {}
-              };
-            } else {
-              var errorMessage = "Parsed JSON is not a valid action object or missing 'name'.";
-              console.error("ReActController: ".concat(errorMessage, " Parsed object:"), parsedAction);
-              action = {
-                name: "parse_error",
-                params: {
-                  error: errorMessage,
-                  response: actionString
-                }
-              };
-            }
-          }
-        }
-      } else {
-        // actionIndex === -1, meaning "Action:" prefix was not found
-        var _thoughtPrefix = "Thought:";
-        if (cleanResponse.startsWith(_thoughtPrefix)) {
-          thought = cleanResponse.substring(_thoughtPrefix.length).trim();
-        } else {
-          thought = cleanResponse;
-        }
-        var thinkingPrefix = "THINKING:"; // New prefix for AI's internal thoughts
-
-        if (cleanResponse.startsWith(thinkingPrefix)) {
-          thought = cleanResponse.substring(thinkingPrefix.length).trim();
-          action = {
-            name: "ai_thinking",
-            params: {
-              message: thought
-            }
-          };
-        } else {
-          // If "Action:" is not found and it's not a "THINKING:" response,
-          // assume the entire response is a thought.
-          if (cleanResponse.startsWith(_thoughtPrefix)) {
-            thought = cleanResponse.substring(_thoughtPrefix.length).trim();
-          } else {
-            thought = cleanResponse; // Assume the entire response is the thought
-          }
-          action = {
-            name: "ai_thinking_only_thought",
-            params: {
-              message: thought
-            }
-          };
-        }
-      }
-
-      // Log the parsed thought and action for debugging
-      console.log("ReActController: Successfully parsed - Thought:", thought);
-      console.log("ReActController: Successfully parsed - Action:", action);
-      return {
-        thought: thought,
-        action: action
-      };
-    }
-  }, {
-    key: "_correctPlanStepTypes",
-    value: function () {
-      var _correctPlanStepTypes2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee9(plan) {
-        var _this2 = this;
-        var SIMILARITY_THRESHOLD, correctedPlanPromises;
-        return _regenerator().w(function (_context0) {
-          while (1) switch (_context0.n) {
-            case 0:
-              SIMILARITY_THRESHOLD = 0.6;
-              correctedPlanPromises = plan.map(/*#__PURE__*/function () {
-                var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8(step) {
-                  var descriptionEmbedding, descriptionEmbeddingString, querySql, result, similarity, _t6;
-                  return _regenerator().w(function (_context9) {
-                    while (1) switch (_context9.n) {
-                      case 0:
-                        if (["data_retrieval", "calculation", "filter", "aggregation"].includes(step.step_type)) {
-                          _context9.n = 1;
-                          break;
-                        }
-                        return _context9.a(2, step);
-                      case 1:
-                        console.log("ReActController: Evaluating step ".concat(step.step, " for geospatial correction."));
-                        _context9.p = 2;
-                        _context9.n = 3;
-                        return _this2.memoryManager.generateEmbedding(step.description);
-                      case 3:
-                        descriptionEmbedding = _context9.v;
-                        descriptionEmbeddingString = JSON.stringify(Array.from(descriptionEmbedding));
-                        querySql = "\n        SELECT\n          array_cosine_distance(\n              embedding,\n              CAST('".concat(descriptionEmbeddingString, "' AS DOUBLE[384])\n          ) AS distance\n        FROM\n          tool_registry_db.geospatial_term_embeddings\n        ORDER BY\n          distance ASC\n        LIMIT 1;\n      ");
-                        _context9.n = 4;
-                        return _this2.memoryManager.query(querySql);
-                      case 4:
-                        result = _context9.v;
-                        if (!(result && result.length > 0)) {
-                          _context9.n = 5;
-                          break;
-                        }
-                        similarity = 1 - result[0].distance;
-                        console.log("ReActController: Step ".concat(step.step, " similarity to geospatial terms: ").concat(similarity.toFixed(4)));
-                        if (!(similarity >= SIMILARITY_THRESHOLD)) {
-                          _context9.n = 5;
-                          break;
-                        }
-                        console.log("ReActController: Correcting step ".concat(step.step, " to 'geospatial'."));
-                        return _context9.a(2, _objectSpread(_objectSpread({}, step), {}, {
-                          step_type: "geospatial"
-                        }));
-                      case 5:
-                        _context9.n = 7;
-                        break;
-                      case 6:
-                        _context9.p = 6;
-                        _t6 = _context9.v;
-                        console.error("ReActController: Could not query geospatial term embeddings. Error: ".concat(_t6.message));
-                        return _context9.a(2, step);
-                      case 7:
-                        return _context9.a(2, step);
-                    }
-                  }, _callee8, null, [[2, 6]]);
-                }));
-                return function (_x9) {
-                  return _ref.apply(this, arguments);
-                };
-              }());
-              return _context0.a(2, Promise.all(correctedPlanPromises));
-          }
-        }, _callee9);
-      }));
-      function _correctPlanStepTypes(_x8) {
-        return _correctPlanStepTypes2.apply(this, arguments);
-      }
-      return _correctPlanStepTypes;
-    }()
-    /**
-     * Calculates the cosine similarity between two vectors.
-     * @param {number[]} vecA The first vector.
-     * @param {number[]} vecB The second vector.
-     * @returns {number} The cosine similarity score.
-     * @private
-     */
-  }, {
-    key: "_cosineSimilarity",
-    value: function _cosineSimilarity(vecA, vecB) {
-      var dotProduct = 0.0;
-      var normA = 0.0;
-      var normB = 0.0;
-      for (var i = 0; i < vecA.length; i++) {
-        dotProduct += vecA[i] * vecB[i];
-        normA += vecA[i] * vecA[i];
-        normB += vecB[i] * vecB[i];
-      }
-      if (normA === 0 || normB === 0) {
-        return 0;
-      }
-      return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
-    }
-
-    /**
-     * Determines if a string from within brackets is an invalid placeholder.
-     * @param {string} bracketContent The text content from inside square brackets.
-     * @returns {Promise<boolean>} True if the content is likely a placeholder.
-     * @private
-     */
-  }, {
-    key: "_isInvalidPlaceholder",
-    value: (function () {
-      var _isInvalidPlaceholder2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee0(bracketContent) {
-        var SIMILARITY_THRESHOLD, contentEmbedding, similarity;
-        return _regenerator().w(function (_context1) {
-          while (1) switch (_context1.n) {
-            case 0:
-              SIMILARITY_THRESHOLD = 0.7; // Add exceptions for common valid formats like "[source: wiki]" or "[1,2,3]".
-              if (!(bracketContent.includes(":") || /^[0-9,\s.-]+$/.test(bracketContent))) {
-                _context1.n = 1;
-                break;
-              }
-              return _context1.a(2, false);
-            case 1:
-              _context1.n = 2;
-              return this.memoryManager.generateEmbedding(bracketContent);
-            case 2:
-              contentEmbedding = _context1.v;
-              similarity = this._cosineSimilarity(contentEmbedding, this.placeholderConceptEmbedding);
-              console.log("ReActController: Placeholder check for \"[".concat(bracketContent, "]\". Similarity: ").concat(similarity.toFixed(4)));
-              return _context1.a(2, similarity > SIMILARITY_THRESHOLD);
-          }
-        }, _callee0, this);
-      }));
-      function _isInvalidPlaceholder(_x0) {
-        return _isInvalidPlaceholder2.apply(this, arguments);
-      }
-      return _isInvalidPlaceholder;
-    }())
-  }, {
-    key: "_dispatchScratchpadUpdate",
-    value: function _dispatchScratchpadUpdate() {
-      var thinkingProcess = this.scratchpad.map(function (entry) {
-        var formattedEntry = "".concat(entry.type.charAt(0).toUpperCase() + entry.type.slice(1), ": ").concat(_typeof(entry.content) === "object" ? JSON.stringify(entry.content, null, 2) : entry.content);
-        if (entry.type === "observation") {
-          return formattedEntry + "\n" + ".".repeat(80);
-        }
-        return formattedEntry;
-      }).join("\n\n");
-      this.communicationBus.dispatchEvent("aiThinkingStream", {
-        content: thinkingProcess
-      });
-    }
-
-    // When adding geospatial data, ensure coordinates are passed as numbers or strings
-  }, {
-    key: "addGeospatialData",
-    value: function () {
-      var _addGeospatialData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1(entityId, entityType, latitude, longitude, address, sessionId) {
-        var lat, lon, _t7;
-        return _regenerator().w(function (_context10) {
-          while (1) switch (_context10.n) {
-            case 0:
-              _context10.p = 0;
-              // Ensure coordinates are valid numbers
-              lat = typeof latitude === "string" ? parseFloat(latitude) : latitude;
-              lon = typeof longitude === "string" ? parseFloat(longitude) : longitude;
-              if (!(isNaN(lat) || isNaN(lon))) {
-                _context10.n = 1;
-                break;
-              }
-              throw new Error("Invalid coordinates for ".concat(entityId, ": lat=").concat(latitude, ", lon=").concat(longitude));
-            case 1:
-              _context10.n = 2;
-              return this.memoryManager.addGeospatialAttribute({
-                entityId: entityId,
-                entityType: entityType,
-                latitude: lat,
-                longitude: lon,
-                address: address,
-                sessionId: this.sessionId
-              });
-            case 2:
-              _context10.n = 4;
-              break;
-            case 3:
-              _context10.p = 3;
-              _t7 = _context10.v;
-              console.error("ReActController: Error adding geospatial data:", _t7);
-              throw _t7;
-            case 4:
-              return _context10.a(2);
-          }
-        }, _callee1, this, [[0, 3]]);
-      }));
-      function addGeospatialData(_x1, _x10, _x11, _x12, _x13, _x14) {
-        return _addGeospatialData.apply(this, arguments);
-      }
-      return addGeospatialData;
-    }()
   }]);
 }();
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ReActController);
@@ -85302,7 +84670,7 @@ function validateAndExtractParams(params) {
     throw new Error("Cuisine must be a string if provided.");
   }
   if (typeof radius_meters !== "number" || radius_meters <= 0) {
-    throw new Error("Radius must be a positive number.");
+    throw new Error("The 'radius_meters' parameter must be a positive number greater than 0. A radius of 0 defines a point, not a search area. For a city-wide search, please use a large radius (e.g., 15000).");
   }
   return {
     latitude: latitude,
