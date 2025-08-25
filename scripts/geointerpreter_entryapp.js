@@ -83722,7 +83722,7 @@ var ReActController = /*#__PURE__*/function () {
                       return _context4.a(2, 0);
                     case 25:
                       // Use embedding similarity to detect if bracketed content is a placeholder.
-                      placeholderRegex = /\\\\[(.*?)\\\\]/g; // Use g for matchAll
+                      placeholderRegex = /\\[(.*?)\\]/g; // Use g for matchAll
                       hasInvalidPlaceholder = false;
                       answerText = action.params.answer;
                       matches = _toConsumableArray(answerText.matchAll(placeholderRegex));
@@ -84542,30 +84542,55 @@ var ReActController = /*#__PURE__*/function () {
         } else {
           thought = cleanResponse;
         }
-        var thinkingPrefix = "THINKING:"; // New prefix for AI's internal thoughts
 
-        if (cleanResponse.startsWith(thinkingPrefix)) {
-          thought = cleanResponse.substring(thinkingPrefix.length).trim();
-          action = {
-            name: "ai_thinking",
-            params: {
-              message: thought
-            }
-          };
-        } else {
-          // If "Action:" is not found and it's not a "THINKING:" response,
-          // assume the entire response is a thought.
-          if (cleanResponse.startsWith(_thoughtPrefix)) {
-            thought = cleanResponse.substring(_thoughtPrefix.length).trim();
-          } else {
-            thought = cleanResponse; // Assume the entire response is the thought
+        // If in planning mode, check if the thought is a plan
+        if (this.isPlanningMode && thought.startsWith("create_plan:")) {
+          try {
+            var planJson = thought.substring("create_plan:".length).trim();
+            var plan = JSON.parse(planJson);
+            action = {
+              name: "create_plan",
+              params: {
+                plan: plan
+              }
+            };
+            thought = "The AI has created a plan."; // Override thought
+          } catch (e) {
+            console.error("ReActController: Failed to parse plan from thought:", e);
+            action = {
+              name: "parse_error",
+              params: {
+                error: e.message,
+                response: thought
+              }
+            };
           }
-          action = {
-            name: "ai_thinking_only_thought",
-            params: {
-              message: thought
+        } else {
+          var thinkingPrefix = "THINKING:"; // New prefix for AI's internal thoughts
+
+          if (cleanResponse.startsWith(thinkingPrefix)) {
+            thought = cleanResponse.substring(thinkingPrefix.length).trim();
+            action = {
+              name: "ai_thinking",
+              params: {
+                message: thought
+              }
+            };
+          } else {
+            // If "Action:" is not found and it's not a "THINKING:" response,
+            // assume the entire response is a thought.
+            if (cleanResponse.startsWith(_thoughtPrefix)) {
+              thought = cleanResponse.substring(_thoughtPrefix.length).trim();
+            } else {
+              thought = cleanResponse; // Assume the entire response is the thought
             }
-          };
+            action = {
+              name: "ai_thinking_only_thought",
+              params: {
+                message: thought
+              }
+            };
+          }
         }
       }
 
