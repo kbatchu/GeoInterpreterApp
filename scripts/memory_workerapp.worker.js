@@ -44812,6 +44812,18 @@ self.onmessage = async (event) => {
         self.postMessage({ messageId, payload: entityInfo });
         break;
 
+      case "reset":
+        // Clear conversation history and session-specific data
+        await dbConn.query("DELETE FROM conversation_chunks;");
+        await dbConn.query("DELETE FROM geospatial_attributes;");
+        await dbConn.query("DELETE FROM entity_attributes;");
+        await dbConn.query("DELETE FROM relationships;");
+        await dbConn.query("DELETE FROM entities;");
+        dbDirty = true; // Mark database as modified
+        console.log("Memory Worker: State has been reset.");
+        self.postMessage({ messageId, payload: "reset successful" });
+        break;
+
       default:
         self.postMessage({ messageId, error: `Unknown command: ${command}` });
     }

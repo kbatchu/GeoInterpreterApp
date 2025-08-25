@@ -82744,7 +82744,7 @@ var MemoryManager = /*#__PURE__*/function () {
 
                 // Fallback to inline worker
                 console.log("MemoryManager: Falling back to inline worker");
-                workerCode = "\n        console.log(\"Memory Worker: Hello from the worker!\");\n\n        \n\n        self.onmessage = async (event) => {\n          const { messageId, command, args } = event.data;\n          \n          try {\n            switch (command) {\n              case 'initialize':\n                self.postMessage({ messageId, payload: 'initialized' });\n                break;\n              \n              case 'generateEmbedding':\n                self.postMessage({ messageId, payload: [] });\n                break;\n                \n              case 'query':\n                self.postMessage({ messageId, payload: [] });\n                break;\n                \n              case 'getRelevantTools':\n                self.postMessage({ messageId, payload: [] });\n                break;\n                \n              case 'addConversationTurn':\n                self.postMessage({ messageId, payload: 'turn added' });\n                break;\n              \n              \n\n              default:\n                self.postMessage({\n                  messageId,\n                  error: 'Unknown command: ' + command,\n                });\n            }\n          } catch (error) {\n            self.postMessage({\n              messageId,\n              error: error.message\n            });\n          }\n        };\n";
+                workerCode = "\n        console.log(\"Memory Worker: Hello from the worker!\");\n\n        \n\n        self.onmessage = async (event) => {\n          const { messageId, command, args } = event.data;\n          \n          try {\n            switch (command) {\n              case 'initialize':\n                self.postMessage({ messageId, payload: 'initialized' });\n                break;\n              \n              case 'generateEmbedding':\n                self.postMessage({ messageId, payload: [] });\n                break;\n                \n              case 'query':\n                self.postMessage({ messageId, payload: [] });\n                break;\n                \n              case 'getRelevantTools':\n                self.postMessage({ messageId, payload: [] });\n                break;\n                \n              case 'addConversationTurn':\n                self.postMessage({ messageId, payload: 'turn added' });\n                break;\n              \n              case 'reset':\n                // Implement state reset logic here\n                self.postMessage({ messageId, payload: 'reset' });\n                break;\n\n              default:\n                self.postMessage({\n                  messageId,\n                  error: 'Unknown command: ' + command,\n                });\n            }\n          } catch (error) {\n            self.postMessage({\n              messageId,\n              error: error.message\n            });\n          }\n        };\n";
                 blob = new Blob([workerCode], {
                   type: "application/javascript"
                 });
@@ -82948,6 +82948,16 @@ var MemoryManager = /*#__PURE__*/function () {
       return this._postMessageAsync("getEntity", {
         entityId: entityId
       });
+    }
+
+    /**
+     * Resets the memory worker's state.
+     * @returns {Promise<void>}
+     */
+  }, {
+    key: "reset",
+    value: function reset() {
+      return this._postMessageAsync("reset");
     }
   }]);
 }();
@@ -84096,7 +84106,6 @@ var ReActController = /*#__PURE__*/function () {
   }, {
     key: "_handleNewSession",
     value: function _handleNewSession() {
-      console.log("ReActController: New session requested. Resetting state.");
       this.isCancelled = true;
       this.scratchpad = [];
       this._dispatchScratchpadUpdate();
@@ -84106,11 +84115,8 @@ var ReActController = /*#__PURE__*/function () {
       this.currentToolLevels = [1];
       this._findPlacesRetryCount = 0;
       this.sessionId = "session-".concat(Date.now());
-      this.stateManager.updateState({
-        agentStatus: "idle",
-        conversationHistory: [],
-        activePlan: null
-      });
+      this.stateManager.reset();
+      this.memoryManager.reset();
     }
   }, {
     key: "_assembleContext",
@@ -84872,6 +84878,22 @@ var StateManager = /*#__PURE__*/function () {
           console.error("StateManager: Error notifying subscriber:", error);
         }
       });
+    }
+
+    /**
+     * Resets the state to its initial values.
+     */
+  }, {
+    key: "reset",
+    value: function reset() {
+      this._state = {
+        layers: [],
+        mapViewport: {},
+        conversationHistory: [],
+        agentStatus: "idle",
+        activePlan: null
+      };
+      this._notifySubscribers();
     }
   }]);
 }();
