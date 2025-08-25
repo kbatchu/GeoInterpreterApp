@@ -83553,10 +83553,12 @@ var ReActController = /*#__PURE__*/function () {
                       throw new Error("AI invocation failed: ".concat(_t.message));
                     case 12:
                       _this2$_parseAIRespon = _this2._parseAIResponse(aiResponse), thought = _this2$_parseAIRespon.thought, action = _this2$_parseAIRespon.action;
-                      _this2.scratchpad.push({
-                        type: "thought",
-                        content: thought
-                      });
+                      if (action.name !== 'create_plan') {
+                        _this2.scratchpad.push({
+                          type: "thought",
+                          content: thought
+                        });
+                      }
                       console.log("ReActController: AI Thought:", thought);
                       _this2._dispatchScratchpadUpdate();
                       console.log("ReActController: AI Action:", action);
@@ -83711,7 +83713,7 @@ var ReActController = /*#__PURE__*/function () {
                       return _context4.a(2, 0);
                     case 25:
                       // Use embedding similarity to detect if bracketed content is a placeholder.
-                      placeholderRegex = /\\\[(.*?)\\\]/g; // Use g for matchAll
+                      placeholderRegex = /\\\\[(.*?)\\\\]/g; // Use g for matchAll
                       hasInvalidPlaceholder = false;
                       answerText = action.params.answer;
                       matches = _toConsumableArray(answerText.matchAll(placeholderRegex));
