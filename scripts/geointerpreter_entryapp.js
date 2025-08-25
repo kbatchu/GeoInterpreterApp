@@ -83132,12 +83132,13 @@ var ReActController = /*#__PURE__*/function () {
             case 2:
               this.placeholderConceptEmbedding = _context.v;
             case 3:
+              // Populate toolRegistry before initializing PromptManager
+              this.toolRegistry = {}; // Initialize toolRegistry
               _context.n = 4;
               return this._getRelevantTools(this.userQuery, 999, [1, 2, 3]);
             case 4:
               allAvailableTools = _context.v;
               // Get all tools
-              this.toolRegistry = {};
               _iterator = _createForOfIteratorHelper(allAvailableTools);
               try {
                 for (_iterator.s(); !(_step = _iterator.n()).done;) {
