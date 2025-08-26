@@ -82991,8 +82991,14 @@ var PromptManager = /*#__PURE__*/function () {
     this.baseSystemPrompt = baseSystemPrompt;
     this.toolRegistry = toolRegistry;
     this.activeToolPrompts = new Map();
+    this.isDiagnosticMode = false; // New state variable
   }
   return _createClass(PromptManager, [{
+    key: "setDiagnosticMode",
+    value: function setDiagnosticMode(isDiagnostic) {
+      this.isDiagnosticMode = isDiagnostic;
+    }
+  }, {
     key: "updatePrompts",
     value: function updatePrompts(relevantToolNames) {
       var newActiveToolPrompts = new Map();
@@ -83016,6 +83022,10 @@ var PromptManager = /*#__PURE__*/function () {
     key: "getFinalPrompt",
     value: function getFinalPrompt() {
       var dynamicInstructions = Array.from(this.activeToolPrompts.values()).join('\n');
+      if (this.isDiagnosticMode) {
+        var diagnosticPrompt = "\n## DIAGNOSTIC MODE: TOOL/DATA ISSUE DETECTED\nYou have failed to find a store multiple times. Your tool may be failing or the category may be incorrect.\n\n**Step 1: Validate the tool.** Try searching for a very common, different amenity (e.g., amenity=restaurant) in the same location.\n**Step 2: Try an alternative category.** If the tool works for restaurants, the original category may be wrong. Try a related category (e.g., shop=supermarket).\n**Step 3: Report failure.** If all diagnostic steps fail, inform the user that you cannot retrieve mapping data at this time.\n";
+        dynamicInstructions = diagnosticPrompt + dynamicInstructions;
+      }
       return this.baseSystemPrompt.replace('<!-- DYNAMIC_TOOL_INSTRUCTIONS -->', dynamicInstructions);
     }
   }]);
@@ -83081,6 +83091,7 @@ var ReActController = /*#__PURE__*/function () {
     this._findPlacesRetryCount = 0;
     this.sessionId = "session-".concat(Date.now());
     this.needsReplan = false;
+    this.isDiagnosticMode = false; // New state variable
     this.planStack = [];
     this.placeholderConceptEmbedding = null;
     this.communicationBus.addEventListener("userQuerySubmitted", this._handleUserQuery.bind(this));
@@ -83105,6 +83116,7 @@ var ReActController = /*#__PURE__*/function () {
               this.currentPlanStepIndex = 0;
               this.currentToolLevels = [1];
               this._findPlacesRetryCount = 0;
+              this.isDiagnosticMode = false; // Reset diagnostic mode
               _context.n = 1;
               return this.memoryManager.initialize();
             case 1:
@@ -83290,7 +83302,7 @@ var ReActController = /*#__PURE__*/function () {
                       console.log("ReActController: All planned steps completed. Now generating final answer.");
                     case 5:
                       _context2.n = 6;
-                      return _this._assembleContext(currentGoal, currentStep);
+                      return _this._assembleContext(currentGoal, currentStep, _this.isDiagnosticMode);
                     case 6:
                       _yield$_this$_assembl = _context2.v;
                       messages = _yield$_this$_assembl.messages;
@@ -83860,6 +83872,7 @@ var ReActController = /*#__PURE__*/function () {
     key: "_isCriticalFailure",
     value: function _isCriticalFailure(observation) {
       if (typeof observation === "string" && observation.includes("Multiple search attempts have failed")) {
+        this.isDiagnosticMode = true; // Activate diagnostic mode
         return true;
       }
       return false;
@@ -84130,6 +84143,7 @@ var ReActController = /*#__PURE__*/function () {
       this.currentToolLevels = [1];
       this._findPlacesRetryCount = 0;
       this.sessionId = "session-".concat(Date.now());
+      this.isDiagnosticMode = false; // Reset diagnostic mode
       this.stateManager.reset();
       this.memoryManager.reset();
     }
@@ -84138,6 +84152,7 @@ var ReActController = /*#__PURE__*/function () {
     value: function () {
       var _assembleContext2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(currentGoal) {
         var currentStep,
+          isDiagnosticMode,
           state,
           toolQuery,
           availableTools,
@@ -84157,6 +84172,7 @@ var ReActController = /*#__PURE__*/function () {
           while (1) switch (_context7.n) {
             case 0:
               currentStep = _args7.length > 1 && _args7[1] !== undefined ? _args7[1] : null;
+              isDiagnosticMode = _args7.length > 2 ? _args7[2] : undefined;
               state = this.stateManager.getState();
               toolQuery = currentGoal;
               if (currentStep && currentStep.step_type) {
@@ -84201,6 +84217,7 @@ var ReActController = /*#__PURE__*/function () {
                   _toolNames = availableTools.map(function (t) {
                     return t.name;
                   });
+                  this.promptManager.setDiagnosticMode(this.isDiagnosticMode); // Set diagnostic mode
                   this.promptManager.updatePrompts(_toolNames);
                   _systemPrompt = this.promptManager.getFinalPrompt();
                 } else {
