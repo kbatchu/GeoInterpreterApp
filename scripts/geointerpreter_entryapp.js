@@ -83230,7 +83230,7 @@ var ReActController = /*#__PURE__*/function () {
               REPETITION_LIMIT = 3;
               lastActionHistory = [];
               _loop = /*#__PURE__*/_regenerator().m(function _loop() {
-                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, startTime, endTime, turnTime, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, observation, refinedPlan, correctedPlan, parentPlanState, _errorMsg, placeholderRegex, hasInvalidPlaceholder, answerText, matches, placeholderChecks, results, _errorMsg2, _currentState2, conversationHistory, _observation, questionText, _errorMsg3, standardizedAction, _currentState3, _observation2, chosenTool, currentStepType, _observation3, executionParams, _currentState4, userLocation, coords, citySearchKeywords, userQuery, isCitySearch, _observation4, finalObservation, geocodeCoordErrorRegex, match, lat, lon, MAX_RETRIES, finalErrorMessage, _currentState5, _t, _t2;
+                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, startTime, endTime, turnTime, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, observation, refinedPlan, correctedPlan, parentPlanState, _errorMsg, placeholderRegex, hasInvalidPlaceholder, answerText, matches, placeholderChecks, results, _errorMsg2, _currentState2, conversationHistory, _observation, questionText, _errorMsg3, standardizedAction, _currentState3, _observation2, chosenTool, currentStepType, _observation3, executionParams, _currentState4, userLocation, tags, coords, citySearchKeywords, userQuery, isCitySearch, _observation4, finalObservation, geocodeCoordErrorRegex, match, lat, lon, MAX_RETRIES, finalErrorMessage, _currentState5, _t, _t2;
                 return _regenerator().w(function (_context2) {
                   while (1) switch (_context2.n) {
                     case 0:
@@ -83724,11 +83724,26 @@ var ReActController = /*#__PURE__*/function () {
                         console.log("ReActController: Remapping parameters for find_places_nearby");
                         _currentState4 = _this.stateManager.getState();
                         userLocation = _currentState4.currentLocation;
+                        tags = {};
+                        if (action.params.tags) {
+                          Object.assign(tags, action.params.tags);
+                        }
+                        if (action.params.amenity) {
+                          tags.amenity = action.params.amenity;
+                        }
+                        if (action.params.cuisine) {
+                          tags.cuisine = action.params.cuisine;
+                        }
+                        if (action.params.categories) {
+                          tags.amenity = action.params.categories;
+                        }
+                        if (action.params.keywords) {
+                          tags.cuisine = action.params.keywords;
+                        }
                         executionParams = {
                           latitude: action.params.lat || action.params.latitude || action.params.around_lat || (userLocation ? userLocation.latitude : undefined),
                           longitude: action.params.lng || action.params.longitude || action.params.around_lng || (userLocation ? userLocation.longitude : undefined),
-                          amenity: action.params.categories || action.params.amenity,
-                          cuisine: action.params.keywords || action.params.cuisine,
+                          tags: tags,
                           radius_meters: action.params.radius || action.params.radius_meters
                         };
                         if (action.params.around && typeof action.params.around === "string") {
