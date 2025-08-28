@@ -84699,20 +84699,41 @@ var ReActController = /*#__PURE__*/function () {
     key: "_isInvalidPlaceholder",
     value: (function () {
       var _isInvalidPlaceholder2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee0(bracketContent) {
-        var SIMILARITY_THRESHOLD, contentEmbedding, similarity;
+        var SIMILARITY_THRESHOLD, PLACEHOLDER_KEYWORDS, lowerCaseContent, _i2, _PLACEHOLDER_KEYWORDS, keyword, contentEmbedding, similarity;
         return _regenerator().w(function (_context1) {
           while (1) switch (_context1.n) {
             case 0:
-              SIMILARITY_THRESHOLD = 0.7; // Add exceptions for common valid formats like "[source: wiki]" or "[1,2,3]".
+              SIMILARITY_THRESHOLD = 0.7;
+              PLACEHOLDER_KEYWORDS = ['list', 'details', 'information', 'description', 'insert', 'fill', 'summary', 'example', 'etc', '...', 'content', 'data', 'value']; // Add exceptions for common valid formats like "[source: wiki]" or "[1,2,3]".
               if (!(bracketContent.includes(":") || /^[0-9,\s.-]+$/.test(bracketContent))) {
                 _context1.n = 1;
                 break;
               }
               return _context1.a(2, false);
             case 1:
-              _context1.n = 2;
-              return this.memoryManager.generateEmbedding(bracketContent);
+              // New: Keyword-based check for obvious placeholders
+              lowerCaseContent = bracketContent.toLowerCase();
+              _i2 = 0, _PLACEHOLDER_KEYWORDS = PLACEHOLDER_KEYWORDS;
             case 2:
+              if (!(_i2 < _PLACEHOLDER_KEYWORDS.length)) {
+                _context1.n = 4;
+                break;
+              }
+              keyword = _PLACEHOLDER_KEYWORDS[_i2];
+              if (!lowerCaseContent.includes(keyword)) {
+                _context1.n = 3;
+                break;
+              }
+              console.log("ReActController: Placeholder detected by keyword '".concat(keyword, "' in \"[").concat(bracketContent, "]\"."));
+              return _context1.a(2, true);
+            case 3:
+              _i2++;
+              _context1.n = 2;
+              break;
+            case 4:
+              _context1.n = 5;
+              return this.memoryManager.generateEmbedding(bracketContent);
+            case 5:
               contentEmbedding = _context1.v;
               similarity = this._cosineSimilarity(contentEmbedding, this.placeholderConceptEmbedding);
               console.log("ReActController: Placeholder check for \"[".concat(bracketContent, "]\". Similarity: ").concat(similarity.toFixed(4)));
