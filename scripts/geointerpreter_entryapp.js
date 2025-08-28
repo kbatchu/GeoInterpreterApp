@@ -83335,7 +83335,7 @@ var ReActController = /*#__PURE__*/function () {
                       return _this.aiCore.chat.completions.create({
                         messages: messages,
                         temperature: 0.1,
-                        max_gen_len: 512
+                        max_gen_len: 1024
                       });
                     case 8:
                       reply = _context2.v;
