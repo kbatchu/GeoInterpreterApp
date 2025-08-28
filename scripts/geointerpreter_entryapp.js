@@ -83018,12 +83018,32 @@ var PromptManager = /*#__PURE__*/function () {
       }
       this.activeToolPrompts = newActiveToolPrompts;
     }
+
+    /**
+     * Constructs the final system prompt.
+     * In normal mode, it injects tool-specific prompts based on relevance.
+     * In diagnostic mode, it injects a special set of instructions to guide the AI
+     * through a suspicion-driven diagnosis workflow. This involves validating the tool
+     * and, for `find_places_nearby`, using `getOsmTagInfo` to discover alternative
+     * search tags if the initial ones fail.
+     * @returns {string} The complete system prompt for the LLM.
+     */
   }, {
     key: "getFinalPrompt",
     value: function getFinalPrompt() {
       var dynamicInstructions = Array.from(this.activeToolPrompts.values()).join('\n');
       if (this.isDiagnosticMode) {
-        var diagnosticPrompt = "\n## DIAGNOSTIC MODE: TOOL/DATA ISSUE DETECTED\nYou have failed to find a store multiple times. Your tool may be failing or the category may be incorrect.\n\n**Step 1: Validate the tool.** Try searching for a very common, different amenity (e.g., amenity=restaurant) in the same location.\n**Step 2: Try an alternative category.** If the tool works for restaurants, the original category may be wrong. Try a related category (e.g., shop=supermarket).\n**Step 3: Report failure.** If all diagnostic steps fail, inform the user that you cannot retrieve mapping data at this time.\n";
+        var diagnosticPrompt = "\n## DIAGNOSTIC MODE: TOOL/DATA ISSUE DETECTED\nYou have failed to find a result. Your tool may be failing or the parameters may be incorrect.\n\n**Step 1: Validate the tool.** Try a known-good, simple search with the same tool (e.g., for find_places_nearby, search for amenity='restaurant').\n";
+
+        // Check if find_places_nearby is the tool being diagnosed.
+        if (this.activeToolPrompts.has('find_places_nearby')) {
+          // Dynamically get the system prompt for the getOsmTagInfo tool.
+          var taginfoPrompt = this.toolRegistry['getOsmTagInfo'] ? this.toolRegistry['getOsmTagInfo'].system_prompt : '';
+          diagnosticPrompt += "\n**Step 2: Discover alternative tags using Taginfo.** If the validation step was successful, the original tag was likely incorrect. Use the getOsmTagInfo tool to discover valid or alternative tags.\n".concat(taginfoPrompt, "\n");
+        } else {
+          diagnosticPrompt += "\n**Step 2: Try an alternative category.** If the tool works for the validation step, the original category may be wrong. Try a related category.\n";
+        }
+        diagnosticPrompt += "\n**Step 3: Report failure.** If all diagnostic steps fail, inform the user that you cannot retrieve the requested data at this time.\n";
         dynamicInstructions = diagnosticPrompt + dynamicInstructions;
       }
       return this.baseSystemPrompt.replace('<!-- DYNAMIC_TOOL_INSTRUCTIONS -->', dynamicInstructions);
@@ -85303,14 +85323,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _geocoding_tool_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geocoding_tool.js */ "./scripts/modules/tools/geocoding_tool.js");
 function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
 function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { if (r) i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n;else { var o = function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); }; o("next", 0), o("throw", 1), o("return", 2); } }, _regeneratorDefine2(e, r, n, t); }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
-function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 
 
 /**
@@ -85323,34 +85344,25 @@ function validateAndExtractParams(params) {
   var _ref = params || {},
     latitude = _ref.latitude,
     longitude = _ref.longitude,
-    amenity = _ref.amenity,
-    cuisine = _ref.cuisine,
+    tags = _ref.tags,
     _ref$radius_meters = _ref.radius_meters,
     radius_meters = _ref$radius_meters === void 0 ? 1000 : _ref$radius_meters;
-
-  // Validate required parameters
-  if (!latitude || !longitude || !amenity) {
-    throw new Error("Missing required parameters. 'latitude', 'longitude', and 'amenity' are required.");
+  if (!latitude || !longitude || !tags) {
+    throw new Error("Missing required parameters. 'latitude', 'longitude', and 'tags' are required.");
   }
-
-  // Validate parameter types and values
-  if (typeof latitude !== "number" || typeof longitude !== "number") {
-    throw new Error("Latitude and longitude must be numbers.");
+  if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+    throw new Error('Latitude and longitude must be numbers.');
   }
-  if (typeof amenity !== "string" || amenity.trim() === "") {
-    throw new Error("Amenity must be a non-empty string.");
+  if (_typeof(tags) !== 'object' || tags === null || Object.keys(tags).length === 0) {
+    throw new Error('Tags must be a non-empty object of key-value pairs.');
   }
-  if (cuisine && typeof cuisine !== "string") {
-    throw new Error("Cuisine must be a string if provided.");
-  }
-  if (typeof radius_meters !== "number" || radius_meters <= 0) {
-    throw new Error("Radius must be a positive number.");
+  if (typeof radius_meters !== 'number' || radius_meters <= 0) {
+    throw new Error('Radius must be a positive number.');
   }
   return {
     latitude: latitude,
     longitude: longitude,
-    amenity: amenity.trim(),
-    cuisine: cuisine === null || cuisine === void 0 ? void 0 : cuisine.trim(),
+    tags: tags,
     radius_meters: radius_meters
   };
 }
@@ -85363,13 +85375,14 @@ function validateAndExtractParams(params) {
 function buildOverpassQuery(_ref2) {
   var latitude = _ref2.latitude,
     longitude = _ref2.longitude,
-    amenity = _ref2.amenity,
-    cuisine = _ref2.cuisine,
+    tags = _ref2.tags,
     radius_meters = _ref2.radius_meters;
-  var filters = "[\"amenity\"=\"".concat(amenity, "\"]");
-  if (cuisine) {
-    filters += "[\"cuisine\"=\"".concat(cuisine, "\"]");
-  }
+  var filters = Object.entries(tags).map(function (_ref3) {
+    var _ref4 = _slicedToArray(_ref3, 2),
+      key = _ref4[0],
+      value = _ref4[1];
+    return "[\"".concat(key, "\"=\"").concat(value, "\"]");
+  }).join('');
   return "\n    [out:json][timeout:25];\n    (\n      node".concat(filters, "(around:").concat(radius_meters, ",").concat(latitude, ",").concat(longitude, ");\n      way").concat(filters, "(around:").concat(radius_meters, ",").concat(latitude, ",").concat(longitude, ");\n      relation").concat(filters, "(around:").concat(radius_meters, ",").concat(latitude, ",").concat(longitude, ");\n    );\n    out center;\n  ");
 }
 
@@ -85423,13 +85436,19 @@ function processOverpassResults(_x2) {
   return _processOverpassResults.apply(this, arguments);
 }
 /**
- * Discovers and lists points of interest (e.g., restaurants, hospitals) near a specified geographic location.
+ * Discovers and lists points of interest (e.g., restaurants, hospitals) near a specified geographic location using OpenStreetMap tags.
  * This tool is designed for finding places based on categories and proximity, not for retrieving the precise street address of a known set of coordinates.
+ * 
+ * @diagnostic
+ * When a search yields no results, the system may enter a diagnostic mode. In this mode,
+ * the AI is prompted to use the `getOsmTagInfo` tool to discover more appropriate or
+ * alternative tags for the search. It will then re-call this function with the
+ * newly discovered tags.
+ * 
  * @param {object} params - The parameters for the search.
- * @param {number} params.latitude - The latitude of the center point.
- * @param {number} params.longitude - The longitude of the center point.
- * @param {string} params.amenity - The type of place to search for (e.g., 'restaurant', 'hospital').
- * @param {string} [params.cuisine] - Optional cuisine type for restaurants.
+ * @param {number} params.latitude - The latitude of the center point for the search.
+ * @param {number} params.longitude - The longitude of the center point for the search.
+ * @param {object} params.tags - A key-value map of OpenStreetMap tags to search for, e.g., {"amenity": "restaurant", "cuisine": "italian"}.
  * @param {number} [params.radius_meters=1000] - The search radius in meters.
  * @returns {Promise<string>} A promise that resolves to a JSON string of found places with their name and coordinates.
  */
@@ -85638,10 +85657,10 @@ function _getReverseGeocodedAddress() {
 function addNonAddressTags(placeObject, tags) {
   var excludedKeys = new Set(["name"]);
   var addressKeyPrefix = "addr:";
-  Object.entries(tags).forEach(function (_ref3) {
-    var _ref4 = _slicedToArray(_ref3, 2),
-      key = _ref4[0],
-      value = _ref4[1];
+  Object.entries(tags).forEach(function (_ref5) {
+    var _ref6 = _slicedToArray(_ref5, 2),
+      key = _ref6[0],
+      value = _ref6[1];
     if (!excludedKeys.has(key) && !key.startsWith(addressKeyPrefix)) {
       placeObject[key] = value;
     }
