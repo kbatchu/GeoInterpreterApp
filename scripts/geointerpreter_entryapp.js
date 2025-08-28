@@ -83230,7 +83230,7 @@ var ReActController = /*#__PURE__*/function () {
               REPETITION_LIMIT = 3;
               lastActionHistory = [];
               _loop = /*#__PURE__*/_regenerator().m(function _loop() {
-                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, startTime, endTime, turnTime, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, observation, refinedPlan, correctedPlan, parentPlanState, _errorMsg, placeholderRegex, hasInvalidPlaceholder, answerText, matches, placeholderChecks, results, _errorMsg2, _currentState2, conversationHistory, _observation, questionText, _errorMsg3, standardizedAction, _currentState3, _observation2, chosenTool, currentStepType, _observation3, executionParams, _currentState4, userLocation, tags, coords, citySearchKeywords, userQuery, isCitySearch, _observation4, finalObservation, geocodeCoordErrorRegex, match, lat, lon, MAX_RETRIES, finalErrorMessage, _currentState5, _t, _t2;
+                var currentGoal, currentStep, activePlan, _yield$_this$_assembl, messages, availableTools, reply, aiResponse, startTime, endTime, turnTime, _this$_parseAIRespons, thought, action, actionSignature, errorMsg, _currentState, observation, refinedPlan, correctedPlan, parentPlanState, _errorMsg, placeholderRegex, hasInvalidPlaceholder, answerText, matches, placeholderChecks, results, _errorMsg2, _currentState2, conversationHistory, _observation, questionText, _errorMsg3, standardizedAction, _currentState3, _observation2, chosenTool, currentStepType, _observation3, executionParams, _observation4, finalObservation, geocodeCoordErrorRegex, match, lat, lon, MAX_RETRIES, finalErrorMessage, _currentState4, _t, _t2;
                 return _regenerator().w(function (_context2) {
                   while (1) switch (_context2.n) {
                     case 0:
@@ -83721,52 +83721,7 @@ var ReActController = /*#__PURE__*/function () {
                       });
                       executionParams = action.params;
                       if (action.name === "find_places_nearby") {
-                        console.log("ReActController: Remapping parameters for find_places_nearby");
-                        _currentState4 = _this.stateManager.getState();
-                        userLocation = _currentState4.currentLocation;
-                        tags = {};
-                        if (action.params.tags) {
-                          Object.assign(tags, action.params.tags);
-                        }
-                        if (action.params.amenity) {
-                          tags.amenity = action.params.amenity;
-                        }
-                        if (action.params.cuisine) {
-                          tags.cuisine = action.params.cuisine;
-                        }
-                        if (action.params.categories) {
-                          tags.amenity = action.params.categories;
-                        }
-                        if (action.params.keywords) {
-                          tags.cuisine = action.params.keywords;
-                        }
-                        executionParams = {
-                          latitude: action.params.lat || action.params.latitude || action.params.around_lat || (userLocation ? userLocation.latitude : undefined),
-                          longitude: action.params.lng || action.params.longitude || action.params.around_lng || (userLocation ? userLocation.longitude : undefined),
-                          tags: tags,
-                          radius_meters: action.params.radius || action.params.radius_meters
-                        };
-                        if (action.params.around && typeof action.params.around === "string") {
-                          coords = action.params.around.match(/-?\d+\.?\d*/g);
-                          if (coords && coords.length >= 2) {
-                            executionParams.latitude = parseFloat(coords[0]);
-                            executionParams.longitude = parseFloat(coords[1]);
-                          }
-                        }
-
-                        // If radius is 0 or not provided, check for city-wide search keywords
-                        if (!executionParams.radius_meters || executionParams.radius_meters === 0) {
-                          citySearchKeywords = ['in the city of', 'in seattle', 'in new york', 'in london', 'in paris', 'in tokyo'];
-                          userQuery = _this.userQuery.toLowerCase();
-                          isCitySearch = citySearchKeywords.some(function (keyword) {
-                            return userQuery.includes(keyword);
-                          });
-                          if (isCitySearch) {
-                            executionParams.radius_meters = 15000;
-                            console.log("ReActController: City-wide search detected. Setting radius_meters to 15000.");
-                          }
-                        }
-                        console.log("ReActController: Remapped parameters:", executionParams);
+                        executionParams = action.params;
                       }
                       _context2.n = 36;
                       return _this.toolExecutor.execute(action.name, executionParams, _this.stateManager.getState());
@@ -83836,10 +83791,10 @@ var ReActController = /*#__PURE__*/function () {
                       });
                       if (loopCount >= MAX_LOOP_ITERATIONS) {
                         finalErrorMessage = "An error occurred: ".concat(_t2.message, ". Max iterations reached.");
-                        _currentState5 = _this.stateManager.getState();
+                        _currentState4 = _this.stateManager.getState();
                         _this.stateManager.updateState({
                           agentStatus: "idle",
-                          conversationHistory: [].concat(_toConsumableArray(_currentState5.conversationHistory), [{
+                          conversationHistory: [].concat(_toConsumableArray(_currentState4.conversationHistory), [{
                             role: "assistant",
                             content: finalErrorMessage
                           }])
