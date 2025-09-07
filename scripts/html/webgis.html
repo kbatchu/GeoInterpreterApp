@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web GIS</title>
+    <link rel="stylesheet" href="css/webgis.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/fontgis.min.css"> <!-- https://viglino.github.io/font-gis/ -->
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">	 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        <div class="row flex-nowrap">
+            <!-- 26May2025 <div class="col-auto col-md-4 col-xl-3 px-sm-2 px-0 bg-light"> -->
+            <div class="col-auto col-md-4 px-sm-2 px-0 bg-light">
+                <div class="d-flex flex-column align-items-center align-items-sm-start pt-2 text-dark min-vh-100">
+                    <div class="d-flex justify-content-between align-items-center w-100 mb-3">
+                        <!-- <button id="btnAddRemoteDataset" type="button" class="btn btn-primary mb-3"
+                            data-bs-toggle="modal" data-bs-target="#divRemoteDatasetPanel"><svg
+                                xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor"
+                                class="bi bi-plus-square" viewBox="0 0 16 16">
+                                <path
+                                    d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />
+                                <path
+                                    d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+                            </svg> Add Dataset</button> -->
+                        <button id="btnAddDataset" type="button" class="btn btn-primary mb-3" data-bs-toggle="modal"
+                            data-bs-target="#divAddDatasetModal"><svg xmlns="http://www.w3.org/2000/svg" width="22"
+                                height="22" fill="currentColor" class="bi bi-plus-square" viewBox="0 0 16 16">
+                                <path
+                                    d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />
+                                <path
+                                    d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+                            </svg> Add Dataset</button>
+                        <button id="btnBrowseDataCatalog" type="button" class="btn btn-primary mb-3 ms-2"
+                            data-bs-toggle="modal" data-bs-target="#divDataCatalogModal">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor"
+                                class="bi bi-journal-richtext" viewBox="0 0 16 16">
+                                <path
+                                    d="M7.5 3.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0zm-.861 1.542 1.33.886 1.854-1.855a.25.25 0 0 1 .289-.047L11 4.75V7a.5.5 0 0 1-.5.5h-5A.5.5 0 0 1 5 7v-.5s1.54-1.274 1.639-1.208zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z" />
+                                <path
+                                    d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-12a2 2 0 0 1 2-2zm0 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3z" />
+                            </svg> Browse Data Catalog
+                        </button>
+                        <div class="d-flex align-items-center mb-3">
+                            <label for="userLevelDropdown" class="me-2">User Level:</label>
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" id="userLevelDropdown"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    Beginner
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="userLevelDropdown">
+                                    <li><a class="dropdown-item active" href="#" id="userLevelBeginner">Beginner</a>
+                                    </li>
+                                    <li><a class="dropdown-item" href="#" id="userLevelIntermediate">Intermediate</a>
+                                    </li>
+                                    <li><a class="dropdown-item" href="#" id="userLevelExpert">Expert</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divDatasetsParent" class="container-fluid bg-info bg-opacity-10 my-1">
+                        <h5>Datasets:</h5>
+                        <div id="divDatasets"
+                            class="container-fluid justify-content-center align-items-center bg-info bg-opacity-10 p-3 ">
+                        </div>
+                    </div>
+                    <div class="container-fluid d-flex justify-content-start align-items-center gap-2 my-3">
+                        <button id="btnCreateWorkflow" type="button" class="btn btn-primary my-3" data-bs-toggle="modal"
+                            data-bs-target="#divWorkflowPanel"><svg xmlns="http://www.w3.org/2000/svg" width="22"
+                                height="22" fill="currentColor" class="bi bi-plus-square" viewBox="0 0 16 16">
+                                <path
+                                    d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />
+                                <path
+                                    d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+                            </svg> Create Workflow</button>
+
+                        <!-- <button id="btnLoadWorkflowConfig" type="button" class="btn btn-primary my-3"><svg
+                                xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor"
+                                class="bi bi-folder-open" viewBox="0 0 16 16">
+                                <path
+                                    d="M14.5 1.5a2 2 0 0 1 1.41 0L8 10.59 6.59 9.1a2 2 0 1 1 0-3.42l2.38 2.38a2 2 0 0 1 1.41 1.41z" />
+                                <path d="M14 10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                                <path d="M14 5H1a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1zm-2-1a2 2 0 0 0-2 2H3a2
+                            2 0 0 0-2 2v
+                            10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" />
+                            </svg> Load Workflow</button> -->
+                        <button id="btnLoadWorkflowConfig" type="button" class="btn btn-primary my-3"><svg
+                                xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor"
+                                class="bi bi-upload" viewBox="0 0 16 16">
+                                <path
+                                    d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+                                <path
+                                    d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
+                            </svg> Load Workflow</button>
+                        <div id="divWorkflowLoadingIcon" class="spinner-border text-primary d-none" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <span id="spanWorkflows" class="small-text-gray"></span>
+                    </div>
+                    <div id="divWorkflowsParent" class="container-fluid bg-warning bg-opacity-10 p-3 my-1">
+                        <h5>Workflows:</h5>
+                        <div id="divWorkflows"
+                            class="container-fluid justify-content-center align-items-center bg-warning bg-opacity-10 p-3 ">
+                        </div>
+
+                    </div>
+                    <h5>Query SQL:</h5>
+                    <div id="divQueryInfo" class="p-3 text-break">
+                    </div>
+
+                </div>
+            </div>
+            <div class="col py-3">
+                <!-- <h5>Dataset Preview</h5>
+                <div id="divDatasetPreview"
+                    class="container-fluid justify-content-center align-items-center bg-light p-3 mt-1"></div> -->
+
+                <!-- GENERIC TOAST ALERT - BEGIN -->
+                <div id="divToastContainer" class="toast-container fixed-top" id="toastContainer">
+                    <div id="divToastAlert" class="toast align-items-center text-white bg-primary border-0" role="alert"
+                        aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div id="divToastText" class="toast-body">
+                                Hello, world! This is a toast message.
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                                aria-label="Close"></button>
+                        </div>
+                    </div>
+                </div>
+                <!-- GENERIC TOAST ALERT - END -->
+                <!-- <h5>Code Blocks</h5> -->
+
+
+                <div class="expandable-panel">
+                    <div class="panel-header"><i class="bi bi-arrows-collapse"></i> <span>Click to collapse</span></div>
+                    <div class="panel-content">
+                        <div id="topPanel">
+                            <div id="divMainBlocklyWorkspace" class="blockly-workspace"
+                                class="container-fluid justify-content-center align-items-center h-25  p-3 bg-light my-1">
+                            </div>
+                            <div id="divQueryPanel"
+                                class="container-fluid d-flex justify-content-center align-items-center bg-light p-3 my-1 gap-3">
+                                <!-- <div class="dropdown">
+                                    <button id="btnSelectQuery" class="btn btn-secondary dropdown-toggle" type="button"
+                                        id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Select Query
+                                    </button>
+                                    <ul id="queryDDL" class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+
+                                    </ul>
+                                </div> -->
+                                <button id="btnExecuteBlock" type="button" class="btn btn-primary">Execute Block(s)
+                                    Code</button>
+                                <button id="btnSaveBlockAsDataset" type="button" class="btn btn-primary"
+                                    data-bs-toggle="modal" data-bs-target="#divBlockDatasetPanel">Save Block(s) as
+                                    Dataset</button>
+                                <button id="btnSaveBlockWorkflowStep" type="button" class="btn btn-primary d-none"
+                                    data-bs-toggle="modal" data-bs-target="#divWorkflowStepPanel">Save Block(s) as
+                                    Workflow Step</button>
+                                <!-- <button id="btnSaveWorkflowStepEdits" type="button" class="btn btn-primary d-none">Save
+                                    Workflow Step Edits</button> -->
+                                <div id="divLoadingIcon" class="spinner-border text-primary d-none" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="position: relative;" class="d-flex justify-content-center align-items-center">
+                    <div class="d-flex flex1"><!--spacer --></div>
+                    <div id="tgBtnMapTable" class="btn-group d-flex flex1 justify-content-center my-2 shadow"
+                        style="max-width: 180px;" role="group">
+                        <input id="radBtnResultsMap" type="radio" class="btn-check" rel="js-VizMapTableToggle"
+                            name="vizMapTableToggle" checked />
+                        <label class="btn btn-outline-primary" for="radBtnResultsMap"><i class="bi bi-map"></i>
+                            Map</label>
+                        <input id="radBtnResultsDataTable" type="radio" class="btn-check" rel="js-VizMapTableToggle"
+                            name="vizMapTableToggle" />
+                        <label class="btn btn-outline-primary" for="radBtnResultsDataTable"><i class="bi bi-table"></i>
+                            Table</label>
+                    </div>
+                    <div class="d-flex flex1 justify-content-end">
+                        <button id="btnClearResultsTable" type="button" class="btn btn-primary">Clear Table</button>
+                    </div>
+                    <div id="layer-control" class="layer-control">
+                        <h5>Map Layers</h5>
+                        <div id="layer-list"></div>
+                        <!-- <button id="satellite" class="add-basemap-layer-btn">Add Satellite Layer</button> -->
+                    </div>
+                </div>
+                <div id="results_map" class="da-map  mx-auto"></div>
+                <div id="results_table" class="flex-grow-1 mx-auto d-none"></div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- REMOTE DATASET MODAL  - BEGIN -->
+    <!-- <div class="modal fade" id="divRemoteDatasetPanel" tabindex="-1" aria-label="add dataset" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <p class="modal-title h5">
+                        Dataset
+                    </p>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="remoteDatasetURL" class="form-label">(e.g.
+                        http(s)://data.mydomain.nyc_streets.parquet)
+                    </label>
+                    <div class="input-group mb-4">
+                        <span class="input-group-text">Dataset Url</span>
+                        <input id="remoteDatasetURL" type="text" aria-label="dataset URL" class="form-control">
+                    </div>
+
+                    <label for="remoteDatasetName" class="form-label">(e.g. nyc_subway_stations)</label>
+                    <div class="input-group mb-4">
+                        <span class="input-group-text">Dataset Name</span>
+                        <input id="remoteDatasetName" type="text" aria-label="dataset name" class="form-control">
+                    </div>
+
+                    <label for="remoteDatasetCRS" class="form-label">(e.g. EPSG:3857)</label>
+                    <div class="input-group mb-4">
+                        <span class="input-group-text">Coordinate Reference System (CRS) EPSG:</span>
+                        <input id="remoteDatasetCRS" type="text" aria-label="coordiante reference system"
+                            class="form-control">
+                    </div>
+
+                    <label for="remoteDatasetDescription" class="form-label">(brief description of the
+                        dataset)</label>
+                    <div class="input-group">
+                        <span class="input-group-text">Description</span>
+                        <textarea id="remoteDatasetDescription" rows="4" cols="50" aria-label="dataset description"
+                            class="form-control"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div id="divSaveRemoteDatasetLoadingIcon" class="spinner-border text-primary d-none" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <button id="btnSaveRemoteDataset" type="button" class="btn btn-primary">Save</button>
+                    <button id="btnCancelDataset" type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div> -->
+    <!-- REMOTE DATASET MODAL - END -->
+    <!-- BLOCK DATASET MODAL  - BEGIN -->
+    <div class="modal fade" id="divBlockDatasetPanel" tabindex="-1" aria-label="add dataset" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <p class="modal-title h5">
+                        Dataset
+                    </p>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="blockDatasetName" class="form-label">(e.g. nyc_subway_stations)</label>
+                    <div class="input-group mb-4">
+                        <span class="input-group-text">Dataset Name</span>
+                        <input id="blockDatasetName" type="text" aria-label="dataset name" class="form-control">
+                    </div>
+                    <label for="blockDatasetDescription" class="form-label">(brief description of the
+                        dataset)</label>
+                    <div class="input-group">
+                        <span class="input-group-text">Description</span>
+                        <textarea id="blockDatasetDescription" rows="4" cols="50" aria-label="dataset description"
+                            class="form-control"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div id="divSaveBlockDatasetLoadingIcon" class="spinner-border text-primary d-none" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <button id="btnSaveBlockDataset" type="button" class="btn btn-primary">Save</button>
+                    <button id="btnCancelBlockDataset" type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- BLOCK DATASET MODAL - END -->
+
+    <!-- WORKFLOW MODAL  - BEGIN -->
+    <div class="modal fade" id="divWorkflowPanel" tabindex="-1" aria-label="create workflow" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <p class="modal-title h5">
+                        Workflow
+                    </p>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="workFlowName" class="form-label">(e.g. taxi trip analysis)</label>
+                    <div class="input-group">
+                        <span class="input-group-text">Workflow Name</span>
+                        <input id="workFlowName" type="text" aria-label="workflow name" class="form-control">
+                    </div>
+
+                    <label for="workFlowDescription" class="form-label">(brief description of the
+                        workflow)</label>
+                    <div class="input-group">
+                        <span class="input-group-text">Description</span>
+                        <textarea id="workFlowDescription" rows="4" cols="50" aria-label="workflow description"
+                            class="form-control"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnSaveWorkflow" type="button" class="btn btn-primary">Save</button>
+                    <button id="btnCancelWorkflow" type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- WORKFLOW MODAL - END -->
+
+    <!-- WORKFLOW STEP MODAL - BEGIN -->
+    <div class="modal fade" id="divWorkflowStepPanel" tabindex="-1" aria-label="add workflow step" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <p class="modal-title h5">
+                        Workflow Step
+                    </p>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="workflowStepName" class="form-label">(e.g. create classification)</label>
+                    <div class="input-group">
+                        <span class="input-group-text">Workflow Step Name</span>
+                        <input id="workflowStepName" type="text" aria-label="workflow step name" class="form-control">
+                    </div>
+                    <label for="workflowStepDescription" class="form-label">(brief description of the workflow
+                        step)</label>
+                    <div class="input-group">
+                        <span class="input-group-text">Description</span>
+                        <textarea id="workflowStepDescription" rows="4" cols="50" aria-label="workflow step description"
+                            class="form-control"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div id="divSaveWorkflowStepLoadingIcon" class="spinner-border text-primary d-none" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <button id="btnSaveWorkflowStep" type="button" class="btn btn-primary">Save</button>
+                    <button id="btnCancelWorkflowStep" type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- WORKFLOW STEP MODAL - END -->
+
+    <!-- DATASET PREVIEW MODAL - BEGIN-->
+    <div class="modal fade" id="divDatasetPreviewPanel" tabindex="-1" aria-label="add dataset" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen modal-dialog-scrollable ">
+            <div class="modal-content">
+                <div class="modal-header bg-success p-2 me-3 bg-opacity-10">
+                    <p class="modal-title h5">
+                        Dataset Preview
+                    </p>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="divDatasetInfo"></div>
+                    <div id="divDatasetPreview"
+                        class="d-flex flex-column justify-content-center align-items-center bg-light px-3 py-1">
+                        <div id="tgBtnPreviewMapTable" class="btn-group d-flex flex1 justify-content-center my-2 shadow"
+                            style="max-width: 180px;" role="group">
+                            <input id="radBtnPreviewMap" type="radio" class="btn-check"
+                                rel="js-VizPreviewMapTableToggle" name="vizPreviewMapTableToggle" />
+                            <label class="btn btn-outline-primary" for="radBtnPreviewMap"><i class="bi bi-map"></i>
+                                Map</label>
+                            <input id="radBtnPreviewDataTable" type="radio" class="btn-check"
+                                rel="js-VizPreviewMapTableToggle" name="vizPreviewMapTableToggle" checked />
+                            <label class="btn btn-outline-primary" for="radBtnPreviewDataTable"><i
+                                    class="bi bi-table"></i>
+                                Table</label>
+                        </div>
+                        <div id="preview_map" class="flex-grow-1 w-100 mx-auto"></div>
+                        <div id="preview_table" class="flex-grow-1 w-100 mx-auto d-none"></div>
+                        <div id="preview_mapTooltip"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnCloseDatasetPreview" type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- DATASET PREVIEW MODAL - END-->
+
+    <!-- ADD DATASET MODAL - BEGIN -->
+    <div class="modal fade" id="divAddDatasetModal" tabindex="-1" aria-labelledby="addDatasetModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addDatasetModalLabel">Add New Dataset</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="py-3 text-center">
+                        <p class="lead">Choose a method below to add your dataset to the Web GIS application.</p>
+                    </div>
+
+                    <!-- SECTION 1: Load Remote Dataset -->
+                    <div class="accordion mb-4" id="accordionRemoteDatasetSectionModal">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingRemoteDatasetModal">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseRemoteDatasetModal" aria-expanded="false"
+                                    aria-controls="collapseRemoteDatasetModal">
+                                    <i class="bi bi-cloud-arrow-down-fill me-2"></i> Load Remote Dataset
+                                </button>
+                            </h2>
+                            <div id="collapseRemoteDatasetModal" class="accordion-collapse collapse"
+                                aria-labelledby="headingRemoteDatasetModal">
+                                <div class="accordion-body">
+                                    <div id="formRemoteDataset">
+                                        <div class="mb-3">
+                                            <label for="remoteDatasetURL" class="form-label">Dataset URL</label>
+                                            <input type="url" class="form-control" id="remoteDatasetURL" placeholder=""
+                                                required>
+                                            <div class="form-text">(e.g. http(s)://data.mydomain.nyc_streets.parquet)
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="remoteDatasetName" class="form-label">Dataset Name</label>
+                                            <input type="text" class="form-control" id="remoteDatasetName"
+                                                placeholder="" required>
+                                            <div class="form-text">(e.g. nyc_subway_stations)</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="remoteDatasetCRS" class="form-label">Coordinate Reference System
+                                                (CRS)</label>
+                                            <input type="text" class="form-control" id="remoteDatasetCRS"
+                                                placeholder="">
+                                            <div class="form-text">(e.g. EPSG:3857). Optional, if known.</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="remoteDatasetDescription" class="form-label">Description</label>
+                                            <textarea class="form-control" id="remoteDatasetDescription" rows="3"
+                                                placeholder="A brief description of the dataset"></textarea>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <button id="btnSaveRemoteDataset" type="button" class="btn btn-primary">
+                                                <i class="bi bi-plus-lg me-1"></i> Add Remote Dataset
+                                            </button>
+                                            <div id="divAddRemoteDatasetLoadingIcon"
+                                                class="spinner-border text-primary d-none ms-2" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                            <div id="divRemoteDatasetSuccessAlert"
+                                                class="alert alert-success d-none border-0 shadow-sm rounded-3 mb-0 ms-2 py-0 px-3 fade show d-flex align-items-center"
+                                                style="height: 38px;" role="alert">
+                                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                                <span class="fw-semibold small">Dataset added successfully!</span>
+                                                <button type="button" class="btn-close btn-sm ms-2 p-0"
+                                                    data-bs-dismiss="alert" aria-label="Close"></button>
+                                            </div>
+                                        </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 2: Load Local Dataset -->
+                        <div class="accordion mb-4" id="accordionLocalDatasetSectionModal">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingLocalDatasetModal">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseLocalDatasetModal" aria-expanded="false"
+                                        aria-controls="collapseLocalDatasetModal">
+                                        <i class="bi bi-upload me-2"></i> Load Local Dataset
+                                    </button>
+                                </h2>
+                                <div id="collapseLocalDatasetModal" class="accordion-collapse collapse"
+                                    aria-labelledby="headingLocalDatasetModal">
+                                    <div class="accordion-body">
+                                        <form id="formLocalDataset">
+                                            <div class="mb-3">
+                                                <label for="localDatasetFile" class="form-label">Dataset File</label>
+                                                <input type="file" class="form-control" id="localDatasetFile" required>
+                                                <div class="form-text">Select a file from your computer (e.g., .geojson,
+                                                    .csv, .parquet).</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="localDatasetName" class="form-label">Dataset Name</label>
+                                                <input type="text" class="form-control" id="localDatasetName"
+                                                    placeholder="">
+                                                <div class="form-text">A name for this dataset. If blank, filename will
+                                                    be
+                                                    used.</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="localDatasetCRS" class="form-label">Coordinate Reference
+                                                    System
+                                                    (CRS)</label>
+                                                <input type="text" class="form-control" id="localDatasetCRS"
+                                                    placeholder="">
+                                                <div class="form-text">Optional, if the dataset doesn't contain CRS
+                                                    information.</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="localDatasetDescription"
+                                                    class="form-label">Description</label>
+                                                <textarea class="form-control" id="localDatasetDescription" rows="3"
+                                                    placeholder="A brief description of the local dataset"></textarea>
+                                            </div>
+                                            <div class="d-flex align-items-center">
+                                                <button id="btnSaveLocalDataset" type="button" class="btn btn-primary">
+                                                    <i class="bi bi-plus-lg me-1"></i> Add Local Dataset
+                                                </button>
+                                                <div id="divAddLocalDatasetLoadingIcon"
+                                                    class="spinner-border text-primary d-none ms-2" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                                <div id="divLocalDatasetSuccessAlert"
+                                                    class="alert alert-success d-none border-0 shadow-sm rounded-3 mb-0 ms-2 py-0 px-3 fade show d-flex align-items-center"
+                                                    style="height: 38px;" role="alert">
+                                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                                    <span class="fw-semibold small">Dataset added successfully!</span>
+                                                    <button type="button" class="btn-close btn-sm ms-2 p-0"
+                                                        data-bs-dismiss="alert" aria-label="Close"></button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ADD DATASET MODAL - END -->
+
+    <!-- EXPLORE DATA MODAL - BEGIN -->
+    <!-- EXPLORE DATA MODAL - BEGIN -->
+    <div class="modal fade" id="exploreDataModal" tabindex="-1" aria-labelledby="exploreDataModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exploreDataModalLabel">Explore Data</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="exploreDataModalBody">
+                    <!-- Content from Huggingface_FourSquare_places.html will be injected here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- EXPLORE DATA MODAL - END -->
+
+    <!-- EXPLORE DATA MODAL - END -->
+
+    <!-- DATA CATALOG MODAL - BEGIN -->
+    <div class="modal fade" id="divDataCatalogModal" tabindex="-1" aria-labelledby="dataCatalogModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dataCatalogModalLabel">Data Catalog Browser</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3 p-3 border rounded bg-light">
+                        <label for="dataCatalogDbFile" class="form-label">Select your .duckdb catalog file:</label>
+                        <div class="input-group">
+                            <input type="file" class="form-control" id="dataCatalogDbFile" accept=".duckdb">
+                            <button id="btnLoadDataCatalogFromDb" class="btn btn-outline-primary" type="button">
+                                <i class="bi bi-arrow-clockwise"></i> Load Catalog
+                            </button>
+                        </div>
+                        <div class="form-text">The .duckdb file should contain a table named 'catalog_items' with
+                            columns like: Name, Description, URL, Keywords (array), Provider, Category, License,
+                            Format, UpdateFrequency, Region.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <input type="search" class="form-control" id="dataCatalogSearchInput"
+                            placeholder="Search catalog (Keywords, Description, Name)...">
+                    </div>
+                    <div id="dataCatalogNoResults" class="col-12 text-center text-muted py-3 d-none">
+                        <p><i class="bi bi-search fs-2"></i></p>
+                        <h5>No Matching Datasets Found</h5>
+                    </div>
+
+                    <div id="divDataCatalogLoading" class="text-center my-3 d-none">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading catalog...</span>
+                        </div>
+                        <p>Loading catalog items...</p>
+                    </div>
+
+                    <div id="dataCatalogCardsContainer" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mt-2">
+                        <div id="dataCatalogPlaceholder" class="col-12 text-center text-muted py-5">
+                            <p><i class="bi bi-info-circle fs-1"></i></p>
+                            <h4>No Catalog Loaded</h4>
+                            <p>Please select a .duckdb file and click "Load Catalog" to browse datasets.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- DATA CATALOG MODAL - END -->
+
+    <!-- WORKFLOW PREVIEW MODAL - BEGIN -->
+    <div class="modal fade" id="divWorkflowPreviewPanel" tabindex="-1" aria-label="workflow preview" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen modal-dialog-scrollable ">
+            <div class="modal-content">
+                <div class="modal-header bg-primary p-2 bg-opacity-10">
+                    <p class="modal-title h5">
+                        Workflow Preview
+                    </p>
+                    <button type="button" class="btn-close me-2" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div
+                    class="modal-body container-fluid d-flex justify-content-center align-items-center h-50  p-3 bg-light my-1">
+                    <div id="divWorkflowPreviewContent"
+                        class="flex-grow-1 d-flex flex-column justify-content-center align-items-center">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnCloseWorkflowPreview" type="button" class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- WORKFLOW PREVIEW MODAL - END -->
+
+
+
+    <!-- GENERIC ALERT MODAL BEGIN -->
+    <div class="modal fade" id="divGenericaModal" tabindex="-1" aria-label="message" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <p class="modal-title h5">
+                        Alert
+                    </p>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="pAlertText"></p>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnOK" type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="mapTooltip"></div>
+    <!-- GENERIC ALERT MODAL END -->
+
+    <script async src="scripts/webgis_entryapp.js"></script>
+</body>
+
+</html>
