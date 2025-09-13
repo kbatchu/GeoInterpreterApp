@@ -44340,7 +44340,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _duckdb_duckdb_wasm__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @duckdb/duckdb-wasm */ "./node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser.mjs");
 /* harmony import */ var _xenova_transformers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @xenova/transformers */ "./node_modules/@xenova/transformers/src/transformers.js");
 /* harmony import */ var _tools_tool_retriever_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tools/tool_retriever.js */ "./scripts/modules/tools/tool_retriever.js");
-// c:\Kiran\Work\GIS\DATAVIZ\GeoInterpreter\scripts\modules\memory_worker.js
+// c:\\Kiran\\Work\\GIS\\DATAVIZ\\GeoInterpreter\\scripts\\modules\\memory_worker.js
 
 
 
@@ -44467,13 +44467,21 @@ async function saveDatabaseToIndexedDB() {
     const request = indexedDB.open("GeoInterpreterDB", 1);
 
     request.onupgradeneeded = (event) => {
-        const db = event.target.result;
-        db.createObjectStore("files", { keyPath: "name" });
+        const indexedDB_db = /** @type {any} */ (event.target).result;
+        if (!indexedDB_db) {
+            console.error("Invalid IndexedDB event target during upgrade");
+            return;
+        }
+        indexedDB_db.createObjectStore("files", { keyPath: "name" });
     };
 
     request.onsuccess = (event) => {
-        const db = event.target.result;
-        const transaction = db.transaction(["files"], "readwrite");
+        const indexedDB_db = /** @type {any} */ (event.target).result;
+        if (!indexedDB_db) {
+            console.error("Invalid IndexedDB event target");
+            return;
+        }
+        const transaction = indexedDB_db.transaction(["files"], "readwrite");
         const store = transaction.objectStore("files");
         store.put({ name: "main.db", buffer });
         transaction.oncomplete = () => {
@@ -44481,13 +44489,23 @@ async function saveDatabaseToIndexedDB() {
             dbDirty = false;
         };
     };
+
+    request.onerror = (event) => {
+        const error = /** @type {any} */ (event.target).error;
+        console.error("Error saving database to IndexedDB:", error || "Unknown IndexedDB error");
+    };
 }
 
 async function deleteDatabaseFromIndexedDB() {
     const request = indexedDB.open("GeoInterpreterDB", 1);
 
     request.onsuccess = (event) => {
-        const indexedDB_db = event.target.result;
+        const indexedDB_db = /** @type {any} */ (event.target).result;
+        if (!indexedDB_db) {
+            console.error("Invalid IndexedDB event target");
+            return;
+        }
+        
         const transaction = indexedDB_db.transaction(["files"], "readwrite");
         const store = transaction.objectStore("files");
         store.delete("main.db");
@@ -44497,7 +44515,8 @@ async function deleteDatabaseFromIndexedDB() {
     };
 
     request.onerror = (event) => {
-        console.error("Error deleting database from IndexedDB:", event.target.error);
+        const error = /** @type {any} */ (event.target).error;
+        console.error("Error deleting database from IndexedDB:", error || "Unknown IndexedDB error");
     };
 }
 
@@ -44506,19 +44525,29 @@ async function loadDatabaseFromIndexedDB() {
 
     return new Promise((resolve, reject) => {
         request.onupgradeneeded = (event) => {
-            const indexedDB_db = event.target.result;
+            const indexedDB_db = /** @type {any} */ (event.target).result;
+            if (!indexedDB_db) {
+                console.error("Invalid IndexedDB event target during upgrade");
+                return;
+            }
             indexedDB_db.createObjectStore("files", { keyPath: "name" });
         };
 
         request.onsuccess = (event) => {
-            const indexedDB_db = event.target.result;
+            const indexedDB_db = /** @type {any} */ (event.target).result;
+            if (!indexedDB_db) {
+                console.error("Invalid IndexedDB event target");
+                reject(new Error("Invalid IndexedDB event target"));
+                return;
+            }
             const transaction = indexedDB_db.transaction(["files"], "readonly");
-            const store = indexedDB_db.transaction("files").objectStore("files");
+            const store = transaction.objectStore("files");
             const getRequest = store.get("main.db");
 
             getRequest.onsuccess = async (event) => {
-                if (event.target.result) {
-                    const buffer = event.target.result.buffer;
+                const getResult = /** @type {any} */ (event.target).result;
+                if (getResult) {
+                    const buffer = getResult.buffer;
                     try {
                         await db.registerFileBuffer("main.duckdb", new Uint8Array(buffer));
                         await dbConn.query("ATTACH 'main.duckdb' AS persisted_db;");
@@ -44534,14 +44563,18 @@ async function loadDatabaseFromIndexedDB() {
             };
 
             getRequest.onerror = (event) => {
-                console.error("Error getting database from IndexedDB:", event.target.error);
-                reject(event.target.error);
+                const error = /** @type {any} */ (event.target).error;
+                const errorMessage = error ? error.toString() : "Unknown IndexedDB get error";
+                console.error("Error getting database from IndexedDB:", errorMessage);
+                reject(new Error(errorMessage));
             };
         };
 
         request.onerror = (event) => {
-            console.error("Error opening IndexedDB:", event.target.error);
-            reject(event.target.error);
+            const error = /** @type {any} */ (event.target).error;
+            const errorMessage = error ? error.toString() : "Unknown IndexedDB error";
+            console.error("Error opening IndexedDB:", errorMessage);
+            reject(new Error(errorMessage));
         };
     });
 }
@@ -44832,7 +44865,6 @@ self.onmessage = async (event) => {
     self.postMessage({ messageId, error: error.message });
   }
 };
-
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } }, 1);
 

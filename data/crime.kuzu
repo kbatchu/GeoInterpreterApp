@@ -1,0 +1,11 @@
+CREATE NODE TABLE Crime (
+    id STRING,
+    type STRING,
+    timestamp INT64,
+    PRIMARY KEY (id)
+);
+
+CREATE REL TABLE isA (
+    FROM Crime,
+    TO Event
+);

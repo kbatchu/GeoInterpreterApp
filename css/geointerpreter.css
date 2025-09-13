@@ -13,7 +13,6 @@ html {
 
 .chat-panel {
   width: 30%;
-  min-width: 200px;
   padding: 12px;
   overflow-y: auto;
   background-color: #f8f9fa;
@@ -59,6 +58,10 @@ html {
   color: #777;
 }
 
+#results_map {
+    flex-grow: 1;
+}
+
 #analysis-output {
   margin-top: 1em;
   padding: 1em;
@@ -68,8 +71,8 @@ html {
 }
 
 #thinking-process-wrapper {
-    flex-shrink: 0;
-    overflow-y: auto;
+  flex-shrink: 0;
+  overflow-y: auto;
 }
 
 #thinking-process-content {
@@ -86,31 +89,62 @@ html {
 }
 
 #chat-input-container {
-  display: flex;
   padding: 15px;
   background-color: #fff;
+  flex-shrink: 0;
 }
 
-#user-input {
-  width: 90%;
+#chat-input-container .input-group {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  width: 100%;
+}
+
+#chat-input-container #user-input {
+  flex: 1 1 auto;
+  min-width: 150px;
+  max-width: none;
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 5px;
   font-size: 1em;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  resize: none;
+  overflow-y: hidden;
 }
 
-#send-button {
-  width: 10%;
-  padding: 10px;
+#chat-input-container #send-button {
+  flex: 0 0 auto;
+  width: 70px;
+  padding: 10px 12px;
   background-color: #007bff;
   color: white;
-  border: none;
+  border: 1px solid #007bff;
   border-radius: 5px;
   cursor: pointer;
   font-size: 1em;
-  margin-left: 5px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-left: 0;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+  box-sizing: border-box;
 }
 
+#chat-input-container #send-button:disabled {
+  background-color: #6c757d !important;
+  border-color: #6c757d !important;
+  cursor: not-allowed !important;
+  opacity: 0.65 !important;
+}
+
+#chat-input-container #send-button:hover:not(:disabled) {
+  background-color: #0056b3 !important;
+  border-color: #0056b3 !important;
+}
 
 /* Custom Logo Styles - 75% smaller than original */
 .logo-wrapper {
@@ -330,4 +364,115 @@ html {
     width: 30px;
     height: 30px;
   }
+}
+
+/* Add responsive behavior for very small screens */
+@media (max-width: 480px) {
+  #chat-input-container {
+    padding: 10px;
+  }
+
+  #chat-input-container .input-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #chat-input-container #user-input {
+    width: 100%;
+    border-radius: 5px !important;
+    margin-bottom: 10px;
+  }
+
+  #chat-input-container #send-button {
+    width: 100%;
+    border-radius: 5px !important;
+    border-left: 1px solid #007bff !important;
+    margin-top: 0;
+    min-width: auto;
+    max-width: none;
+  }
+}
+
+#map-table-controls {
+  position: relative;
+}
+
+#tgBtnMapTable {
+  max-width: 180px;
+}
+
+.clear-table-container {
+  position: absolute;
+  right: 1rem;
+}
+
+.layer-control {
+  position: absolute;
+  top: 62px;
+  right: 10px;
+  background: white;
+  padding: 10px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  padding-bottom: 20px;
+  width: 20rem;
+}
+
+.layer-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.layer-item {
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 3px 0; /* Add padding for better spacing */
+}
+
+.layer-item-sortable {
+  cursor: move; /* Change the cursor to indicate that items are draggable */
+  border-bottom: 1px solid #ddd;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.layer-item-sortable:hover {
+  background-color: #f5f5f5;
+}
+
+.drag-handle {
+  display: flex;
+  align-items: center;
+  margin-right: 5px;
+  cursor: move;
+}
+
+.layer-info {
+  display: flex;
+  align-items: center; /* Change back to center for better vertical alignment */
+  flex-grow: 1;
+}
+
+.layer-visibility-toggle {
+  margin: 0;
+  margin-right: 10px;
+  flex-shrink: 0;
+  margin-top: 2px; /* Match the same top margin as the icon */
+  cursor: pointer;
+  position: relative;
+  z-index: 10; /* Ensure checkbox is above other elements */
+}
+
+.layer-item label {
+  margin-left: 5px;
+  margin-right: 10px;
+}
+
+.active-map-layer {
+  background-color: #ffd800;
 }

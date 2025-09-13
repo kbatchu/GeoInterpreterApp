@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="css/bootstrap.min.css" />
   <link rel="stylesheet" href="css/datatables.min.css" />
   <link rel="stylesheet" href="css/ol.css">
-  <link rel="stylesheet" href="css/webgis.css">
+  <link rel="stylesheet" href="css/fontgis.min.css">
   <link rel="stylesheet" href="css/geointerpreter.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
 </head>
@@ -92,8 +92,7 @@
         </div>
 
         <!-- Container for the agent to ask the user for input -->
-        <div id="user-prompt-container" style="
-              display: none;
+        <div id="user-prompt-container" class="d-none" style="
               padding: 15px;
               background-color: #fff8e1;
               border-top: 1px solid #eee;
@@ -104,7 +103,7 @@
             <!-- Buttons for options will be dynamically inserted here -->
           </div>
           <div id="user-prompt-input-wrapper">
-            <input type="text" id="user-prompt-input" class="form-control"
+            <input type="text" id="user-prompt-input" class="form-control"  aria-label="User response input"
               style="display: inline-block; width: calc(100% - 95px)" />
             <button id="user-prompt-submit" class="btn btn-warning" style="margin-left: 10px">
               Submit
@@ -113,19 +112,17 @@
         </div>
 
         <div id="chat-input-container">
-          <input type="text" id="user-input" placeholder="Ask GeoInterpreter a question..." disabled />
-          <button id="send-button" disabled>Send</button>
+          <div class="input-group">
+            <textarea id="user-input" class="form-control" placeholder="Ask GeoInterpreter a question..." disabled rows="1"></textarea>
+            <button id="send-button" class="btn btn-primary" disabled>Send</button>
+          </div>
         </div>
       </div>
     </div>
     <div id="splitter"></div>
     <div class="map-table-panel" id="map-table-panel">
-      <div style="position: relative;" class="d-flex justify-content-center align-items-center">
-        <div class="d-flex flex1">
-          <!--spacer-->
-        </div>
-        <div id="tgBtnMapTable" class="btn-group d-flex flex1 justify-content-center my-2 shadow"
-          style="max-width: 180px;" role="group">
+      <div id="map-table-controls" class="d-flex justify-content-center align-items-center">
+        <div id="tgBtnMapTable" class="btn-group my-2 shadow" role="group">
           <input id="radBtnResultsMap" type="radio" class="btn-check" rel="js-VizMapTableToggle"
             name="vizMapTableToggle" checked />
           <label class="btn btn-outline-primary" for="radBtnResultsMap"><i class="bi bi-map"></i>
@@ -135,16 +132,32 @@
           <label class="btn btn-outline-primary" for="radBtnResultsDataTable"><i class="bi bi-table"></i>
             Table</label>
         </div>
-        <div class="d-flex flex1 justify-content-end">
+        <div class="clear-table-container">
           <button id="btnClearResultsTable" type="button" class="btn btn-primary">Clear Table</button>
         </div>
-        
+        <div id="layer-control" class="layer-control">
+                        <h5>Map Layers</h5>
+                        <div id="layer-list"></div>
+                        <!-- <button id="satellite" class="add-basemap-layer-btn">Add Satellite Layer</button> -->
+                    </div>
       </div>
       <div id="results_map" class="da-map  mx-auto"></div>
       <div id="results_table" class="flex-grow-1 mx-auto d-none"></div>
     </div>
   </div>
-  <script type="module" async src="scripts/geointerpreter_entryapp.js"></script>
+  <script type="module" src="scripts/geointerpreter_entryapp.js"></script>
+  <script type="module">
+    import kuzu_wasm from 'https://unpkg.com/@kuzu/kuzu-wasm@latest/dist/kuzu-browser.js';
+    (async () => {
+      const kuzu = await kuzu_wasm();
+      window.kuzu = kuzu;
+      const db = await kuzu.Database();
+      const conn = await kuzu.Connection(db);
+      window.kuzuDb = db;
+      window.kuzuConn = conn;
+      console.log("Kuzu WASM loaded and available on window.kuzu, window.kuzuDb, and window.kuzuConn");
+    })();
+  </script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -159,6 +172,8 @@
     const splitter = document.getElementById('splitter');
     const chatPanel = document.getElementById('chat-panel');
     const mapTablePanel = document.getElementById('map-table-panel');
+
+    const userInput = document.getElementById('user-input');
 
     let isDragging = false;
 
@@ -180,6 +195,11 @@
     document.addEventListener('mouseup', () => {
       isDragging = false;
       document.body.style.cursor = 'default';
+    });
+
+    userInput.addEventListener('input', () => {
+      userInput.style.height = 'auto';
+      userInput.style.height = (userInput.scrollHeight) + 'px';
     });
 
   </script>
